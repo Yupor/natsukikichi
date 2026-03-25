@@ -214,6 +214,11 @@ body.season-halloween{background:radial-gradient(ellipse at 70% 30%,#160800 0%,#
 body.season-halloween .header{background:rgba(20,8,0,.95);}
 #season-banner{display:none;text-align:center;padding:8px 16px;font-size:14px;font-weight:700;animation:pulse 2s infinite;}
 #season-banner.show{display:block;}
+/* CELEBRATION */
+@keyframes celebBounce{0%{transform:scale(0);opacity:0;}60%{transform:scale(1.3);}100%{transform:scale(1);opacity:1;}}
+@keyframes celebSlide{from{transform:translateY(16px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+@keyframes confettiFall{0%{transform:translateY(0) rotate(0deg);opacity:1;}100%{transform:translateY(100vh) rotate(720deg);opacity:0;}}
+@keyframes screenShake{0%,100%{transform:translateX(0);}20%{transform:translateX(-5px);}40%{transform:translateX(5px);}60%{transform:translateX(-3px);}80%{transform:translateX(3px);}}
 /* UX IMPROVEMENTS */
 /* Quote card italic */
 #dquote{font-style:italic;}
@@ -1072,7 +1077,13 @@ async function answerQuiz(correct,p,chosen,container){
   container.querySelectorAll('.qopt').forEach((b,i)=>{b.disabled=true;if(i===p.a)b.classList.add('correct');else if(i===chosen&&!correct)b.classList.add('wrong');});
   document.getElementById('quiz-exp').textContent=p.exp;document.getElementById('quiz-exp').classList.remove('hidden');
   await sSet('proverb-'+todayKey(),{correct});
-  if(correct){questData['proverb']=true;await sSet('quests-'+todayKey(),questData);renderQuests();}
+  if(correct){
+    questData['proverb']=true;await sSet('quests-'+todayKey(),questData);renderQuests();
+    showQuizCelebration();
+  }
+}
+function showQuizCelebration(){
+  celebrate(2,'🎓','正解！','中学受験クイズ +5XP');
 }
 async function loadCheckin(){const d=await sGet('checkin-'+todayKey());if(d)setCheckinDone(d.time);}
 function setCheckinDone(t){checkedIn=true;checkinTime=t;const btn=document.getElementById('chkbtn');btn.className='chkbtn done';btn.innerHTML='✅ チェックイン済み（'+t+'）';}
@@ -1096,6 +1107,10 @@ async function doCheckin(){
   const prev=await sGet('streak');let nc=1;if(prev&&prev.lastKey===yk)nc=prev.count+1;
   streakDays=nc;await sSet('streak',{count:nc,lastKey:todayKey()});renderStreakBadge();
   questData['checkin']=true;await sSet('quests-'+todayKey(),questData);renderQuests();
+  // Checkin celebration
+  if(nc>=7)celebrate(3,'🔥',nc+'日連続！','ストリーク継続中！すごい！');
+  else if(nc>=3)celebrate(2,'🔥',nc+'日連続チェックイン！','この調子で続けよう！');
+  else celebrate(1,'📍','チェックイン！','今日もがんばろう！');
   if(!medals.find(m=>m.id==='first'))await earnMedal('first');
   if(nc>=3&&!medals.find(m=>m.id==='streak3'))await earnMedal('streak3');
   if(nc>=7&&!medals.find(m=>m.id==='streak7'))await earnMedal('streak7');
@@ -1250,7 +1265,10 @@ function renderQuests(){
   document.getElementById('xpval').textContent=xp+' / '+tot+' XP';
   document.getElementById('xpbar').style.width=Math.round(xp/tot*100)+'%';
   // Auto-check fullquest medal
-  if(xp===tot&&!medals.find(m=>m.id==='fullquest'))earnMedal('fullquest');
+  if(xp===tot&&!medals.find(m=>m.id==='fullquest')){
+    celebrate(3,'💎','全クエスト制覇！','今日のXPをすべて獲得！');
+    earnMedal('fullquest');
+  }
 }
 async function checkAllQuests(){
   await sSet('quests-'+todayKey(),questData);renderQuests();
@@ -1468,10 +1486,89 @@ function resetQuest(){
   window.scrollTo(0,0);
 }
 async function loadMedals(){const d=await sGet('medals');medals=d||[];}
+// ── CELEBRATION ENGINE ────────────────────────────────────────
+// tier: 1=small, 2=medium, 3=big, 4=epic
+function celebrate(tier, icon, title, subtitle){
+  const confettiCount = [0, 12, 24, 40, 60][tier];
+  const duration     = [0, 1600, 2200, 3000, 4000][tier];
+  const colors=['var(--gold)','var(--teal)','var(--green)','var(--blue)','var(--purple)','#ff7eb3','var(--orange)'];
+
+  // Overlay
+  const el=document.createElement('div');
+  el.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;pointer-events:none;';
+
+  // Tier-based styling
+  const iconSize  = [0,52,64,80,96][tier];
+  const titleSize = [0,20,24,30,36][tier];
+  const glow = tier>=3 ? `text-shadow:0 0 30px ${tier===4?'var(--gold)':'var(--teal)'};` : '';
+  const titleColor = tier===4 ? 'var(--gold)' : tier===3 ? 'var(--teal)' : 'var(--green)';
+
+  el.innerHTML=`
+    <div style="font-size:${iconSize}px;animation:celebBounce .5s ease;line-height:1;">${icon}</div>
+    <div style="font-size:${titleSize}px;font-weight:800;color:${titleColor};margin-top:10px;animation:celebSlide .4s ease .1s both;${glow}">${title}</div>
+    ${subtitle?`<div style="font-size:14px;color:var(--text2);margin-top:6px;animation:celebSlide .4s ease .2s both;">${subtitle}</div>`:''}
+    ${tier===4?`<div style="font-size:13px;color:var(--gold);margin-top:8px;animation:celebSlide .4s ease .3s both;opacity:.8;">★★★ EPIC ACHIEVEMENT ★★★</div>`:''}
+  `;
+  document.body.appendChild(el);
+
+  // Confetti
+  for(let i=0;i<confettiCount;i++){
+    const c=document.createElement('div');
+    const col=colors[i%colors.length];
+    const x=Math.random()*100;
+    const delay=Math.random()*(tier>=3?.6:.3);
+    const dur=.8+Math.random()*(tier>=3?1.2:.6);
+    const size=tier>=3?8+Math.random()*10:5+Math.random()*7;
+    const shape=Math.random()>.5?'50%':'2px';
+    c.style.cssText=`position:fixed;top:-10px;left:${x}%;width:${size}px;height:${size}px;background:${col};border-radius:${shape};z-index:9998;pointer-events:none;animation:confettiFall ${dur}s ease ${delay}s both;`;
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(), (dur+delay)*1000+200);
+  }
+
+  // Shake screen for epic tier
+  if(tier===4){
+    document.body.style.animation='screenShake .4s ease';
+    setTimeout(()=>document.body.style.animation='',400);
+  }
+
+  setTimeout(()=>el.remove(), duration);
+}
+
+// Medal tier mapping
+const MEDAL_TIERS={
+  'first':2,      // 初チェックイン
+  'math1':2,'jp1':2,'sci1':2,'soc1':2,  // 教科メダル
+  'streak3':2,    // 3日連続
+  'streak7':3,    // 7日連続
+  'fullquest':3,  // 全クエスト
+  'wk3h':2,       // 週3時間
+  'wk10h':3,      // 週10時間
+  'wk20h':4,      // 週20時間 EPIC
+  'wk30h':4,      // 週30時間 EPIC
+};
+
 async function earnMedal(id){
-  if(medals.find(m=>m.id===id))return;const def=MEDAL_DEFS.find(m=>m.id===id);if(!def)return;
-  medals.push({id,earned:new Date().toLocaleDateString('ja-JP'),label:def.label});await sSet('medals',medals);
-  renderMedals();renderMedalGuides();showToast('🎉 メダル獲得！「'+def.label+'」');
+  if(medals.find(m=>m.id===id))return;
+  const def=MEDAL_DEFS.find(m=>m.id===id);if(!def)return;
+  medals.push({id,earned:new Date().toLocaleDateString('ja-JP'),label:def.label});
+  await sSet('medals',medals);
+  renderMedals();renderMedalGuides();
+  const tier=MEDAL_TIERS[id]||2;
+  const subtitles={
+    'first':'はじめてのチェックイン！',
+    'streak3':'3日間続けたね！',
+    'streak7':'1週間毎日続けた！すごい！',
+    'fullquest':'今日のクエスト全制覇！',
+    'wk10h':'今週10時間達成！本気だ！',
+    'wk20h':'今週20時間！受験生モード全開！',
+    'wk30h':'今週30時間！限界突破！！！',
+  };
+  celebrate(
+    tier,
+    def.icon,
+    'メダル獲得！「'+def.label+'」',
+    subtitles[id]||'+'+def.label
+  );
 }
 function renderMedals(){
   document.getElementById('mgrid').innerHTML=MEDAL_DEFS.map(def=>{const e=medals.find(m=>m.id===def.id);return`<div class="mcard${e?' earned':''}"><span class="mico">${def.icon}</span><div class="mlbl">${def.label}</div>${!e?'<span class="mlck">🔒</span>':''}</div>`;}).join('');
