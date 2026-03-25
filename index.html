@@ -514,11 +514,6 @@ body.season-halloween .header{background:rgba(20,8,0,.95);}
     <button class="btn btn-teal btn-full" onclick="sendMsg()">送信する</button>
   </div>
   <div class="card">
-    <div class="ctitle">📧 Gmail連携</div>
-    <div style="font-size:14px;color:var(--text2);margin-bottom:12px;line-height:1.7;">塾からのお知らせ・テスト結果をGmailで確認できます</div>
-    <a href="https://mail.google.com" target="_blank" class="btn btn-outline btn-full" style="text-decoration:none;">📬 Gmailを開く</a>
-  </div>
-  <div class="card">
     <div class="ctitle">⚙️ 入試日設定</div>
     <div style="margin-bottom:10px;"><span class="lbl">目標入試日（例: 2027/2/1）</span><input type="text" id="exam-inp" placeholder="2027/2/1"/></div>
     <button class="btn btn-teal" onclick="saveExam()">保存する</button>
@@ -607,7 +602,23 @@ body.season-halloween .header{background:rgba(20,8,0,.95);}
 
     <div class="hsec">
       <div class="hhead" onclick="toggleHelp(this)">
-        <span class="hico">🏅</span><span class="htit">メダルの獲得条件</span><span class="harr">›</span>
+        <span class="hico">👨‍👩‍👦</span><span class="htit">ファミリータブの使い方</span><span class="harr">›</span>
+      </div>
+      <div class="hbody">
+        <div class="hstep">
+          <div class="hnum">1</div>
+          <div><div class="hstit">今日のまとめ</div><div class="hsdesc">自分がどれだけ勉強したか、クエストをいくつ達成したかが一目でわかるよ。パパとママも同じ画面を見られるよ！</div></div>
+        </div>
+        <div class="hstep">
+          <div class="hnum">2</div>
+          <div>
+            <div class="hstit">💌 ファミリーメッセージ</div>
+            <div class="hsdesc">パパやママからの応援メッセージが届くよ！自分からも送れる。<br>①「🧒 夏伎」を選ぶ<br>②メッセージを入力<br>③「送信する」をタップ<br><br>パパとママのスマホにも届くよ！</div>
+          </div>
+        </div>
+        <div class="htip">💬 <strong>パパやママへ「がんばってる！」と報告</strong>してみよう。きっと返信がくるよ！</div>
+      </div>
+    </div>
       </div>
       <div class="hbody">
         <div class="mdetail" id="medal-guide-natsuki"></div>
@@ -685,17 +696,27 @@ body.season-halloween .header{background:rgba(20,8,0,.95);}
       <div class="hbody">
         <div class="hstep">
           <div class="hnum hnum-gold">1</div>
-          <div><div class="hstit">今日のまとめを確認</div><div class="hsdesc">夏伎くんの学習時間・クエスト達成数・XP・メダル数・チェックイン状況がまとめて見られます。</div></div>
+          <div><div class="hstit">今日のまとめを確認</div><div class="hsdesc">夏伎くんの当日の学習時間・クエスト達成数・XP・メダル数・チェックイン状況がまとめて見られます。</div></div>
         </div>
         <div class="hstep">
           <div class="hnum hnum-gold">2</div>
-          <div><div class="hstit">ファミリーメッセージ</div><div class="hsdesc">送信者（夏伎/パパ/ママ）を選んでメッセージを送ると家族全員のタイムラインに表示されます。励ましのメッセージを送りましょう！</div></div>
+          <div>
+            <div class="hstit">💌 ファミリーメッセージ</div>
+            <div class="hsdesc">家族3人がアプリ内でメッセージを送り合える機能です。<br>①送信者（夏伎 / パパ / ママ）をプルダウンで選ぶ<br>②メッセージを入力して「送信する」<br>③全員のタイムラインに表示される<br><br>Firebaseに保存されているので、どの端末からでも同じメッセージが見られます。夏伎くんへの応援メッセージや、パパからのひとことに使ってください！</div>
+          </div>
         </div>
         <div class="hstep">
           <div class="hnum hnum-gold">3</div>
           <div><div class="hstit">入試日の設定</div><div class="hsdesc">「入試日設定」で入試本番の日付を入力してください。ヘッダーのカウントダウンが自動更新されます。</div></div>
         </div>
-        <div class="htip htip-gold">💡 <strong>すべてのデータは家族で共有</strong>されています。どの端末からでも同じデータが確認できます。</div>
+        <div class="hstep">
+          <div class="hnum hnum-gold">4</div>
+          <div>
+            <div class="hstit">🔑 AI機能の設定（Yuko専用）</div>
+            <div class="hsdesc">攻略の道のAI問題生成・採点に必要なAnthropicのAPIキーを設定する場所です。<br>①<a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--blue);">console.anthropic.com</a>でAPIキーを作成<br>②「sk-ant-...」で始まるキーをコピー<br>③ここに貼り付けて「保存する」<br><br>一度設定すればそのスマホではずっと使えます。夏伎くんとYasuhiroのスマホそれぞれで設定が必要です。</div>
+          </div>
+        </div>
+        <div class="htip htip-gold">💡 <strong>すべてのデータはFirebaseで家族共有</strong>されています。どの端末からでも同じデータが確認できます。</div>
       </div>
     </div>
 
