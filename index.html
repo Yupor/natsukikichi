@@ -246,7 +246,7 @@ body.season-halloween .header{background:rgba(20,8,0,.95);}
 <!-- HEADER -->
 <div class="header">
   <div class="hbrand">
-    <div class="en">WASEDA ACADEMY / 受験基地</div>
+    <div class="en">WASEDA ACADEMY / 受験基地 <span id="fb-status" title="接続状態" style="font-size:10px;margin-left:4px;">🔄</span></div>
     <div class="jp">🚀 夏伎の受験基地</div>
   </div>
   <div class="cright">
@@ -879,12 +879,66 @@ let medals=[],messages=[],examDate=new Date('2027-02-01');
 let hChart=null,curHS='総合';
 let genProblemText='',uploadedImg=null,uploadedMime=null;
 
-// STORAGE
+// ── FIREBASE ─────────────────────────────────────────────────
+const _FB_CFG={
+  apiKey:'AIzaSyAWKQMRQREp765mBbjHHvntnkPF-PV3MMs',
+  authDomain:'natsukikich.firebaseapp.com',
+  databaseURL:'https://natsukikich-default-rtdb.asia-southeast1.firebasedatabase.app',
+  projectId:'natsukikich',
+  storageBucket:'natsukikich.firebasestorage.app',
+  messagingSenderId:'897484879290',
+  appId:'1:897484879290:web:dd104398870f0209801983'
+};
+// Fallback in-memory cache
 const _m={};
-async function sGet(k){try{if(window.storage){const r=await window.storage.get('nk:'+k,true);return r?JSON.parse(r.value):null;}}catch{}return _m[k]??null;}
-async function sSet(k,v){_m[k]=v;try{if(window.storage)await window.storage.set('nk:'+k,JSON.stringify(v),true);}catch{}}
+let _db=null;
+
+async function _fbInit(){
+  if(_db)return _db;
+  try{
+    // Load Firebase SDKs from CDN
+    await Promise.all([
+      _loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js'),
+      _loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js')
+    ]);
+    if(!firebase.apps.length)firebase.initializeApp(_FB_CFG);
+    _db=firebase.database();
+    return _db;
+  }catch(e){console.warn('Firebase init failed:',e);return null;}
+}
+function _loadScript(src){
+  return new Promise((res,rej)=>{
+    if(document.querySelector(`script[src="${src}"]`)){res();return;}
+    const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);
+  });
+}
+async function sGet(k){
+  try{
+    const db=await _fbInit();
+    if(db){
+      const snap=await db.ref('natsuki/'+k).get();
+      if(snap.exists())return snap.val();
+    }
+  }catch(e){console.warn('sGet FB err',e);}
+  return _m[k]??null;
+}
+async function sSet(k,v){
+  _m[k]=v;
+  try{
+    const db=await _fbInit();
+    if(db)await db.ref('natsuki/'+k).set(v);
+  }catch(e){console.warn('sSet FB err',e);}
+}
 
 async function init(){
+  // Show connecting indicator
+  const fbStatus=document.getElementById('fb-status');
+  if(fbStatus)fbStatus.textContent='🔄';
+  try{
+    await _fbInit();
+    if(_db&&fbStatus){fbStatus.textContent='🟢';fbStatus.title='Firebaseに接続中';}
+    else if(fbStatus){fbStatus.textContent='🔴';fbStatus.title='オフライン';}
+  }catch{if(fbStatus)fbStatus.textContent='🔴';}
   await loadExamDate();updateCountdown();
   applySeasonalTheme();
   initDailyQuote();await initProverbQuiz();
