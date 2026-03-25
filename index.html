@@ -214,7 +214,31 @@ body.season-halloween{background:radial-gradient(ellipse at 70% 30%,#160800 0%,#
 body.season-halloween .header{background:rgba(20,8,0,.95);}
 #season-banner{display:none;text-align:center;padding:8px 16px;font-size:14px;font-weight:700;animation:pulse 2s infinite;}
 #season-banner.show{display:block;}
-@keyframes pulse{0%,100%{opacity:.8;}50%{opacity:1;}}
+/* UX IMPROVEMENTS */
+/* Quote card italic */
+#dquote{font-style:italic;}
+/* Smooth card entrance */
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.card{animation:fadeUp .3s ease both;}
+/* Quest item hover */
+.qitem:hover{background:rgba(255,255,255,.02);border-radius:8px;}
+/* Subject button active press */
+.sbtn:active{transform:scale(.95);}
+/* Btn press */
+.btn:active{transform:scale(.97);}
+/* Better scrollbar */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+/* Upload area active */
+.upload-area:active{border-color:var(--teal);background:rgba(0,224,181,.06);}
+/* Quiz option press */
+.qopt:active:not(:disabled){transform:scale(.99);}
+/* Checkin button pulse when not checked in */
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(0,224,181,.3);}50%{box-shadow:0 0 0 8px rgba(0,224,181,.0);}}
+.chkbtn:not(.done){animation:glow 2.5s infinite;}
+/* milestone hit animation */
+.wkmile.hit{animation:fadeUp .4s ease both;}
 </style>
 </head>
 <body>
@@ -244,8 +268,9 @@ body.season-halloween .header{background:rgba(20,8,0,.95);}
 <div id="tab-home" class="content active">
   <div class="card card-hi">
     <div class="ctitle">💬 今日の名言</div>
-    <div id="dquote" style="font-size:16px;line-height:1.9;color:var(--text);"></div>
-    <div id="dquote-author" style="font-size:13px;color:var(--text3);margin-top:8px;text-align:right;"></div>
+    <div style="font-size:36px;color:var(--teal);opacity:.3;line-height:1;margin-bottom:-6px;font-family:Georgia,serif;">"</div>
+    <div id="dquote" style="font-size:16px;line-height:1.9;color:var(--text);font-style:italic;padding:0 8px;"></div>
+    <div id="dquote-author" style="font-size:13px;color:var(--text3);margin-top:10px;text-align:right;padding-top:8px;border-top:1px solid var(--border);"></div>
   </div>
 
   <div class="card">
@@ -801,20 +826,20 @@ const EXAM_QUIZ=[
 ];
 
 const QUOTES=[
-  {q:'成功とは、情熱を失わずに失敗から失敗へと歩き続けることだ。',a:'ウィンストン・チャーチル',meta:'イギリス / 政治家・首相 / 20世紀'},
-  {q:'才能とは、続けること。',a:'松浦弥太郎',meta:'日本 / 編集者・作家 / 現代'},
-  {q:'夢は逃げない。逃げるのはいつも自分だ。',a:'高橋歩',meta:'日本 / 作家・冒険家 / 現代'},
-  {q:'今日できることを明日に延ばすな。',a:'ベンジャミン・フランクリン',meta:'アメリカ / 政治家・発明家 / 18世紀'},
-  {q:'努力する人は希望を語り、怠ける人は不満を語る。',a:'井上靖',meta:'日本 / 小説家 / 20世紀'},
-  {q:'困難の真っただ中にこそ、チャンスは潜んでいる。',a:'アルベルト・アインシュタイン',meta:'ドイツ→アメリカ / 物理学者 / 20世紀'},
-  {q:'できると思えばできる。これは絶対的な法則だ。',a:'パブロ・ピカソ',meta:'スペイン / 画家・芸術家 / 20世紀'},
-  {q:'千里の道も一歩から。',a:'老子',meta:'中国 / 思想家・哲学者 / 紀元前6〜5世紀'},
-  {q:'人生はチャレンジです。チャレンジを受けなさい。',a:'マザー・テレサ',meta:'アルバニア→インド / 修道女・慈善家 / 20世紀'},
-  {q:'散るぞ悲しき。',a:'栗林忠道',meta:'日本 / 陸軍大将 / 20世紀'},
-  {q:'道は開ける。',a:'デール・カーネギー',meta:'アメリカ / 作家・自己啓発家 / 20世紀'},
-  {q:'学びて思わざれば則ち罔し、思いて学ばざれば則ち殆し。',a:'孔子',meta:'中国 / 思想家・教育者 / 紀元前5世紀'},
-  {q:'われ思う、ゆえにわれあり。',a:'デカルト',meta:'フランス / 哲学者・数学者 / 17世紀'},
-  {q:'天才とは、一パーセントのひらめきと九十九パーセントの努力である。',a:'トーマス・エジソン',meta:'アメリカ / 発明家 / 19〜20世紀'}
+  {q:'成功とは、情熱を失わずに失敗から失敗へと歩き続けることだ。',a:'ウィンストン・チャーチル',r:'うぃんすとん・ちゃーちる',meta:'イギリス / 政治家・首相 / 20世紀'},
+  {q:'才能とは、続けること。',a:'松浦弥太郎',r:'まつうら やたろう',meta:'日本 / 編集者・作家 / 現代'},
+  {q:'夢は逃げない。逃げるのはいつも自分だ。',a:'高橋歩',r:'たかはし あゆむ',meta:'日本 / 作家・冒険家 / 現代'},
+  {q:'今日できることを明日に延ばすな。',a:'ベンジャミン・フランクリン',r:'べんじゃみん・ふらんくりん',meta:'アメリカ / 政治家・発明家 / 18世紀'},
+  {q:'努力する人は希望を語り、怠ける人は不満を語る。',a:'井上靖',r:'いのうえ やすし',meta:'日本 / 小説家 / 20世紀'},
+  {q:'困難の真っただ中にこそ、チャンスは潜んでいる。',a:'アルベルト・アインシュタイン',r:'あるべると・あいんしゅたいん',meta:'ドイツ→アメリカ / 物理学者 / 20世紀'},
+  {q:'できると思えばできる。これは絶対的な法則だ。',a:'パブロ・ピカソ',r:'ぱぶろ・ぴかそ',meta:'スペイン / 画家・芸術家 / 20世紀'},
+  {q:'千里の道も一歩から。',a:'老子',r:'ろうし',meta:'中国 / 思想家・哲学者 / 紀元前6〜5世紀'},
+  {q:'人生はチャレンジです。チャレンジを受けなさい。',a:'マザー・テレサ',r:'まざー・てれさ',meta:'アルバニア→インド / 修道女・慈善家 / 20世紀'},
+  {q:'散るぞ悲しき。',a:'栗林忠道',r:'くりばやし ただみち',meta:'日本 / 陸軍大将 / 20世紀'},
+  {q:'道は開ける。',a:'デール・カーネギー',r:'でーる・かーねぎー',meta:'アメリカ / 作家・自己啓発家 / 20世紀'},
+  {q:'学びて思わざれば則ち罔し、思いて学ばざれば則ち殆し。',a:'孔子',r:'こうし',meta:'中国 / 思想家・教育者 / 紀元前5世紀'},
+  {q:'われ思う、ゆえにわれあり。',a:'デカルト',r:'でかると',meta:'フランス / 哲学者・数学者 / 17世紀'},
+  {q:'天才とは、一パーセントのひらめきと九十九パーセントの努力である。',a:'トーマス・エジソン',r:'とーます・えじそん',meta:'アメリカ / 発明家 / 19〜20世紀'}
 ];
 const SUBJECTS=[
   {id:'国語',icon:'📖',col:'var(--sk)'},
@@ -943,7 +968,8 @@ function initDailyQuote(){
   document.getElementById('dquote').textContent='「'+q.q+'」';
   const el=document.getElementById('dquote-author');
   if(q.a){
-    el.innerHTML=`<span style="font-weight:700;color:var(--text2);">— ${q.a}</span>`+(q.meta?`<span style="display:block;font-size:11px;color:var(--text3);margin-top:3px;letter-spacing:.3px;">${q.meta}</span>`:'');
+    const nameHtml=q.r?`${q.a}<span style="font-size:11px;font-weight:400;color:var(--text3);margin-left:4px;">（${q.r}）</span>`:q.a;
+    el.innerHTML=`<span style="font-weight:700;color:var(--text2);">— ${nameHtml}</span>`+(q.meta?`<span style="display:block;font-size:11px;color:var(--text3);margin-top:3px;letter-spacing:.3px;">${q.meta}</span>`:'');
   } else {el.textContent='';}
 }
 
