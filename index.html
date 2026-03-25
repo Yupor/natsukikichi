@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>夏伎の受験基地</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#040b18;--surface:#0c1a2e;--card:#0f2040;--card2:#132545;--border:#1e3558;--border2:#2a4a70;
+  --gold:#ffd23f;--teal:#00e0b5;--blue:#5aabff;--purple:#b394ff;
+  --red:#ff6060;--green:#44d98e;--orange:#ff9a50;
+  --text:#eef4ff;--text2:#a8c0e0;--text3:#5a7a9a;
+  --sk:#ff7eb3;--ss:#5aabff;--sr:#44d98e;--ssh:#ffd23f;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,'Hiragino Sans','Yu Gothic UI',sans-serif;font-size:16px;line-height:1.6;}
+body{max-width:480px;margin:0 auto;position:relative;overflow-x:hidden;}
+.hidden{display:none!important;}
+.header{background:var(--surface);padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50;gap:10px;}
+.hbrand .en{font-size:9px;color:var(--text3);letter-spacing:2px;}
+.hbrand .jp{font-size:18px;font-weight:800;color:var(--gold);}
+.cright{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;}
+.cbox{text-align:right;}
+.cbox .cl{font-size:11px;color:var(--text3);}
+.cbox .cn{font-size:34px;font-weight:800;color:var(--teal);line-height:1;}
+.cbox .cu{font-size:11px;color:var(--text2);}
+.school-cdns{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;}
+.scdn{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700;border:1px solid;}
+.scdn-w{background:rgba(90,171,255,.1);border-color:rgba(90,171,255,.3);color:var(--blue);}
+.scdn-k{background:rgba(179,148,255,.1);border-color:rgba(179,148,255,.3);color:var(--purple);}
+.scdn .dn{font-size:14px;font-weight:800;}
+.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--surface);border-top:2px solid var(--border);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom);}
+.ni{flex:1;padding:9px 2px 11px;background:none;border:none;color:var(--text3);cursor:pointer;font-size:9px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px;transition:color .2s;font-family:inherit;letter-spacing:.3px;}
+.ni.active{color:var(--teal);}
+.ni .ico{font-size:20px;line-height:1;}
+.content{padding:16px 16px 100px;display:none;}
+.content.active{display:block;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:14px;}
+.card-hi{border-color:var(--teal);border-width:1.5px;}
+.ctitle{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:6px;}
+.qopts{display:flex;flex-direction:column;gap:8px;margin-top:12px;}
+.qopt{padding:14px 16px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;text-align:left;font-size:15px;font-family:inherit;transition:all .15s;width:100%;line-height:1.5;font-weight:500;}
+.qopt:hover:not(:disabled){border-color:var(--blue);background:rgba(90,171,255,.07);}
+.qopt.correct{border-color:var(--green)!important;background:rgba(68,217,142,.1);color:var(--green);font-weight:700;}
+.qopt.wrong{border-color:var(--red)!important;background:rgba(255,96,96,.09);color:var(--red);}
+.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.sbtn{padding:14px 4px;border-radius:12px;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;font-size:12px;text-align:center;transition:all .2s;font-family:inherit;font-weight:700;}
+.sbtn.sel{border-color:var(--teal);color:var(--teal);background:rgba(0,224,181,.1);}
+.sbtn .si{font-size:24px;margin-bottom:4px;display:block;}
+.sbtn .sn{font-size:12px;}
+.sbtn .st{font-size:11px;color:var(--text3);margin-top:3px;display:block;}
+.timerdisp{font-size:52px;font-weight:800;color:var(--gold);text-align:center;letter-spacing:4px;font-variant-numeric:tabular-nums;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 20px;border-radius:10px;border:none;cursor:pointer;font-size:15px;font-weight:700;font-family:inherit;transition:all .2s;}
+.btn-teal{background:var(--teal);color:#040b18;}
+.btn-teal:hover{opacity:.9;}
+.btn-teal:disabled{opacity:.45;cursor:default;}
+.btn-gold{background:var(--gold);color:#040b18;}
+.btn-gold:hover{opacity:.9;}
+.btn-gold:disabled{opacity:.45;cursor:default;}
+.btn-outline{background:none;border:1.5px solid var(--border2);color:var(--text2);}
+.btn-outline:hover{border-color:var(--teal);color:var(--teal);}
+.btn-full{width:100%;}
+.btn-sm{padding:9px 14px;font-size:13px;}
+.pbar{height:8px;background:var(--surface);border-radius:4px;overflow:hidden;margin-top:8px;}
+.pfill{height:100%;background:var(--teal);border-radius:4px;transition:width .6s ease;}
+.pfill-gold{background:linear-gradient(90deg,var(--gold),#ff9a50);}
+.chkbtn{width:100%;padding:18px;border-radius:14px;border:none;background:linear-gradient(135deg,var(--teal),#00b896);color:#040b18;font-size:17px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:10px;transition:opacity .2s;}
+.chkbtn.done{background:var(--surface);color:var(--teal);border:2px solid var(--teal);cursor:default;}
+.qitem{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+.qitem:last-child{border-bottom:none;}
+.qchk{width:26px;height:26px;border-radius:50%;border:2px solid var(--border2);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;background:none;font-size:14px;margin-top:2px;}
+.qchk.done{background:var(--teal);border-color:var(--teal);color:#040b18;}
+.qtxt{flex:1;font-size:15px;color:var(--text);line-height:1.5;}
+.qtxt.done{text-decoration:line-through;color:var(--text3);}
+.qxp{font-size:12px;color:var(--gold);font-weight:800;white-space:nowrap;background:rgba(255,210,63,.1);padding:3px 8px;border-radius:6px;margin-top:3px;}
+.pin-wrap{padding:36px 24px;text-align:center;}
+.pdots{display:flex;gap:16px;justify-content:center;margin:20px 0;}
+.pdot{width:16px;height:16px;border-radius:50%;border:2px solid var(--border2);background:transparent;transition:all .15s;}
+.pdot.filled{background:var(--gold);border-color:var(--gold);}
+.pkpad{display:grid;grid-template-columns:repeat(3,76px);gap:10px;justify-content:center;margin-top:14px;}
+.pkey{height:60px;border-radius:12px;border:1.5px solid var(--border2);background:var(--surface);color:var(--text);font-size:22px;font-family:inherit;cursor:pointer;transition:all .1s;font-weight:700;}
+.pkey:active{background:var(--card2);transform:scale(.94);}
+.pkey-sm{font-size:14px;}
+.itabs{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:4px;}
+.itab{padding:7px 16px;border-radius:20px;border:1.5px solid var(--border);background:none;color:var(--text2);cursor:pointer;font-size:13px;font-weight:700;white-space:nowrap;font-family:inherit;transition:all .2s;}
+.itab.active{background:var(--teal);border-color:var(--teal);color:#040b18;}
+.calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center;}
+.calh{font-size:12px;color:var(--text3);padding:6px 0;font-weight:700;}
+.calday{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:14px;border-radius:8px;cursor:pointer;position:relative;transition:background .15s;color:var(--text);font-weight:600;}
+.calday:hover{background:var(--surface);}
+.calday.today{background:rgba(0,224,181,.2);color:var(--teal);font-weight:800;}
+.calday.selected{background:rgba(255,210,63,.2);color:var(--gold);font-weight:800;}
+.calday.other{color:var(--text3);font-weight:400;}
+.calday.has-evt::after{content:'';width:5px;height:5px;border-radius:50%;background:var(--gold);position:absolute;bottom:3px;}
+.upload-area{border:2px dashed var(--border2);border-radius:14px;padding:32px;text-align:center;cursor:pointer;transition:all .2s;}
+.upload-area:hover{border-color:var(--teal);background:rgba(0,224,181,.04);}
+.mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.mcard{border-radius:14px;border:1.5px solid var(--border);background:var(--surface);padding:12px 6px;text-align:center;position:relative;}
+.mcard.earned{border-color:var(--gold);background:rgba(255,210,63,.07);}
+.mico{font-size:26px;display:block;margin-bottom:4px;}
+.mlbl{font-size:10px;color:var(--text3);line-height:1.3;font-weight:700;}
+.mcard.earned .mlbl{color:var(--text2);}
+.mlck{position:absolute;top:4px;right:4px;font-size:10px;color:var(--text3);}
+.aiproblem{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;font-size:16px;line-height:1.9;white-space:pre-wrap;color:var(--text);}
+.ldots{display:inline-flex;gap:5px;align-items:center;}
+.ldots span{width:7px;height:7px;border-radius:50%;background:var(--teal);animation:bounce 1.2s infinite;}
+.ldots span:nth-child(2){animation-delay:.2s;}
+.ldots span:nth-child(3){animation-delay:.4s;}
+@keyframes bounce{0%,80%,100%{transform:scale(.6);opacity:.4;}40%{transform:scale(1);opacity:1;}}
+input[type=text],input[type=number],textarea,select{background:var(--surface);border:1.5px solid var(--border);border-radius:10px;color:var(--text);padding:12px 14px;font-size:15px;font-family:inherit;width:100%;outline:none;line-height:1.5;}
+input:focus,textarea:focus,select:focus{border-color:var(--teal);}
+select option{background:var(--card);}
+textarea{resize:vertical;min-height:90px;}
+.srow{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--border);font-size:15px;}
+.srow:last-child{border-bottom:none;}
+.sl{color:var(--text2);}
+.sv{font-weight:700;color:var(--text);}
+.msgitem{padding:12px 14px;border-radius:12px;background:var(--surface);border:1px solid var(--border);margin-bottom:10px;}
+.msgh{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.msgfrom{font-weight:800;font-size:13px;}
+.msgtime{font-size:12px;color:var(--text3);}
+.msgbody{font-size:15px;color:var(--text);line-height:1.6;}
+.score-circ{width:90px;height:90px;border-radius:50%;border:3px solid var(--gold);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:36px;font-weight:800;color:var(--gold);}
+.etag{display:inline-block;padding:3px 9px;border-radius:5px;font-size:11px;font-weight:700;margin-right:4px;}
+.etag-class{background:rgba(90,171,255,.2);color:var(--blue);}
+.etag-test{background:rgba(255,96,96,.2);color:var(--red);}
+.etag-special{background:rgba(255,210,63,.2);color:var(--gold);}
+/* HELP */
+.hsec{border-radius:14px;overflow:hidden;margin-bottom:10px;border:1.5px solid var(--border);}
+.hhead{padding:16px 18px;display:flex;align-items:center;gap:12px;cursor:pointer;background:var(--card);transition:background .2s;user-select:none;}
+.hhead:hover{background:var(--card2);}
+.hhead .hico{font-size:26px;}
+.hhead .htit{font-size:16px;font-weight:800;flex:1;color:var(--text);}
+.hhead .harr{font-size:18px;color:var(--text3);transition:transform .3s;font-weight:700;}
+.hhead.open .harr{transform:rotate(90deg);}
+.hbody{display:none;background:var(--surface);padding:18px;border-top:1px solid var(--border);}
+.hbody.open{display:block;}
+.hstep{display:flex;gap:14px;margin-bottom:18px;}
+.hstep:last-child{margin-bottom:0;}
+.hnum{width:30px;height:30px;border-radius:50%;background:var(--teal);color:#040b18;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:3px;}
+.hnum-gold{background:var(--gold);}
+.hstit{font-size:16px;font-weight:800;color:var(--text);margin-bottom:4px;}
+.hsdesc{font-size:14px;color:var(--text2);line-height:1.7;}
+.htip{background:rgba(0,224,181,.07);border:1px solid rgba(0,224,181,.2);border-radius:10px;padding:12px 14px;font-size:14px;color:var(--text2);line-height:1.7;margin-top:10px;}
+.htip strong{color:var(--teal);}
+.htip-gold{background:rgba(255,210,63,.07);border-color:rgba(255,210,63,.2);}
+.htip-gold strong{color:var(--gold);}
+/* MEDAL DETAIL */
+.mdetail{display:flex;flex-direction:column;gap:8px;}
+.mdet{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:var(--surface);}
+.mdet.earned{border-color:rgba(255,210,63,.35);background:rgba(255,210,63,.05);}
+.mdico{font-size:24px;flex-shrink:0;}
+.mdinf{flex:1;}
+.mdnm{font-size:15px;font-weight:700;color:var(--text);}
+.mdcd{font-size:13px;color:var(--text2);margin-top:2px;line-height:1.4;}
+.mdst{font-size:12px;font-weight:800;white-space:nowrap;padding:3px 8px;border-radius:6px;}
+.mdst.got{background:rgba(68,217,142,.12);color:var(--green);}
+.mdst.not{background:var(--surface);color:var(--text3);border:1px solid var(--border);}
+/* STREAK */
+.sbadge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,154,80,.12);border:1px solid rgba(255,154,80,.3);border-radius:20px;padding:6px 14px;font-size:14px;font-weight:800;color:var(--orange);}
+/* TOAST */
+.toast{position:fixed;bottom:110px;left:50%;transform:translateX(-50%);background:var(--gold);color:#040b18;padding:12px 22px;border-radius:24px;font-weight:800;font-size:15px;z-index:999;white-space:nowrap;pointer-events:none;}
+/* LABEL */
+.lbl{font-size:12px;color:var(--text3);font-weight:700;margin-bottom:5px;display:block;}
+.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
+/* STUDY MODE TOGGLE */
+.mode-toggle{display:flex;gap:0;border-radius:10px;overflow:hidden;border:1.5px solid var(--border2);margin-bottom:12px;width:100%;}
+.mopt{flex:1;padding:10px 0;border:none;background:none;color:var(--text3);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s;}
+.mopt.sel-y{background:rgba(90,171,255,.18);color:var(--blue);}
+.mopt.sel-f{background:rgba(255,154,80,.18);color:var(--orange);}
+/* WEEKLY STATS */
+.wkrow{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.wkday{font-size:11px;color:var(--text3);font-weight:700;width:22px;flex-shrink:0;text-align:center;}
+.wkbar-wrap{flex:1;height:16px;background:var(--surface);border-radius:4px;overflow:hidden;display:flex;}
+.wkbar-y{background:rgba(90,171,255,.75);height:100%;transition:width .6s ease;min-width:0;}
+.wkbar-f{background:rgba(255,154,80,.75);height:100%;transition:width .6s ease;min-width:0;}
+.wkmins{font-size:11px;color:var(--text2);font-weight:700;width:34px;text-align:right;flex-shrink:0;}
+.wkmile{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:10px;border:1px solid var(--border);background:var(--surface);margin-top:8px;}
+.wkmile.hit{border-color:var(--gold);background:rgba(255,210,63,.07);}
+.wmico{font-size:22px;flex-shrink:0;}
+.wminfo{flex:1;}
+.wmtit{font-size:14px;font-weight:700;color:var(--text);}
+.wmbar{height:5px;background:var(--border);border-radius:3px;margin-top:4px;overflow:hidden;}
+.wmfill{height:100%;border-radius:3px;transition:width .6s ease;}
+.wmxp{font-size:12px;font-weight:800;white-space:nowrap;}
+/* VISUAL EXPLANATION */
+.exp-card{border-radius:14px;padding:16px;margin-bottom:10px;}
+.exp-card-correct{background:rgba(68,217,142,.08);border:1.5px solid rgba(68,217,142,.3);}
+.exp-card-wrong{background:rgba(255,96,96,.07);border:1.5px solid rgba(255,96,96,.25);}
+.exp-card-info{background:rgba(90,171,255,.07);border:1.5px solid rgba(90,171,255,.2);}
+.exp-card-key{background:rgba(255,210,63,.07);border:1.5px solid rgba(255,210,63,.2);}
+.exp-card-tip{background:rgba(179,148,255,.07);border:1.5px solid rgba(179,148,255,.2);}
+.exp-label{font-size:11px;font-weight:800;letter-spacing:1.5px;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.exp-body{font-size:15px;line-height:1.8;color:var(--text);}
+.exp-answer-big{font-size:28px;font-weight:800;color:var(--green);text-align:center;padding:10px 0;}
+.exp-steps{display:flex;flex-direction:column;gap:8px;margin-top:8px;}
+.exp-step{display:flex;gap:10px;align-items:flex-start;}
+.exp-step-num{width:24px;height:24px;border-radius:50%;background:var(--blue);color:#040b18;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
+.exp-step-txt{font-size:14px;color:var(--text);line-height:1.7;flex:1;}
+.result-verdict{text-align:center;padding:20px 0 14px;}
+.result-circle{width:80px;height:80px;border-radius:50%;border:3px solid;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:36px;font-weight:800;}
+/* SEASONAL OVERLAYS */
+body.season-valentine{background:radial-gradient(ellipse at 20% 50%,#1a0818 0%,#040b18 60%);}
+body.season-valentine .header{background:rgba(30,8,25,.95);}
+body.season-xmas{background:radial-gradient(ellipse at 80% 20%,#0a1a08 0%,#040b18 60%);}
+body.season-xmas .header{background:rgba(8,20,8,.95);}
+body.season-newyear{background:radial-gradient(ellipse at 50% 0%,#1a1400 0%,#040b18 70%);}
+body.season-newyear .header{background:rgba(20,16,0,.95);}
+body.season-sakura{background:radial-gradient(ellipse at 30% 80%,#1a0812 0%,#040b18 60%);}
+body.season-sakura .header{background:rgba(22,8,16,.95);}
+body.season-tanabata{background:radial-gradient(ellipse at 60% 10%,#080818 0%,#040b18 70%);}
+body.season-halloween{background:radial-gradient(ellipse at 70% 30%,#160800 0%,#040b18 60%);}
+body.season-halloween .header{background:rgba(20,8,0,.95);}
+#season-banner{display:none;text-align:center;padding:8px 16px;font-size:14px;font-weight:700;animation:pulse 2s infinite;}
+#season-banner.show{display:block;}
+@keyframes pulse{0%,100%{opacity:.8;}50%{opacity:1;}}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="hbrand">
+    <div class="en">WASEDA ACADEMY / 受験基地</div>
+    <div class="jp">🚀 夏伎の受験基地</div>
+  </div>
+  <div class="cright">
+    <div class="cbox">
+      <div class="cl">入試まで</div>
+      <div class="cn" id="cdays">---</div>
+      <div class="cu">日</div>
+    </div>
+    <div class="school-cdns">
+      <div class="scdn scdn-w">早稲田 2/1 <span class="dn" id="cd-waseda">--</span>日</div>
+      <div class="scdn scdn-k">慶應 2/3 <span class="dn" id="cd-keio">--</span>日</div>
+    </div>
+  </div>
+</div>
+
+<div id="season-banner"></div>
+
+<!-- ══ TAB: ホーム ══ -->
+<div id="tab-home" class="content active">
+  <div class="card card-hi">
+    <div class="ctitle">💬 今日の名言</div>
+    <div id="dquote" style="font-size:16px;line-height:1.9;color:var(--text);"></div>
+    <div id="dquote-author" style="font-size:13px;color:var(--text3);margin-top:8px;text-align:right;"></div>
+  </div>
+
+  <div class="card">
+    <div class="ctitle">🎓 今日の中学受験クイズ</div>
+    <div id="quiz-school-badge" style="margin-bottom:8px;"></div>
+    <div style="background:rgba(255,210,63,.07);border:1.5px solid rgba(255,210,63,.2);border-radius:12px;padding:14px;margin-bottom:6px;">
+      <div id="proverb-text" style="font-size:15px;font-weight:700;color:var(--text);line-height:1.7;"></div>
+    </div>
+    <div id="quiz-done-msg" class="hidden" style="text-align:center;font-size:15px;padding:8px 0;font-weight:700;"></div>
+    <div class="qopts" id="quiz-opts"></div>
+    <div id="quiz-exp" class="hidden" style="margin-top:12px;padding:14px;background:rgba(0,224,181,.06);border-radius:10px;font-size:14px;color:var(--text2);line-height:1.8;border-left:3px solid var(--teal);"></div>
+  </div>
+
+  <div class="card">
+    <div class="ctitle">✅ 自習チェックイン</div>
+    <div style="margin-bottom:12px;" id="streak-display"></div>
+    <button class="chkbtn" id="chkbtn" onclick="doCheckin()">📍 今日の自習をはじめる！</button>
+    <div id="chktime" style="text-align:center;font-size:14px;color:var(--text3);margin-top:10px;"></div>
+  </div>
+
+  <div class="card">
+    <div class="ctitle">📚 教科別 自習タイマー</div>
+    <div class="sgrid" id="sgrid"></div>
+    <div id="timer-area" class="hidden" style="margin-top:16px;">
+      <!-- 予習 / 復習 選択 -->
+      <div class="mode-toggle">
+        <button class="mopt sel-y" id="mode-y" onclick="setMode('予習')">📘 予習</button>
+        <button class="mopt" id="mode-f" onclick="setMode('復習')">📙 復習</button>
+      </div>
+      <div id="timer-subj-label" style="font-size:15px;color:var(--text2);margin-bottom:8px;font-weight:700;text-align:center;"></div>
+      <div class="timerdisp" id="timerdisp" style="text-align:center;">00:00</div>
+      <div style="display:flex;gap:10px;margin-top:14px;justify-content:center;">
+        <button class="btn btn-teal" id="timer-toggle" onclick="toggleTimer()">▶ スタート</button>
+        <button class="btn btn-outline" onclick="stopTimer()">✓ 終了して記録</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 今週の学習時間 -->
+  <div class="card" id="weekly-stats-card">
+    <div class="ctitle">📊 今週の学習時間</div>
+    <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:4px;">
+      <div class="wk-total" id="wk-total-disp">0</div>
+      <div style="font-size:14px;color:var(--text2);">分</div>
+      <div style="font-size:12px;color:var(--text3);margin-left:4px;" id="wk-total-h"></div>
+    </div>
+    <div style="display:flex;gap:12px;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--text3);"><div style="width:10px;height:10px;border-radius:2px;background:rgba(90,171,255,.75);"></div>予習</div>
+      <div style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--text3);"><div style="width:10px;height:10px;border-radius:2px;background:rgba(255,154,80,.75);"></div>復習</div>
+    </div>
+    <div id="wk-bars"></div>
+    <div id="wk-milestones" style="margin-top:10px;"></div>
+  </div>
+
+  <div class="card">
+    <div class="ctitle">⚔️ 今日のクエスト</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <span style="font-size:13px;color:var(--text3);">本日のXP</span>
+      <span id="xpval" style="font-size:15px;font-weight:800;color:var(--gold);"></span>
+    </div>
+    <div class="pbar"><div class="pfill pfill-gold" id="xpbar" style="width:0%"></div></div>
+    <div id="qlist" style="margin-top:14px;"></div>
+  </div>
+</div>
+
+<!-- ══ TAB: 偏差値 ══ -->
+<div id="tab-hensachi" class="content">
+  <div id="pin-wrap" class="pin-wrap">
+    <div style="font-size:11px;color:var(--text3);letter-spacing:3px;font-weight:700;">PAPA ONLY</div>
+    <div style="font-size:26px;font-weight:800;color:var(--gold);margin-top:10px;">🔐 PIN入力</div>
+    <div style="font-size:15px;color:var(--text2);margin-top:6px;">Yasuhiro専用エリアです</div>
+    <div class="pdots" id="pdots">
+      <div class="pdot" id="pd0"></div><div class="pdot" id="pd1"></div>
+      <div class="pdot" id="pd2"></div><div class="pdot" id="pd3"></div>
+    </div>
+    <div id="pin-err" style="font-size:14px;color:var(--red);height:20px;text-align:center;margin-bottom:10px;font-weight:700;"></div>
+    <div class="pkpad">
+      <button class="pkey" onclick="pinIn('1')">1</button><button class="pkey" onclick="pinIn('2')">2</button><button class="pkey" onclick="pinIn('3')">3</button>
+      <button class="pkey" onclick="pinIn('4')">4</button><button class="pkey" onclick="pinIn('5')">5</button><button class="pkey" onclick="pinIn('6')">6</button>
+      <button class="pkey" onclick="pinIn('7')">7</button><button class="pkey" onclick="pinIn('8')">8</button><button class="pkey" onclick="pinIn('9')">9</button>
+      <button class="pkey pkey-sm" onclick="pinClear()">C</button><button class="pkey" onclick="pinIn('0')">0</button><button class="pkey pkey-sm" onclick="pinDel()">⌫</button>
+    </div>
+  </div>
+  <div id="hensachi-content" class="hidden">
+    <div class="card">
+      <div class="ctitle">📈 偏差値グラフ</div>
+      <div class="itabs" id="htabs">
+        <button class="itab active" onclick="selHS('総合',this)">総合</button>
+        <button class="itab" onclick="selHS('国語',this)">国語</button>
+        <button class="itab" onclick="selHS('算数',this)">算数</button>
+        <button class="itab" onclick="selHS('理科',this)">理科</button>
+        <button class="itab" onclick="selHS('社会',this)">社会</button>
+      </div>
+      <canvas id="hchart" height="220"></canvas>
+    </div>
+    <div class="card">
+      <div class="ctitle">➕ 成績を追加</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+        <div><span class="lbl">日付</span><input type="text" id="h-date" placeholder="例: 3/25"/></div>
+        <div><span class="lbl">偏差値</span><input type="number" id="h-score" placeholder="55" min="20" max="80"/></div>
+      </div>
+      <div style="margin-bottom:10px;"><span class="lbl">教科</span><select id="h-subj"><option>総合</option><option>国語</option><option>算数</option><option>理科</option><option>社会</option></select></div>
+      <div style="margin-bottom:12px;"><span class="lbl">テスト名</span><input type="text" id="h-name" placeholder="例: マンスリーテスト 3月"/></div>
+      <button class="btn btn-teal btn-full" onclick="addHS()">追加する</button>
+    </div>
+    <div class="card">
+      <div class="ctitle">📋 成績履歴</div>
+      <div id="score-hist"></div>
+    </div>
+    <div style="text-align:right;margin-bottom:14px;">
+      <button class="btn btn-outline btn-sm" onclick="lockHS()">🔒 ロックする</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TAB: カレンダー ══ -->
+<div id="tab-calendar" class="content">
+  <!-- Google Calendar 連携 -->
+  <div class="card" style="border-color:rgba(90,171,255,.4);border-width:1.5px;">
+    <div class="ctitle">📆 Googleカレンダー連携</div>
+    <div id="gcal-status" style="font-size:14px;color:var(--text2);margin-bottom:12px;line-height:1.6;">YasuhiroのGoogleカレンダーと同期して塾の予定を自動取り込みできます。</div>
+    <div id="gcal-setup">
+      <div style="margin-bottom:10px;">
+        <span class="lbl">📧 GoogleカレンダーのiCalアドレス</span>
+        <input type="text" id="gcal-url" placeholder="https://calendar.google.com/calendar/ical/…" style="font-size:13px;"/>
+        <div style="font-size:12px;color:var(--text3);margin-top:5px;line-height:1.6;">Googleカレンダー → 設定 → 対象カレンダー → 「カレンダーの統合」→ 「非公開のiCalアドレス」をコピー</div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-teal" style="flex:1;" onclick="saveGCalUrl()">📅 URLを保存して同期</button>
+        <button class="btn btn-outline" onclick="document.getElementById('gcal-setup').classList.add('hidden');document.getElementById('gcal-toggle').classList.remove('hidden')">閉じる</button>
+      </div>
+    </div>
+    <div id="gcal-toggle" class="hidden" style="display:flex;gap:8px;align-items:center;">
+      <div id="gcal-saved-label" style="flex:1;font-size:13px;color:var(--teal);font-weight:700;"></div>
+      <button class="btn btn-teal btn-sm" onclick="syncGCal()">🔄 同期する</button>
+      <button class="btn btn-outline btn-sm" onclick="document.getElementById('gcal-setup').classList.remove('hidden');document.getElementById('gcal-toggle').classList.add('hidden')">変更</button>
+    </div>
+    <div id="gcal-sync-result" style="font-size:13px;color:var(--text3);margin-top:8px;"></div>
+  </div>
+  <div class="card" style="padding:14px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <button class="btn btn-outline" onclick="chMo(-1)" style="padding:8px 18px;font-size:20px;">‹</button>
+      <div id="cal-label" style="font-size:18px;font-weight:800;"></div>
+      <button class="btn btn-outline" onclick="chMo(1)" style="padding:8px 18px;font-size:20px;">›</button>
+    </div>
+    <div class="calgrid">
+      <div class="calh" style="color:var(--red);">日</div>
+      <div class="calh">月</div><div class="calh">火</div><div class="calh">水</div><div class="calh">木</div><div class="calh">金</div>
+      <div class="calh" style="color:var(--blue);">土</div>
+    </div>
+    <div class="calgrid" id="caldays"></div>
+  </div>
+  <div class="card">
+    <div class="ctitle" id="day-evts-title">📅 授業・イベント</div>
+    <div id="day-evts-list" style="font-size:15px;color:var(--text3);">カレンダーの日付をタップしてください</div>
+    <button class="btn btn-outline btn-full" style="margin-top:12px;" onclick="showAddEvt()">＋ イベントを追加</button>
+  </div>
+  <div class="card hidden" id="add-evt-form">
+    <div class="ctitle">➕ イベントを追加</div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div><span class="lbl">タイトル</span><input type="text" id="evt-title" placeholder="例: 算数特訓"/></div>
+      <div><span class="lbl">種別</span><select id="evt-type"><option value="class">授業</option><option value="test">テスト</option><option value="special">特訓</option></select></div>
+      <div><span class="lbl">時間</span><input type="text" id="evt-time" placeholder="例: 17:00–21:00"/></div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-teal" style="flex:1;" onclick="saveEvt()">保存</button>
+        <button class="btn btn-outline" style="flex:1;" onclick="document.getElementById('add-evt-form').classList.add('hidden')">キャンセル</button>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctitle">🔔 今後の予定</div>
+    <div id="upcoming-evts"></div>
+  </div>
+</div>
+
+<!-- ══ TAB: 攻略の道 ══ -->
+<div id="tab-kouryaku" class="content">
+  <div class="card" style="text-align:center;padding:22px 18px 18px;">
+    <div style="font-size:40px;margin-bottom:8px;">⚔️</div>
+    <div style="font-size:22px;font-weight:800;color:var(--gold);">攻略の道</div>
+    <div style="font-size:14px;color:var(--text2);margin-top:6px;line-height:1.7;">問題写真を撮影 → AI類似問題を生成<br>正解するとメダルが獲得できる！</div>
+  </div>
+  <div class="card">
+    <div class="ctitle">🏅 獲得メダル</div>
+    <div class="mgrid" id="mgrid"></div>
+    <div id="medal-count" style="font-size:14px;color:var(--text3);margin-top:12px;text-align:center;"></div>
+    <hr class="divider">
+    <div style="font-size:12px;color:var(--text3);font-weight:700;letter-spacing:1px;margin-bottom:10px;">獲得条件一覧</div>
+    <div class="mdetail" id="medal-detail-list"></div>
+  </div>
+  <div class="card" id="step-upload">
+    <div class="ctitle">📷 ステップ1：問題を撮影・アップロード</div>
+    <div class="upload-area" onclick="document.getElementById('fupload').click()">
+      <div style="font-size:42px;margin-bottom:10px;">📸</div>
+      <div style="font-size:16px;color:var(--text2);font-weight:700;">タップして写真を選択</div>
+      <div style="font-size:13px;color:var(--text3);margin-top:5px;">JPG / PNG 対応</div>
+    </div>
+    <input type="file" id="fupload" accept="image/*" style="display:none;" onchange="handleUpload(event)">
+    <div id="upload-preview" class="hidden" style="margin-top:12px;">
+      <img id="prev-img" style="width:100%;border-radius:10px;max-height:220px;object-fit:contain;border:1px solid var(--border);"/>
+      <div style="margin-top:12px;"><span class="lbl">教科を選択</span><select id="k-subj"><option>算数</option><option>国語</option><option>理科</option><option>社会</option></select></div>
+      <button class="btn btn-teal btn-full" style="margin-top:12px;" onclick="genProblem()">🤖 AI類似問題を生成する</button>
+    </div>
+  </div>
+  <div class="card hidden" id="step-problem">
+    <div class="ctitle">🧩 ステップ2：問題を解こう！</div>
+    <div id="gen-problem-q" style="font-size:16px;font-weight:700;color:var(--text);line-height:1.8;padding:14px;background:rgba(255,210,63,.06);border:1.5px solid rgba(255,210,63,.2);border-radius:12px;margin-bottom:14px;"></div>
+    <div id="gen-problem-opts" class="qopts"></div>
+  </div>
+  <div class="card hidden" id="step-result">
+    <div id="grade-result"></div>
+    <button class="btn btn-outline btn-full" style="margin-top:14px;" onclick="resetQuest()">🔄 別の問題に挑戦する</button>
+  </div>
+</div>
+
+<!-- ══ TAB: ファミリー ══ -->
+<div id="tab-family" class="content">
+  <div class="card">
+    <div class="ctitle">👨‍👩‍👦 ファミリーメンバー</div>
+    <div style="display:flex;gap:16px;justify-content:center;">
+      <div style="text-align:center;"><div style="width:56px;height:56px;border-radius:50%;background:rgba(0,224,181,.15);border:2px solid var(--teal);display:flex;align-items:center;justify-content:center;margin:0 auto 6px;font-size:26px;">🧒</div><div style="font-size:15px;font-weight:800;">夏伎</div><div style="font-size:11px;color:var(--text3);">小5・受験生</div></div>
+      <div style="text-align:center;"><div style="width:56px;height:56px;border-radius:50%;background:rgba(255,210,63,.15);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;margin:0 auto 6px;font-size:26px;">👨</div><div style="font-size:15px;font-weight:800;">Yasuhiro</div><div style="font-size:11px;color:var(--text3);">パパ</div></div>
+      <div style="text-align:center;"><div style="width:56px;height:56px;border-radius:50%;background:rgba(179,148,255,.15);border:2px solid var(--purple);display:flex;align-items:center;justify-content:center;margin:0 auto 6px;font-size:26px;">👩</div><div style="font-size:15px;font-weight:800;">Yuko</div><div style="font-size:11px;color:var(--text3);">ママ</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctitle">📊 今日のまとめ</div>
+    <div id="fam-summary"></div>
+  </div>
+  <div class="card">
+    <div class="ctitle">💌 ファミリーメッセージ</div>
+    <div id="fam-msgs" style="margin-bottom:12px;max-height:240px;overflow-y:auto;"></div>
+    <div style="display:flex;gap:8px;margin-bottom:10px;">
+      <select id="msg-from" style="width:88px;flex-shrink:0;padding:12px 6px;">
+        <option value="夏伎">🧒 夏伎</option>
+        <option value="Yasuhiro">👨 パパ</option>
+        <option value="Yuko">👩 ママ</option>
+      </select>
+      <input type="text" id="msg-input" placeholder="メッセージを送る…" style="flex:1;"/>
+    </div>
+    <button class="btn btn-teal btn-full" onclick="sendMsg()">送信する</button>
+  </div>
+  <div class="card">
+    <div class="ctitle">📧 Gmail連携</div>
+    <div style="font-size:14px;color:var(--text2);margin-bottom:12px;line-height:1.7;">塾からのお知らせ・テスト結果をGmailで確認できます</div>
+    <a href="https://mail.google.com" target="_blank" class="btn btn-outline btn-full" style="text-decoration:none;">📬 Gmailを開く</a>
+  </div>
+  <div class="card">
+    <div class="ctitle">⚙️ 入試日設定</div>
+    <div style="margin-bottom:10px;"><span class="lbl">目標入試日（例: 2027/2/1）</span><input type="text" id="exam-inp" placeholder="2027/2/1"/></div>
+    <button class="btn btn-teal" onclick="saveExam()">保存する</button>
+  </div>
+
+  <div class="card" style="border-color:rgba(255,96,96,.3);border-width:1.5px;">
+    <div class="ctitle">🔑 AI機能の設定（Yuko専用）</div>
+    <div id="apikey-status" style="font-size:14px;margin-bottom:12px;padding:10px 12px;border-radius:8px;"></div>
+    <div id="apikey-form">
+      <div style="margin-bottom:10px;">
+        <span class="lbl">Anthropic APIキー</span>
+        <input type="password" id="apikey-inp" placeholder="sk-ant-api03-…" autocomplete="off"/>
+        <div style="font-size:12px;color:var(--text3);margin-top:5px;line-height:1.6;">攻略の道のAI問題生成・採点に必要です。<br>console.anthropic.com で取得したキーを入力。</div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-teal" style="flex:1;" onclick="saveApiKey()">🔑 保存する</button>
+        <button class="btn btn-red btn-sm" onclick="clearApiKey()" id="apikey-clear-btn" style="display:none;">削除</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TAB: 使い方 ══ -->
+<div id="tab-guide" class="content">
+  <div style="text-align:center;padding:4px 0 20px;">
+    <div style="font-size:38px;margin-bottom:8px;">📖</div>
+    <div style="font-size:22px;font-weight:800;color:var(--text);">アプリの使い方</div>
+    <div style="font-size:14px;color:var(--text2);margin-top:6px;">夏伎用・パパママ用にわかりやすく解説</div>
+  </div>
+
+  <!-- 夏伎用 -->
+  <div style="background:rgba(0,224,181,.06);border:2px solid rgba(0,224,181,.3);border-radius:20px;padding:18px;margin-bottom:14px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+      <div style="font-size:34px;">🧒</div>
+      <div>
+        <div style="font-size:20px;font-weight:800;color:var(--teal);">夏伎くんへ</div>
+        <div style="font-size:13px;color:var(--text2);">毎日これをやれば合格に近づくよ！</div>
+      </div>
+    </div>
+
+    <div class="hsec">
+      <div class="hhead" onclick="toggleHelp(this)">
+        <span class="hico">🏠</span><span class="htit">ホームタブの使い方</span><span class="harr">›</span>
+      </div>
+      <div class="hbody">
+        <div class="hstep">
+          <div class="hnum">1</div>
+          <div><div class="hstit">毎日チェックイン</div><div class="hsdesc">アプリを開いたら「今日の自習をはじめる！」ボタンをタップ。連続記録が増えると🔥ストリークが伸びていくよ！</div></div>
+        </div>
+        <div class="hstep">
+          <div class="hnum">2</div>
+          <div><div class="hstit">中学受験クイズに答える</div><div class="hsdesc">毎日1問、ことわざ・四字熟語など受験頻出の問題が4択で出るよ。どこの学校の問題かも書いてある。正解すると+10XPで、解説も読んでおこう！</div></div>
+        </div>
+        <div class="hstep">
+          <div class="hnum">3</div>
+          <div><div class="hstit">教科タイマーで学習を記録</div><div class="hsdesc">「国語・算数・理科・社会」をタップ → <strong style="color:var(--blue)">📘 予習</strong> か <strong style="color:var(--orange)">📙 復習</strong> かを選ぶ → スタート → 終了して記録。何分勉強したか・予習か復習かが自動で記録されるよ！</div></div>
+        </div>
+        <div class="hstep">
+          <div class="hnum">4</div>
+          <div><div class="hstit">クエストをクリアしてXPを集める</div><div class="hsdesc">5つのクエストを全部クリアすると「💎全クエスト制覇」メダルがもらえるよ！毎日チャレンジしよう。</div></div>
+        </div>
+        <div class="htip">⭐ <strong>全クエストクリアで100XP獲得！</strong>積み上げていこう。</div>
+      </div>
+    </div>
+
+    <div class="hsec">
+      <div class="hhead" onclick="toggleHelp(this)">
+        <span class="hico">⚔️</span><span class="htit">攻略の道タブの使い方</span><span class="harr">›</span>
+      </div>
+      <div class="hbody">
+        <div class="hstep">
+          <div class="hnum">1</div>
+          <div><div class="hstit">問題を写真で撮る</div><div class="hsdesc">塾のテキストや宿題で難しかった問題をスマホで撮影して、アップロードしよう。</div></div>
+        </div>
+        <div class="hstep">
+          <div class="hnum">2</div>
+          <div><div class="hstit">教科を選んでAI生成</div><div class="hsdesc">「🤖 AI類似問題を生成する」を押すと、同じ分野・難しさの違う問題が自動で作られるよ！</div></div>
+        </div>
+        <div class="hstep">
+          <div class="hnum">3</div>
+          <div><div class="hstit">答えを書いて採点してもらう</div><div class="hsdesc">答えを入力したら「✓ 採点する！」を押す。AIが○か×か教えてくれて、正解の解説もついてくる！</div></div>
+        </div>
+        <div class="htip">🏅 <strong>正解するとメダルが獲得できる！</strong>算数・国語・理科・社会それぞれのメダルがあるよ。全部集めよう！</div>
+      </div>
+    </div>
+
+    <div class="hsec">
+      <div class="hhead" onclick="toggleHelp(this)">
+        <span class="hico">🏅</span><span class="htit">メダルの獲得条件</span><span class="harr">›</span>
+      </div>
+      <div class="hbody">
+        <div class="mdetail" id="medal-guide-natsuki"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- パパママ用 -->
+  <div style="background:rgba(255,210,63,.05);border:2px solid rgba(255,210,63,.3);border-radius:20px;padding:18px;margin-bottom:14px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+      <div style="font-size:34px;">👨👩</div>
+      <div>
+        <div style="font-size:20px;font-weight:800;color:var(--gold);">Yasuhiro・Yukoへ</div>
+        <div style="font-size:13px;color:var(--text2);">サポート機能の使い方です</div>
+      </div>
+    </div>
+
+    <div class="hsec">
+      <div class="hhead" onclick="toggleHelp(this)">
+        <span class="hico">📈</span><span class="htit">偏差値グラフの見方・使い方</span><span class="harr">›</span>
+      </div>
+      <div class="hbody">
+        <div class="hstep">
+          <div class="hnum hnum-gold">1</div>
+          <div><div class="hstit">PINでロック解除</div><div class="hsdesc">「偏差値」タブを開くとPIN入力画面になります。PIN番号「<strong style="color:var(--gold)">0201</strong>」を入力してロック解除してください。</div></div>
+        </div>
+        <div class="hstep">
+          <div class="hnum hnum-gold">2</div>
+          <div><div class="hstit">成績を記録する</div><div class="hsdesc">マンスリーテスト・SOなどの結果を「成績を追加」から入力。日付・偏差値・教科・テスト名を記録できます。</div></div>
+        </div>
+        <div class="hstep">
+          <div class="hnum hnum-gold">3</div>
+          <div><div class="hstit">グラフで推移を確認</div><div class="hsdesc">教科タブを切り替えると各教科の偏差値折れ線グラフが表示されます。データが増えるほど推移が見やすくなります。</div></div>
+        </div>
+        <div class="htip htip-gold">🔒 <strong>使い終わったら「ロックする」ボタン</strong>を必ず押してPINロックしてください。夏伎くんに見られないようにするためです。</div>
+      </div>
+    </div>
+
+    <div class="hsec">
+      <div class="hhead" onclick="toggleHelp(this)">
+        <span class="hico">📅</span><span class="htit">塾カレンダーの管理</span><span class="harr">›</span>
+      </div>
+      <div class="hbody">
+        <div class="hstep">
+          <div class="hnum hnum-gold">1</div>
+          <div><div class="hstit">日付をタップして予定を追加</div><div class="hsdesc">カレンダーの日付をタップ → 「＋ イベントを追加」→ タイトル・種別（授業/テスト/特訓）・時間を入力して保存。</div></div>
+        </div>
+        <div class="hstep">
+          <div class="hnum hnum-gold">2</div>
+          <div><div class="hstit">予定の確認方法</div><div class="hsdesc">予定のある日には金色の●がつきます。「今後の予定」に直近5件が一覧表示されます。</div></div>
+        </div>
+        <div class="htip htip-gold">📌 <strong>データは家族で共有</strong>されています。パパが入力したカレンダーはママと夏伎くんも見られます。</div>
+        <hr style="border:none;border-top:1px solid var(--border);margin:14px 0;">
+        <div style="font-size:12px;color:var(--gold);font-weight:800;letter-spacing:1px;margin-bottom:12px;">🔗 GOOGLEカレンダー連携</div>
+        <div class="hstep">
+          <div class="hnum hnum-gold">1</div>
+          <div><div class="hstit">iCalアドレスをコピー</div><div class="hsdesc">Googleカレンダーを開く → 右上の歯車アイコン「設定」→ 左側メニューから連携したいカレンダー名（例：塾）をクリック → 下の方にある「カレンダーの統合」→「<strong style="color:var(--gold)">非公開のiCalアドレス</strong>」をコピー</div></div>
+        </div>
+        <div class="hstep">
+          <div class="hnum hnum-gold">2</div>
+          <div><div class="hstit">アプリにURLを貼り付けて保存</div><div class="hsdesc">このアプリの「塾カレ」タブ → 上部の「Googleカレンダー連携」カードにURLを貼り付け → 「📅 URLを保存して同期」ボタンを押す。</div></div>
+        </div>
+        <div class="hstep">
+          <div class="hnum hnum-gold">3</div>
+          <div><div class="hstit">同期する</div><div class="hsdesc">URLを保存後、「🔄 同期する」ボタンを押すとYasuhiroのGoogleカレンダーのイベントが自動取り込みされます。イベントの種別（授業/テスト/特訓）もタイトルから自動判定。</div></div>
+        </div>
+        <div class="htip htip-gold">⚠️ <strong>注意：</strong>「非公開のiCalアドレス」はカレンダーのすべての予定が見えるURLです。家族間での共有には問題ありませんが、第三者に教えないでください。URLはこのアプリ内にのみ保存されます。</div>
+      </div>
+    </div>
+
+    <div class="hsec">
+      <div class="hhead" onclick="toggleHelp(this)">
+        <span class="hico">👨‍👩‍👦</span><span class="htit">ファミリータブの機能</span><span class="harr">›</span>
+      </div>
+      <div class="hbody">
+        <div class="hstep">
+          <div class="hnum hnum-gold">1</div>
+          <div><div class="hstit">今日のまとめを確認</div><div class="hsdesc">夏伎くんの学習時間・クエスト達成数・XP・メダル数・チェックイン状況がまとめて見られます。</div></div>
+        </div>
+        <div class="hstep">
+          <div class="hnum hnum-gold">2</div>
+          <div><div class="hstit">ファミリーメッセージ</div><div class="hsdesc">送信者（夏伎/パパ/ママ）を選んでメッセージを送ると家族全員のタイムラインに表示されます。励ましのメッセージを送りましょう！</div></div>
+        </div>
+        <div class="hstep">
+          <div class="hnum hnum-gold">3</div>
+          <div><div class="hstit">入試日の設定</div><div class="hsdesc">「入試日設定」で入試本番の日付を入力してください。ヘッダーのカウントダウンが自動更新されます。</div></div>
+        </div>
+        <div class="htip htip-gold">💡 <strong>すべてのデータは家族で共有</strong>されています。どの端末からでも同じデータが確認できます。</div>
+      </div>
+    </div>
+
+    <div class="hsec">
+      <div class="hhead" onclick="toggleHelp(this)">
+        <span class="hico">🏅</span><span class="htit">メダル一覧と獲得条件</span><span class="harr">›</span>
+      </div>
+      <div class="hbody">
+        <div class="mdetail" id="medal-guide-parent"></div>
+        <div class="htip htip-gold" style="margin-top:12px;">📊 <strong>メダルはモチベーション管理</strong>に活用できます。夏伎くんがメダルを獲得したらたくさん褒めてあげてください！</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bnav">
+  <button class="ni active" id="nb-home" onclick="showTab('home')"><span class="ico">🏠</span>ホーム</button>
+  <button class="ni" id="nb-hensachi" onclick="showTab('hensachi')"><span class="ico">📈</span>偏差値</button>
+  <button class="ni" id="nb-calendar" onclick="showTab('calendar')"><span class="ico">📅</span>塾カレ</button>
+  <button class="ni" id="nb-kouryaku" onclick="showTab('kouryaku')"><span class="ico">⚔️</span>攻略</button>
+  <button class="ni" id="nb-family" onclick="showTab('family')"><span class="ico">👨‍👩‍👦</span>家族</button>
+  <button class="ni" id="nb-guide" onclick="showTab('guide')"><span class="ico">📖</span>使い方</button>
+</div>
+
+<script>
+const EXAM_QUIZ=[
+  {type:'ことわざ',school:'早稲田中学 頻出',
+   q:'「七転び八起き」の意味として正しいものはどれ？',
+   opts:['七と八は幸運な数字という意味','何度失敗しても諦めずに立ち上がること','七回転んで八回休むこと','転ばないように気をつけること'],
+   a:1,exp:'何度失敗しても、そのたびに立ち上がる強さが大切だという意味。受験でも失敗を恐れずに挑戦しよう！'},
+  {type:'四字熟語',school:'慶應中等部 頻出',
+   q:'「一期一会」の意味として正しいものはどれ？',
+   opts:['一生に一度しかない大切な出会い','一つの期間に一度会うこと','一年に一回の行事','一人で一つの仕事をすること'],
+   a:0,exp:'茶道から生まれた言葉で、「この出会いは二度と繰り返されない」という意味。すべての出会いを大切にする心が込められている。'},
+  {type:'ことわざ',school:'麻布中学 出題傾向',
+   q:'「情けは人の為ならず」の本当の意味はどれ？',
+   opts:['人に親切にしても無駄だ','人に親切にすると巡り巡って自分に良いことが返ってくる','情けをかけると相手のためにならない','人の情けは信用できない'],
+   a:1,exp:'よく「人に甘くするのは良くない」と誤解されるが、本当の意味は「人に親切にすることは、回り回って自分のためになる」という意味！'},
+  {type:'四字熟語',school:'開成中学 頻出',
+   q:'「温故知新」の意味として正しいものはどれ？',
+   opts:['古いものは温めて新しくすること','昔のことを学び直して新しい知識や考え方を見つけること','古い友人と新しい友人を大切にすること','温かい心で新しいことに挑戦すること'],
+   a:1,exp:'孔子の言葉で「古いことをよく研究して、そこから新しい知識を得る」という意味。歴史や古典を学ぶ大切さを教えている。'},
+  {type:'ことわざ',school:'武蔵中学 出題傾向',
+   q:'「三人寄れば文殊の知恵」の意味として正しいものはどれ？',
+   opts:['三人で集まれば必ずけんかになる','普通の人でも三人集まって考えれば、すばらしい考えが生まれる','文殊様は三人の神様である','三人では多すぎて意見がまとまらない'],
+   a:1,exp:'文殊菩薩は知恵の神様。「凡人でも三人集まれば、知恵の神様のような素晴らしいアイデアが出せる」という意味だよ。'},
+  {type:'四字熟語',school:'海城中学 出題傾向',
+   q:'「自業自得」の意味として正しいものはどれ？',
+   opts:['自分で仕事をして得をすること','良いことも悪いことも自分の行いの結果として自分に返ってくること','自分勝手に得をしようとすること','仕事は自分でやるのが一番いいこと'],
+   a:1,exp:'仏教の言葉で「自分の行いの結果は自分に帰ってくる」という意味。良い行いも悪い行いも、最後は自分に返ってくる。'},
+  {type:'ことわざ',school:'早稲田実業中 頻出',
+   q:'「亀の甲より年の功」の意味として正しいものはどれ？',
+   opts:['亀は甲羅があるので長生きする','年をとった人の経験や知恵は非常に価値がある','年をとると甲羅のように硬くなる','亀のようにゆっくり生きることが大切だ'],
+   a:1,exp:'「亀の甲」は縁起の良いもの。それよりも、年長者が長い経験で積み上げた知恵の方が価値があるという意味。'},
+  {type:'四字熟語',school:'慶應普通部 頻出',
+   q:'「臨機応変」の意味として正しいものはどれ？',
+   opts:['機械を使って変化に対応すること','その場その場の状況に応じて、適切な対処をすること','いつでも変化することが大切だということ','機会を見て急いで変えること'],
+   a:1,exp:'「臨機」はその場に臨むこと、「応変」は変化に応じること。決まった方法にとらわれず、状況に合わせて柔軟に対応する大切さを表している。'},
+  {type:'ことわざ',school:'芝中学 出題傾向',
+   q:'「猿も木から落ちる」と同じ意味のことわざはどれ？',
+   opts:['七転び八起き','弘法も筆の誤り','急がば回れ','千里の道も一歩から'],
+   a:1,exp:'「弘法も筆の誤り」も同じ意味。どちらも「名人や達人でも時には失敗することがある」という意味。失敗を恐れずチャレンジしよう！'},
+  {type:'四字熟語',school:'雙葉中学 出題傾向',
+   q:'「以心伝心」の意味として正しいものはどれ？',
+   opts:['心と心が紙で伝わること','言葉を使わなくても気持ちが通じ合うこと','心の伝言ゲームをすること','心を伝えるために手紙を書くこと'],
+   a:1,exp:'禅宗の言葉。「言葉や文字を使わなくても、心と心で通じ合える」という意味。親友や家族との深い絆を表す言葉だよ。'},
+  {type:'ことわざ',school:'慶應中等部 頻出',
+   q:'「百聞は一見に如かず」の意味として正しいものはどれ？',
+   opts:['百回見るより一回聞いた方がいい','百回聞くよりも一回自分の目で見た方がよくわかる','百人に聞いた方が一人に見せるよりいい','見ることより聞くことの方が大切だ'],
+   a:1,exp:'中国の歴史書「漢書」にある言葉。どんなに多く話に聞いても、実際に自分の目で見ることには及ばないという意味。'},
+  {type:'四字熟語',school:'早稲田中学 頻出',
+   q:'「起承転結」の説明として正しいものはどれ？',
+   opts:['文章の書き方で、始め・続き・変化・まとめの四つの構成','起きて、受けて、転んで、結果が出ること','四人が力を合わせて一つのことをすること','四つの季節のこと'],
+   a:0,exp:'漢詩の構成から来た言葉。「起」＝テーマを提示、「承」＝展開、「転」＝変化、「結」＝まとめ。文章を書く時の基本の型だよ。'},
+  {type:'ことわざ',school:'桐朋中学 出題傾向',
+   q:'「聞くは一時の恥、聞かぬは一生の恥」の意味として正しいものはどれ？',
+   opts:['恥ずかしいことは一生忘れない','知らないことを聞くのは一時的な恥だが、聞かずにいる方が一生恥ずかしいままだ','一生に一度だけ恥をかいてもいい','聞くことよりも見ることが大切だ'],
+   a:1,exp:'知らないことは素直に聞いた方がいい。黙っていても知識は増えない。「聞くことは恥ずかしい」と思っているうちは成長できない！'},
+  {type:'四字熟語',school:'武蔵中学 出題傾向',
+   q:'「四面楚歌」の意味として正しいものはどれ？',
+   opts:['四方から楽しい歌が聞こえてくること','周りが全て敵になって、孤立した状態','四つの面にそれぞれ歌を書くこと','四人で楚という国の歌を歌うこと'],
+   a:1,exp:'中国の「楚」という国の将軍・項羽が四方を敵に囲まれ、故郷の歌が聞こえてきた故事から。「完全に孤立して助けがない状況」を表す。'},
+  {type:'ことわざ',school:'女子学院 出題傾向',
+   q:'「親の心子知らず」の意味として正しいものはどれ？',
+   opts:['親は子どもの気持ちを理解できない','親が子どものために深く心配しているのに、子どもはそれを理解しない','子どもは親の言うことを聞かない','親と子どもは考え方が違う'],
+   a:1,exp:'親は子どものことを深く心配しているのに、子どもはそれに気づかない。家族への感謝を忘れずに過ごしたいね。'},
+  {type:'四字熟語',school:'桜蔭中学 頻出',
+   q:'「大器晩成」の意味として正しいものはどれ？',
+   opts:['大きな器は晩ご飯の時に使うこと','才能のある人は若い頃は目立たなくても、後になって大きく成長すること','大きな成果は夕方になって出ること','晩年になって器を作り始めること'],
+   a:1,exp:'「大きな器は完成するのに時間がかかる」という意味。焦らなくていい。じっくり実力をつけていけば必ず開花する！'},
+  {type:'四字熟語',school:'早稲田中学 出題傾向',
+   q:'「有言実行」の意味として正しいものはどれ？',
+   opts:['言葉だけで行動しないこと','言ったことを必ず実行すること','有名な言葉を実際に使うこと','言葉があれば何でも実現する'],
+   a:1,exp:'「言ったことは必ずやる」という意味。「不言実行（黙って行動する）」と対になる言葉。約束や宣言したことは必ず守ろう。'},
+  {type:'ことわざ',school:'海城中学 出題傾向',
+   q:'「塵も積もれば山となる」と同じ意味のことわざはどれ？',
+   opts:['急がば回れ','千里の道も一歩から','猿も木から落ちる','一石二鳥'],
+   a:1,exp:'「千里の道も一歩から」も「小さな積み重ねが大きな結果につながる」という同じ意味。毎日少しずつの勉強が合格への道！'},
+  {type:'四字熟語',school:'慶應中等部 出題傾向',
+   q:'「一石二鳥」の意味として正しいものはどれ？',
+   opts:['石で鳥を二羽捕まえること','一つの行動で二つの利益を得ること','一羽の鳥が石の上にいること','二羽の鳥が石を運ぶこと'],
+   a:1,exp:'英語では "Kill two birds with one stone" と言うよ。一つの努力で二つの目的が達成できる時に使う表現だ。'},
+  {type:'ことわざ',school:'麻布中学 頻出',
+   q:'「急がば回れ」の意味として正しいものはどれ？',
+   opts:['急ぐときは全力で走れ','焦らず確実な方法をとった方が、結果的に早く目的に達せる','急いでいる時は回り道をしてはいけない','急ぐ時こそゆっくり走れ'],
+   a:1,exp:'琵琶湖を渡る時、嵐の日は近道の渡し舟より遠くても陸路の方が早いという実体験から生まれたことわざ。焦らず着実に！'},
+  {type:'四字熟語',school:'開成中学 出題傾向',
+   q:'次の文の（　）にあてはまる四字熟語はどれか。「試験の前日に一夜漬けで勉強するのは（　）のやり方だ。」',
+   opts:['一石二鳥','付け焼き刃','温故知新','一期一会'],
+   a:1,exp:'「付け焼き刃」は「刃物の切れ味を一時的によく見せるために焼いて研ぐこと」から。実力のない表面だけの準備のことを言う。'},
+  {type:'ことわざ',school:'桜蔭中学 出題傾向',
+   q:'「石橋を叩いて渡る」の意味として正しいものはどれ？',
+   opts:['石橋は壊れやすいので叩いて確かめること','十分に安全を確認してから行動すること','石橋を壊してしまうこと','叩かないと橋は渡れないこと'],
+   a:1,exp:'丈夫な石橋でも叩いて安全を確かめてから渡るという意味。慎重すぎるほど用心して物事を行うことを表す。テストも見直しが大事！'},
+  {type:'四字熟語',school:'女子学院 頻出',
+   q:'「一生懸命」の元々の漢字として正しいものはどれ？',
+   opts:['一生懸命','一所懸命','一心懸命','一途懸命'],
+   a:1,exp:'元々は「一所懸命」！武士が自分の領地（一か所）を命がけで守ることから来た。今は「一生懸命」と書くことが多いが、元の形も覚えておこう。'},
+  {type:'ことわざ',school:'慶應普通部 出題傾向',
+   q:'「二兎を追う者は一兎をも得ず」の意味として正しいものはどれ？',
+   opts:['二羽のウサギは一羽より速い','二つのことを同時に狙うと、どちらも成功しない','ウサギを二羽飼うと一羽になってしまう','二つ目標があれば一つは達成できる'],
+   a:1,exp:'二匹のウサギを同時に追いかけると両方逃げてしまう。「欲張って二つのことを同時に狙うと、どちらも失敗する」という教え。一つに集中しよう！'},
+  {type:'四字熟語',school:'早稲田中学 出題傾向',
+   q:'「切磋琢磨」の意味として正しいものはどれ？',
+   opts:['石や玉を切って磨いて美しくするように、互いに励まし合って向上すること','一人で黙々と努力すること','先生から厳しく指導されること','競争で相手を負かすこと'],
+   a:0,exp:'「切」「磋」は骨・象牙を加工すること、「琢」「磨」は玉・石を磨くこと。友達と切磋琢磨して、お互い高め合っていこう！'}
+];
+
+const QUOTES=[
+  {q:'成功とは、情熱を失わずに失敗から失敗へと歩き続けることだ。',a:'ウィンストン・チャーチル',meta:'イギリス / 政治家・首相 / 20世紀'},
+  {q:'才能とは、続けること。',a:'松浦弥太郎',meta:'日本 / 編集者・作家 / 現代'},
+  {q:'夢は逃げない。逃げるのはいつも自分だ。',a:'高橋歩',meta:'日本 / 作家・冒険家 / 現代'},
+  {q:'今日できることを明日に延ばすな。',a:'ベンジャミン・フランクリン',meta:'アメリカ / 政治家・発明家 / 18世紀'},
+  {q:'努力する人は希望を語り、怠ける人は不満を語る。',a:'井上靖',meta:'日本 / 小説家 / 20世紀'},
+  {q:'困難の真っただ中にこそ、チャンスは潜んでいる。',a:'アルベルト・アインシュタイン',meta:'ドイツ→アメリカ / 物理学者 / 20世紀'},
+  {q:'できると思えばできる。これは絶対的な法則だ。',a:'パブロ・ピカソ',meta:'スペイン / 画家・芸術家 / 20世紀'},
+  {q:'千里の道も一歩から。',a:'老子',meta:'中国 / 思想家・哲学者 / 紀元前6〜5世紀'},
+  {q:'人生はチャレンジです。チャレンジを受けなさい。',a:'マザー・テレサ',meta:'アルバニア→インド / 修道女・慈善家 / 20世紀'},
+  {q:'散るぞ悲しき。',a:'栗林忠道',meta:'日本 / 陸軍大将 / 20世紀'},
+  {q:'道は開ける。',a:'デール・カーネギー',meta:'アメリカ / 作家・自己啓発家 / 20世紀'},
+  {q:'学びて思わざれば則ち罔し、思いて学ばざれば則ち殆し。',a:'孔子',meta:'中国 / 思想家・教育者 / 紀元前5世紀'},
+  {q:'われ思う、ゆえにわれあり。',a:'デカルト',meta:'フランス / 哲学者・数学者 / 17世紀'},
+  {q:'天才とは、一パーセントのひらめきと九十九パーセントの努力である。',a:'トーマス・エジソン',meta:'アメリカ / 発明家 / 19〜20世紀'}
+];
+const SUBJECTS=[
+  {id:'国語',icon:'📖',col:'var(--sk)'},
+  {id:'算数',icon:'🔢',col:'var(--ss)'},
+  {id:'理科',icon:'🔬',col:'var(--sr)'},
+  {id:'社会',icon:'🌏',col:'var(--ssh)'}
+];
+const QUEST_DEFS=[
+  {id:'checkin',txt:'自習チェックインをする',xp:20,icon:'📍',auto:true},
+  {id:'proverb',txt:'中学受験クイズに正解する',xp:5,icon:'🎓',auto:true},
+  {id:'study30',txt:'どれかの教科を30分以上勉強する',xp:20,icon:'⏱',auto:true},
+  {id:'allsubjects',txt:'全教科の学習記録をつける',xp:5,icon:'📚',auto:true},
+  {id:'questpath',txt:'攻略の道で1問解く',xp:30,icon:'⚔️',auto:true}
+];
+const MEDAL_DEFS=[
+  {id:'first',icon:'🚀',label:'スタートダッシュ',cond:'初めて自習チェックインをする'},
+  {id:'math1',icon:'🥇',label:'算数の達人',cond:'攻略の道で算数問題に正解する'},
+  {id:'jp1',icon:'📜',label:'国語の達人',cond:'攻略の道で国語問題に正解する'},
+  {id:'sci1',icon:'🔭',label:'理科の達人',cond:'攻略の道で理科問題に正解する'},
+  {id:'soc1',icon:'🗺️',label:'社会の達人',cond:'攻略の道で社会問題に正解する'},
+  {id:'streak3',icon:'🔥',label:'3日連続',cond:'3日間連続でチェックインする'},
+  {id:'streak7',icon:'⭐',label:'7日連続',cond:'7日間連続でチェックインする'},
+  {id:'fullquest',icon:'💎',label:'全クエスト制覇',cond:'1日の全クエスト（5つ）を完了する'},
+  {id:'wk3h',icon:'⏰',label:'週3時間達成',cond:'1週間の学習時間が合計3時間を超える'},
+  {id:'wk10h',icon:'🔥',label:'週10時間達成',cond:'1週間の学習時間が合計10時間を超える'},
+  {id:'wk20h',icon:'💎',label:'週20時間達成',cond:'1週間の学習時間が合計20時間を超える'},
+  {id:'wk30h',icon:'🚀',label:'週30時間達成',cond:'1週間の学習時間が合計30時間を超える'},
+];
+
+// STATE
+let pinBuf='',pinUnlocked=false;
+let timerOn=false,timerIv=null,timerSec=0,activeSubj=null,activeMode='予習';
+let calDate=new Date(),selCalDate=null;
+let hensachiData={},studyData={},studyDetail={},questData={};
+let checkedIn=false,checkinTime='',streakDays=0;
+let medals=[],messages=[],examDate=new Date('2027-02-01');
+let hChart=null,curHS='総合';
+let genProblemText='',uploadedImg=null,uploadedMime=null;
+
+// STORAGE
+const _m={};
+async function sGet(k){try{if(window.storage){const r=await window.storage.get('nk:'+k,true);return r?JSON.parse(r.value):null;}}catch{}return _m[k]??null;}
+async function sSet(k,v){_m[k]=v;try{if(window.storage)await window.storage.set('nk:'+k,JSON.stringify(v),true);}catch{}}
+
+async function init(){
+  await loadExamDate();updateCountdown();
+  applySeasonalTheme();
+  initDailyQuote();await initProverbQuiz();
+  await loadCheckin();await loadStudyData();await loadQuests();await loadStreak();
+  renderSubjectGrid();renderQuests();renderStreakBadge();renderCalendar();
+  await loadMedals();renderMedals();renderMedalGuides();
+  await loadMessages();renderMessages();renderFamilySummary();
+  await loadGCalSetup();
+  await renderWeeklyStats();
+  renderApiKeyStatus();
+}
+function applySeasonalTheme(){
+  const d=new Date();const m=d.getMonth()+1,day=d.getDate();
+  const b=document.body;const banner=document.getElementById('season-banner');
+  // Clear previous
+  b.className='';banner.className='';banner.textContent='';
+  if(m===2&&day===14){
+    b.classList.add('season-valentine');
+    banner.className='show';banner.style.background='linear-gradient(90deg,rgba(255,80,120,.15),rgba(255,100,150,.08),rgba(255,80,120,.15))';
+    banner.style.color='#ff7eb3';banner.style.borderBottom='1px solid rgba(255,126,179,.2)';
+    banner.textContent='💝 Happy Valentine\'s Day! 合格という最高のプレゼントを目指そう！ 💝';
+  } else if(m===12&&(day===24||day===25)){
+    b.classList.add('season-xmas');
+    banner.className='show';banner.style.background='linear-gradient(90deg,rgba(20,80,20,.2),rgba(30,100,30,.1),rgba(20,80,20,.2))';
+    banner.style.color='#44d98e';banner.style.borderBottom='1px solid rgba(68,217,142,.2)';
+    banner.textContent='🎄 Merry Christmas! 冬休みも勉強を忘れずに！ ⭐';
+  } else if(m===1&&day===1){
+    b.classList.add('season-newyear');
+    banner.className='show';banner.style.background='linear-gradient(90deg,rgba(255,210,63,.12),rgba(255,180,0,.06),rgba(255,210,63,.12))';
+    banner.style.color='var(--gold)';banner.style.borderBottom='1px solid rgba(255,210,63,.25)';
+    banner.textContent='🎍 あけましておめでとうございます！今年こそ合格！ 🎏';
+  } else if(m===3&&day>=20||m===4&&day<=10){
+    b.classList.add('season-sakura');
+    banner.className='show';banner.style.background='linear-gradient(90deg,rgba(255,126,179,.1),rgba(255,100,160,.05),rgba(255,126,179,.1))';
+    banner.style.color='var(--sk)';banner.style.borderBottom='1px solid rgba(255,126,179,.2)';
+    banner.textContent='🌸 桜の季節！受験生として最後の春を全力で！ 🌸';
+  } else if(m===7&&day===7){
+    b.classList.add('season-tanabata');
+    banner.className='show';banner.style.background='linear-gradient(90deg,rgba(90,171,255,.08),rgba(179,148,255,.08),rgba(90,171,255,.08))';
+    banner.style.color='var(--blue)';banner.style.borderBottom='1px solid rgba(90,171,255,.2)';
+    banner.textContent='🎋 七夕！合格祈願！ たなばたさまに願いを 🎋';
+  } else if(m===10&&day===31){
+    b.classList.add('season-halloween');
+    banner.className='show';banner.style.background='linear-gradient(90deg,rgba(255,154,80,.1),rgba(200,80,0,.05),rgba(255,154,80,.1))';
+    banner.style.color='var(--orange)';banner.style.borderBottom='1px solid rgba(255,154,80,.2)';
+    banner.textContent='🎃 Happy Halloween! 悪魔の誘惑（ゲーム）に負けるな！ 👻';
+  }
+}
+function showTab(id){
+  document.querySelectorAll('.content').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(e=>e.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  document.getElementById('nb-'+id).classList.add('active');
+  if(id==='hensachi'&&pinUnlocked)renderHChart();
+  if(id==='calendar'){renderCalendar();loadGCalSetup();}
+  if(id==='family'){renderFamilySummary();renderMessages();}
+}
+async function loadExamDate(){const s=await sGet('exam-date');if(s){examDate=new Date(s);const el=document.getElementById('exam-inp');if(el)el.value=s;}}
+function updateCountdown(){
+  const now=new Date();
+  const diff=examDate-now;
+  const days=Math.max(0,Math.floor(diff/864e5));
+  const el=document.getElementById('cdays');
+  el.textContent=days;
+  el.style.color=days<60?'var(--red)':days<180?'var(--gold)':'var(--teal)';
+  // Waseda & Keio fixed dates (next upcoming)
+  function nextExam(mo,day){
+    let y=now.getFullYear();
+    const d=new Date(y,mo-1,day);
+    if(d<=now)d.setFullYear(y+1);
+    return Math.max(0,Math.floor((d-now)/864e5));
+  }
+  const wEl=document.getElementById('cd-waseda');
+  const kEl=document.getElementById('cd-keio');
+  if(wEl)wEl.textContent=nextExam(2,1);
+  if(kEl)kEl.textContent=nextExam(2,3);
+}
+async function saveExam(){const v=document.getElementById('exam-inp').value.trim();if(!v)return;await sSet('exam-date',v);examDate=new Date(v);updateCountdown();showToast('入試日を保存しました！🎯');}
+function initDailyQuote(){
+  const d=new Date();const i=(d.getFullYear()*366+d.getMonth()*31+d.getDate())%QUOTES.length;const q=QUOTES[i];
+  document.getElementById('dquote').textContent='「'+q.q+'」';
+  const el=document.getElementById('dquote-author');
+  if(q.a){
+    el.innerHTML=`<span style="font-weight:700;color:var(--text2);">— ${q.a}</span>`+(q.meta?`<span style="display:block;font-size:11px;color:var(--text3);margin-top:3px;letter-spacing:.3px;">${q.meta}</span>`:'');
+  } else {el.textContent='';}
+}
+
+let quizAnswered=false;
+async function initProverbQuiz(){
+  const d=new Date();const i=(d.getFullYear()*366+d.getMonth()*31+d.getDate())%EXAM_QUIZ.length;const p=EXAM_QUIZ[i];
+  // Show school badge
+  const badge=document.getElementById('quiz-school-badge');
+  if(badge){
+    const typeColor=p.type==='四字熟語'?'var(--purple)':'var(--teal)';
+    const typeBg=p.type==='四字熟語'?'rgba(179,148,255,.12)':'rgba(0,224,181,.1)';
+    badge.innerHTML=`<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+      <span style="display:inline-block;background:${typeBg};color:${typeColor};border:1px solid ${typeColor}44;border-radius:6px;padding:3px 9px;font-size:12px;font-weight:800;">${p.type}</span>
+      <span style="display:inline-block;background:rgba(255,210,63,.1);color:var(--gold);border:1px solid rgba(255,210,63,.25);border-radius:6px;padding:3px 9px;font-size:11px;font-weight:700;">📚 ${p.school}</span>
+    </div>`;
+  }
+  document.getElementById('proverb-text').textContent=p.q;
+  const done=await sGet('proverb-'+todayKey());
+  if(done){quizAnswered=true;const m=document.getElementById('quiz-done-msg');m.textContent=done.correct?'✅ 正解！すばらしい！':'❌ 残念…正解は「'+p.opts[p.a]+'」';m.style.color=done.correct?'var(--green)':'var(--red)';m.classList.remove('hidden');document.getElementById('quiz-opts').innerHTML='';document.getElementById('quiz-exp').textContent=p.exp;document.getElementById('quiz-exp').classList.remove('hidden');return;}
+  const c=document.getElementById('quiz-opts');c.innerHTML='';
+  p.opts.forEach((o,i)=>{const btn=document.createElement('button');btn.className='qopt';btn.textContent=o;btn.onclick=()=>answerQuiz(i===p.a,p,i,c);c.appendChild(btn);});
+}
+async function answerQuiz(correct,p,chosen,container){
+  if(quizAnswered)return;quizAnswered=true;
+  container.querySelectorAll('.qopt').forEach((b,i)=>{b.disabled=true;if(i===p.a)b.classList.add('correct');else if(i===chosen&&!correct)b.classList.add('wrong');});
+  document.getElementById('quiz-exp').textContent=p.exp;document.getElementById('quiz-exp').classList.remove('hidden');
+  await sSet('proverb-'+todayKey(),{correct});
+  if(correct){questData['proverb']=true;await sSet('quests-'+todayKey(),questData);renderQuests();}
+}
+async function loadCheckin(){const d=await sGet('checkin-'+todayKey());if(d)setCheckinDone(d.time);}
+function setCheckinDone(t){checkedIn=true;checkinTime=t;const btn=document.getElementById('chkbtn');btn.className='chkbtn done';btn.innerHTML='✅ チェックイン済み（'+t+'）';}
+async function loadStreak(){
+  const d=await sGet('streak');if(!d){streakDays=0;return;}
+  const y=new Date();y.setDate(y.getDate()-1);
+  const yk=y.getFullYear()+'-'+String(y.getMonth()+1).padStart(2,'0')+'-'+String(y.getDate()).padStart(2,'0');
+  streakDays=(d.lastKey===todayKey()||d.lastKey===yk)?d.count:0;
+}
+function renderStreakBadge(){
+  const el=document.getElementById('streak-display');if(!el)return;
+  if(streakDays>=2)el.innerHTML=`<div class="sbadge">🔥 ${streakDays}日連続チェックイン中！</div>`;
+  else if(checkedIn)el.innerHTML=`<div class="sbadge" style="background:rgba(0,224,181,.1);border-color:rgba(0,224,181,.3);color:var(--teal);">✅ 今日もチェックイン済み！</div>`;
+  else el.innerHTML='<div style="font-size:14px;color:var(--text3);">毎日続けてストリークを伸ばそう！🔥</div>';
+}
+async function doCheckin(){
+  if(checkedIn)return;
+  const now=new Date();const t=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+  setCheckinDone(t);await sSet('checkin-'+todayKey(),{time:t});
+  const y=new Date();y.setDate(y.getDate()-1);const yk=y.getFullYear()+'-'+String(y.getMonth()+1).padStart(2,'0')+'-'+String(y.getDate()).padStart(2,'0');
+  const prev=await sGet('streak');let nc=1;if(prev&&prev.lastKey===yk)nc=prev.count+1;
+  streakDays=nc;await sSet('streak',{count:nc,lastKey:todayKey()});renderStreakBadge();
+  questData['checkin']=true;await sSet('quests-'+todayKey(),questData);renderQuests();
+  if(!medals.find(m=>m.id==='first'))await earnMedal('first');
+  if(nc>=3&&!medals.find(m=>m.id==='streak3'))await earnMedal('streak3');
+  if(nc>=7&&!medals.find(m=>m.id==='streak7'))await earnMedal('streak7');
+}
+async function loadStudyData(){
+  const d=await sGet('study-'+todayKey());studyData=d||{国語:0,算数:0,理科:0,社会:0};
+  const dd=await sGet('study-detail-'+todayKey());studyDetail=dd||{国語:{予習:0,復習:0},算数:{予習:0,復習:0},理科:{予習:0,復習:0},社会:{予習:0,復習:0}};
+}
+function renderSubjectGrid(){
+  const g=document.getElementById('sgrid');g.innerHTML='';
+  SUBJECTS.forEach(s=>{
+    const tot=studyData[s.id]||0;
+    const det=studyDetail[s.id]||{予習:0,復習:0};
+    const y=det['予習']||0,f=det['復習']||0;
+    const sub=tot>0?`<span style="font-size:9px;color:var(--blue)">${y}分</span><span style="font-size:9px;color:var(--text3)">|</span><span style="font-size:9px;color:var(--orange)">${f}分</span>`:'';
+    const b=document.createElement('div');b.className='sbtn'+(activeSubj===s.id?' sel':'');
+    b.innerHTML=`<span class="si">${s.icon}</span><span class="sn">${s.id}</span><span class="st" style="display:flex;gap:2px;justify-content:center;align-items:center;">${tot>0?sub:'-'}</span>`;
+    b.onclick=()=>selectSubj(s.id);g.appendChild(b);
+  });
+}
+function setMode(m){
+  activeMode=m;
+  document.getElementById('mode-y').className='mopt'+(m==='予習'?' sel-y':'');
+  document.getElementById('mode-f').className='mopt'+(m==='復習'?' sel-f':'');
+  // Update label
+  const s=SUBJECTS.find(s=>s.id===activeSubj);
+  if(s)document.getElementById('timer-subj-label').innerHTML=`<span style="color:${s.col}">${s.icon} ${s.id}</span> <span style="color:${m==='予習'?'var(--blue)':'var(--orange)'}">（${m}）</span>`;
+}
+function selectSubj(id){
+  if(activeSubj===id){document.getElementById('timer-area').classList.add('hidden');activeSubj=null;renderSubjectGrid();return;}
+  if(timerOn)stopTimer();activeSubj=id;renderSubjectGrid();
+  const s=SUBJECTS.find(s=>s.id===id);
+  document.getElementById('timer-subj-label').innerHTML=`<span style="color:${s.col}">${s.icon} ${s.id}</span> <span style="color:${activeMode==='予習'?'var(--blue)':'var(--orange)'}">（${activeMode}）</span>`;
+  document.getElementById('timer-area').classList.remove('hidden');
+  timerSec=0;document.getElementById('timerdisp').textContent='00:00';document.getElementById('timer-toggle').textContent='▶ スタート';timerOn=false;
+}
+function toggleTimer(){
+  if(!timerOn){timerOn=true;document.getElementById('timer-toggle').textContent='⏸ 一時停止';timerIv=setInterval(()=>{timerSec++;const m=Math.floor(timerSec/60),s=timerSec%60;document.getElementById('timerdisp').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');},1000);}
+  else{timerOn=false;clearInterval(timerIv);document.getElementById('timer-toggle').textContent='▶ 再開';}
+}
+async function stopTimer(){
+  if(timerOn){timerOn=false;clearInterval(timerIv);}if(!activeSubj||timerSec<10)return;
+  const mins=Math.max(1,Math.floor(timerSec/60));
+  // Total
+  studyData[activeSubj]=(studyData[activeSubj]||0)+mins;
+  await sSet('study-'+todayKey(),studyData);
+  // Detail (予習/復習)
+  if(!studyDetail[activeSubj])studyDetail[activeSubj]={予習:0,復習:0};
+  studyDetail[activeSubj][activeMode]=(studyDetail[activeSubj][activeMode]||0)+mins;
+  await sSet('study-detail-'+todayKey(),studyDetail);
+  activeSubj=null;timerSec=0;
+  document.getElementById('timer-area').classList.add('hidden');renderSubjectGrid();
+  if(Object.values(studyData).some(v=>v>=30))questData['study30']=true;
+  if(Object.values(studyData).every(v=>v>0))questData['allsubjects']=true;
+  await sSet('quests-'+todayKey(),questData);renderQuests();
+  await renderWeeklyStats();
+  renderFamilySummary();showToast(`${activeMode==='予習'?'📘 予習':'📙 復習'} ${mins}分を記録したよ！`);
+}
+// ── WEEKLY STATS ─────────────────────────────────────────────
+const WEEK_MILESTONES=[
+  {mins:300, label:'3時間達成',xp:50,icon:'⏰',col:'var(--blue)',id:'wk3h'},
+  {mins:600, label:'10時間達成',xp:100,icon:'🔥',col:'var(--orange)',id:'wk10h'},
+  {mins:1200,label:'20時間達成',xp:200,icon:'💎',col:'var(--gold)',id:'wk20h'},
+  {mins:1800,label:'30時間達成',xp:350,icon:'🚀',col:'var(--teal)',id:'wk30h'},
+];
+async function renderWeeklyStats(){
+  const today=new Date();
+  const DAY=['日','月','火','水','木','金','土'];
+  let totalY=0,totalF=0;
+  const rows=[];
+  let maxMins=1;
+  for(let i=6;i>=0;i--){
+    const d=new Date(today);d.setDate(today.getDate()-i);
+    const k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    const tot=(await sGet('study-'+k))||{};
+    const det=(await sGet('study-detail-'+k))||{};
+    const dayTotal=Object.values(tot).reduce((s,v)=>s+v,0);
+    const dayY=Object.values(det).reduce((s,v)=>s+(v['予習']||0),0);
+    const dayF=Object.values(det).reduce((s,v)=>s+(v['復習']||0),0);
+    totalY+=dayY;totalF+=(dayF+(dayTotal-dayY-dayF>0?dayTotal-dayY-dayF:0));
+    if(dayTotal>maxMins)maxMins=dayTotal;
+    rows.push({label:DAY[d.getDay()],tot:dayTotal,y:dayY,f:dayF,isToday:i===0});
+  }
+  // Re-calc totalF properly
+  totalF=0;
+  for(let i=6;i>=0;i--){
+    const d=new Date(today);d.setDate(today.getDate()-i);
+    const k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    const det=(await sGet('study-detail-'+k))||{};
+    totalF+=Object.values(det).reduce((s,v)=>s+(v['復習']||0),0);
+    totalY-=0;
+  }
+  // Simpler: recalc
+  let wkY=0,wkF=0;
+  for(const r of rows){wkY+=r.y;wkF+=r.f;}
+  const wkTotal=wkY+wkF+Math.max(0,rows.reduce((s,r)=>s+r.tot,0)-wkY-wkF);
+  const grandTotal=rows.reduce((s,r)=>s+r.tot,0);
+  document.getElementById('wk-total-disp').textContent=grandTotal;
+  const h=Math.floor(grandTotal/60),m=grandTotal%60;
+  document.getElementById('wk-total-h').textContent=h>0?`(${h}時間${m>0?m+'分':''})`:m>0?`(${m}分)`:'';
+  // Color per total
+  const el=document.getElementById('wk-total-disp');
+  el.style.color=grandTotal>=1200?'var(--gold)':grandTotal>=600?'var(--orange)':grandTotal>=300?'var(--teal)':'var(--text2)';
+  // Bar chart
+  const barsEl=document.getElementById('wk-bars');barsEl.innerHTML='';
+  const barMax=Math.max(...rows.map(r=>r.tot),60);
+  rows.forEach(r=>{
+    const pctY=Math.round((r.y/barMax)*100);
+    const pctF=Math.round((r.f/barMax)*100);
+    const pctRest=Math.max(0,Math.round((r.tot/barMax)*100)-pctY-pctF);
+    const div=document.createElement('div');div.className='wkrow';
+    const isToday=r.isToday;
+    div.innerHTML=`
+      <div class="wkday" style="${isToday?'color:var(--teal);':''}">${r.label}${isToday?'<span style="font-size:8px;display:block;color:var(--teal)">今</span>':''}</div>
+      <div class="wkbar-wrap">
+        <div class="wkbar-y" style="width:${pctY}%"></div>
+        <div class="wkbar-f" style="width:${pctF+pctRest}%"></div>
+      </div>
+      <div class="wkmins">${r.tot>0?r.tot:''}</div>`;
+    barsEl.appendChild(div);
+  });
+  // Milestones
+  const mEl=document.getElementById('wk-milestones');mEl.innerHTML='';
+  for(const ms of WEEK_MILESTONES){
+    const pct=Math.min(100,Math.round((grandTotal/ms.mins)*100));
+    const hit=grandTotal>=ms.mins;
+    if(hit&&!medals.find(m=>m.id===ms.id)){await earnMedal(ms.id);}
+    const div=document.createElement('div');div.className='wkmile'+(hit?' hit':'');
+    div.innerHTML=`
+      <div class="wmico">${ms.icon}</div>
+      <div class="wminfo">
+        <div class="wmtit">${ms.label} <span style="font-size:11px;color:var(--text3);">${grandTotal}/${ms.mins}分</span></div>
+        <div class="wmbar"><div class="wmfill" style="width:${pct}%;background:${hit?ms.col:'var(--border2)'}"></div></div>
+      </div>
+      <div class="wmxp" style="color:${hit?ms.col:'var(--text3)'}">${hit?'✓':'+'}<br>${ms.xp}XP</div>`;
+    mEl.appendChild(div);
+  }
+}
+async function loadQuests(){const d=await sGet('quests-'+todayKey());questData=d||{};}
+function renderQuests(){
+  const list=document.getElementById('qlist');list.innerHTML='';
+  let xp=0;const tot=QUEST_DEFS.reduce((s,q)=>s+q.xp,0);
+  QUEST_DEFS.forEach(q=>{
+    const done=!!questData[q.id];if(done)xp+=q.xp;
+    const div=document.createElement('div');div.className='qitem';
+    div.innerHTML=`
+      <div class="qchk${done?' done':''}" style="cursor:default;">${done?'✓':''}</div>
+      <div class="qtxt${done?' done':''}">${q.icon} ${q.txt}</div>
+      <div class="qxp">${done?'<span style="color:var(--green)">✓</span> ':'+'}${q.xp}XP</div>`;
+    list.appendChild(div);
+  });
+  document.getElementById('xpval').textContent=xp+' / '+tot+' XP';
+  document.getElementById('xpbar').style.width=Math.round(xp/tot*100)+'%';
+  // Auto-check fullquest medal
+  if(xp===tot&&!medals.find(m=>m.id==='fullquest'))earnMedal('fullquest');
+}
+async function checkAllQuests(){
+  await sSet('quests-'+todayKey(),questData);renderQuests();
+}
+function pinIn(n){if(pinBuf.length>=4)return;pinBuf+=n;for(let i=0;i<4;i++)document.getElementById('pd'+i).classList.toggle('filled',i<pinBuf.length);if(pinBuf.length===4)setTimeout(checkPin,100);}
+function pinDel(){pinBuf=pinBuf.slice(0,-1);for(let i=0;i<4;i++)document.getElementById('pd'+i).classList.toggle('filled',i<pinBuf.length);}
+function pinClear(){pinBuf='';for(let i=0;i<4;i++)document.getElementById('pd'+i).classList.remove('filled');document.getElementById('pin-err').textContent='';}
+function checkPin(){
+  if(pinBuf==='0201'){pinUnlocked=true;document.getElementById('pin-wrap').classList.add('hidden');document.getElementById('hensachi-content').classList.remove('hidden');loadHensachi().then(()=>renderHChart());}
+  else{document.getElementById('pin-err').textContent='PINが違います。もう一度どうぞ。';pinBuf='';for(let i=0;i<4;i++)document.getElementById('pd'+i).classList.remove('filled');}
+}
+function lockHS(){pinUnlocked=false;pinBuf='';document.getElementById('hensachi-content').classList.add('hidden');document.getElementById('pin-wrap').classList.remove('hidden');for(let i=0;i<4;i++)document.getElementById('pd'+i).classList.remove('filled');document.getElementById('pin-err').textContent='';}
+const HS_COL={'総合':'#00e0b5','国語':'#ff7eb3','算数':'#5aabff','理科':'#44d98e','社会':'#ffd23f'};
+async function loadHensachi(){const d=await sGet('hensachi');hensachiData=d||{'総合':[],'国語':[],'算数':[],'理科':[],'社会':[]};renderScoreHist();}
+function renderHChart(){
+  const data=hensachiData[curHS]||[];const ctx=document.getElementById('hchart').getContext('2d');
+  if(hChart)hChart.destroy();
+  hChart=new Chart(ctx,{type:'line',data:{labels:data.map(d=>d.date),datasets:[{label:curHS,data:data.map(d=>d.score),borderColor:HS_COL[curHS],backgroundColor:HS_COL[curHS]+'22',tension:.35,pointRadius:6,pointBackgroundColor:HS_COL[curHS],fill:true,borderWidth:2.5}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'偏差値: '+c.raw},bodyFont:{size:15},titleFont:{size:14}}},scales:{y:{min:30,max:80,grid:{color:'#1e3558'},ticks:{color:'#a8c0e0',font:{size:13}}},x:{grid:{color:'#1e3558'},ticks:{color:'#a8c0e0',font:{size:12}}}}}});
+}
+function selHS(s,btn){curHS=s;document.querySelectorAll('#htabs .itab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderHChart();}
+async function addHS(){
+  const date=document.getElementById('h-date').value.trim(),score=parseFloat(document.getElementById('h-score').value),subj=document.getElementById('h-subj').value,name=document.getElementById('h-name').value.trim();
+  if(!date||isNaN(score))return alert('日付と偏差値を入力してください');
+  if(!hensachiData[subj])hensachiData[subj]=[];
+  hensachiData[subj].push({date,score,name});await sSet('hensachi',hensachiData);
+  document.getElementById('h-date').value='';document.getElementById('h-score').value='';document.getElementById('h-name').value='';
+  renderHChart();renderScoreHist();showToast('成績を追加しました！📊');
+}
+function renderScoreHist(){
+  const el=document.getElementById('score-hist');const all=[];
+  Object.entries(hensachiData).forEach(([s,arr])=>arr.forEach(d=>all.push({...d,s})));
+  all.sort((a,b)=>b.date.localeCompare(a.date));
+  if(!all.length){el.innerHTML='<div style="color:var(--text3);font-size:15px;">まだ成績がありません</div>';return;}
+  el.innerHTML=all.slice(0,15).map(d=>`<div class="srow"><span class="sl">${d.date} <span style="color:${HS_COL[d.s]}">[${d.s}]</span>${d.name?' '+d.name:''}</span><span class="sv" style="color:${d.score>=60?'var(--green)':d.score>=50?'var(--gold)':'var(--red)'}">${d.score}</span></div>`).join('');
+}
+async function loadCalEvents(){const d=await sGet('cal-events');return d||[];}
+async function saveCalEvents(e){await sSet('cal-events',e);}
+function renderCalendar(){
+  const y=calDate.getFullYear(),m=calDate.getMonth();document.getElementById('cal-label').textContent=y+'年'+(m+1)+'月';
+  const first=new Date(y,m,1).getDay(),last=new Date(y,m+1,0).getDate(),today=new Date();
+  const grid=document.getElementById('caldays');grid.innerHTML='';
+  const prevLast=new Date(y,m,0).getDate();
+  for(let i=0;i<first;i++){const d=document.createElement('div');d.className='calday other';d.textContent=prevLast-first+1+i;grid.appendChild(d);}
+  loadCalEvents().then(evts=>{
+    for(let d=1;d<=last;d++){
+      const el=document.createElement('div');el.className='calday';
+      if(y===today.getFullYear()&&m===today.getMonth()&&d===today.getDate())el.classList.add('today');
+      const ds=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+      if(evts.some(e=>e.date===ds))el.classList.add('has-evt');
+      if(selCalDate===ds)el.classList.add('selected');
+      el.textContent=d;el.onclick=()=>selectDay(ds,evts);grid.appendChild(el);
+    }
+    const rem=(7-((first+last)%7))%7;for(let i=1;i<=rem;i++){const d=document.createElement('div');d.className='calday other';d.textContent=i;grid.appendChild(d);}
+    renderUpcoming(evts);
+  });
+}
+function chMo(d){calDate=new Date(calDate.getFullYear(),calDate.getMonth()+d,1);renderCalendar();}
+function selectDay(ds,evts){
+  selCalDate=ds;renderCalendar();const[y,m,d]=ds.split('-');
+  document.getElementById('day-evts-title').textContent='📅 '+parseInt(y)+'年'+parseInt(m)+'月'+parseInt(d)+'日';
+  const de=evts.filter(e=>e.date===ds);const el=document.getElementById('day-evts-list');
+  if(!de.length){el.innerHTML='<div style="color:var(--text3);font-size:15px;">予定なし</div>';return;}
+  el.innerHTML=de.map(e=>`<div class="srow"><span><span class="etag etag-${e.type}">${e.type==='class'?'授業':e.type==='test'?'テスト':'特訓'}</span> ${e.title}</span><span style="font-size:13px;color:var(--text3);">${e.time||''}</span></div>`).join('');
+}
+function showAddEvt(){if(!selCalDate)return alert('カレンダーから日付を選択してください');document.getElementById('add-evt-form').classList.remove('hidden');}
+async function saveEvt(){
+  const title=document.getElementById('evt-title').value.trim();if(!title)return alert('タイトルを入力してください');
+  const evts=await loadCalEvents();evts.push({id:Date.now(),date:selCalDate,title,type:document.getElementById('evt-type').value,time:document.getElementById('evt-time').value});
+  await saveCalEvents(evts);document.getElementById('evt-title').value='';document.getElementById('evt-time').value='';document.getElementById('add-evt-form').classList.add('hidden');renderCalendar();showToast('予定を追加しました！📅');
+}
+function renderUpcoming(evts){
+  const today=new Date().toISOString().split('T')[0];const up=evts.filter(e=>e.date>=today).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,5);const el=document.getElementById('upcoming-evts');
+  if(!up.length){el.innerHTML='<div style="color:var(--text3);font-size:15px;">予定なし</div>';return;}
+  el.innerHTML=up.map(e=>{const[y,m,d]=e.date.split('-');return`<div class="srow"><span><span class="etag etag-${e.type}">${e.type==='class'?'授業':e.type==='test'?'テスト':'特訓'}</span> ${e.title}</span><span style="font-size:14px;color:var(--text2);font-weight:700;">${parseInt(m)}/${parseInt(d)}</span></div>`;}).join('');
+}
+function handleUpload(e){
+  const file=e.target.files[0];if(!file)return;uploadedMime=file.type;
+  const r=new FileReader();r.onload=ev=>{uploadedImg=ev.target.result.split(',')[1];document.getElementById('prev-img').src=ev.target.result;document.getElementById('upload-preview').classList.remove('hidden');};r.readAsDataURL(file);
+}
+let currentProblemData=null;
+async function genProblem(){
+  const subj=document.getElementById('k-subj').value;if(!uploadedImg)return alert('まず写真をアップロードしてください');
+  if(!checkApiKeyForKouryaku())return;
+  const btn=document.querySelector('#step-upload .btn-teal');btn.disabled=true;btn.innerHTML='<span class="ldots"><span></span><span></span><span></span></span> AI生成中...';
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':getApiKey(),
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body:JSON.stringify({
+        model:'claude-sonnet-4-6',
+        max_tokens:1200,
+        messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:uploadedMime,data:uploadedImg}},
+          {type:'text',text:`あなたは優秀な中学受験の${subj}の先生です。この画像の問題と同じ分野・難易度で、数値や条件を少し変えた類似問題を1問作成してください。小学5年生の早稲田アカデミー生向けです。
+
+以下のJSON形式のみで返してください。余計な文章は一切不要です：
+{
+  "question": "問題文をここに書く",
+  "options": ["選択肢A", "選択肢B", "選択肢C", "選択肢D"],
+  "answer": 0,
+  "answer_text": "正解の値や言葉",
+  "explanation": {
+    "point": "この問題のポイントを一言で（例：三角形の面積公式）",
+    "formula": "使う公式や考え方（例：底辺×高さ÷2）",
+    "steps": ["計算ステップ1", "計算ステップ2", "計算ステップ3"],
+    "tip": "次に活かせるアドバイスを一言"
+  }
+}
+
+answerは正解の選択肢のインデックス番号（0〜3）。4択で必ず1つだけ正解にすること。`}
+        ]}]
+      })
+    });
+    const data=await res.json();
+    if(!res.ok){
+      const msg=data?.error?.message||`エラー (HTTP ${res.status})`;
+      alert('API エラー：'+msg);
+      btn.disabled=false;btn.innerHTML='🤖 AI類似問題を生成する';return;
+    }
+    const raw=data.content?.[0]?.text||'{}';
+    let parsed;
+    try{
+      const clean=raw.replace(/```json|```/g,'').trim();
+      parsed=JSON.parse(clean);
+    }catch{
+      alert('問題の解析に失敗しました。もう一度試してください。');
+      btn.disabled=false;btn.innerHTML='🤖 AI類似問題を生成する';return;
+    }
+    currentProblemData=parsed;
+    genProblemText=parsed.question||'';
+    // Render question
+    document.getElementById('gen-problem-q').textContent=parsed.question;
+    // Render options
+    const optsEl=document.getElementById('gen-problem-opts');optsEl.innerHTML='';
+    (parsed.options||[]).forEach((opt,i)=>{
+      const labels=['①','②','③','④'];
+      const btn2=document.createElement('button');btn2.className='qopt';
+      btn2.innerHTML=`<span style="font-weight:800;color:var(--text3);margin-right:8px;">${labels[i]}</span>${opt}`;
+      btn2.onclick=()=>selectAnswer(i,parsed);
+      optsEl.appendChild(btn2);
+    });
+    document.getElementById('step-problem').classList.remove('hidden');
+    document.getElementById('step-problem').scrollIntoView({behavior:'smooth'});
+    questData['questpath']=true;await sSet('quests-'+todayKey(),questData);renderQuests();
+  }catch(err){alert('通信エラー：'+err.message+'\n\nAPIキーを確認してください。');}
+  btn.disabled=false;btn.innerHTML='🤖 AI類似問題を生成する';
+}
+async function selectAnswer(chosen,prob){
+  // Disable all buttons
+  document.querySelectorAll('#gen-problem-opts .qopt').forEach((b,i)=>{
+    b.disabled=true;
+    if(i===prob.answer)b.classList.add('correct');
+    else if(i===chosen&&chosen!==prob.answer)b.classList.add('wrong');
+  });
+  const isCorrect=chosen===prob.answer;
+  const exp=prob.explanation||{};
+  const labels=['①','②','③','④'];
+  // Build visual result
+  const resultHtml=`
+    <div class="result-verdict">
+      <div class="result-circle" style="border-color:${isCorrect?'var(--green)':'var(--red)'};color:${isCorrect?'var(--green)':'var(--red)'};">${isCorrect?'○':'×'}</div>
+      <div style="font-size:22px;font-weight:800;color:${isCorrect?'var(--green)':'var(--red)'};">${isCorrect?'正解！すごい！':'惜しい！もう少し！'}</div>
+      ${!isCorrect?`<div style="font-size:14px;color:var(--text2);margin-top:4px;">正解は <strong style="color:var(--green)">${labels[prob.answer]} ${prob.answer_text||prob.options[prob.answer]}</strong></div>`:''}
+    </div>
+
+    ${exp.point?`
+    <div class="exp-card exp-card-key">
+      <div class="exp-label" style="color:var(--gold);">📌 この問題のポイント</div>
+      <div class="exp-body" style="font-size:17px;font-weight:700;color:var(--gold);">${exp.point}</div>
+    </div>`:''}
+
+    ${exp.formula?`
+    <div class="exp-card exp-card-info">
+      <div class="exp-label" style="color:var(--blue);">📐 公式・考え方</div>
+      <div class="exp-body" style="font-family:monospace;font-size:16px;font-weight:700;color:var(--blue);letter-spacing:.5px;">${exp.formula}</div>
+    </div>`:''}
+
+    ${exp.steps&&exp.steps.length?`
+    <div class="exp-card exp-card-correct">
+      <div class="exp-label" style="color:var(--green);">🔢 解き方のステップ</div>
+      <div class="exp-steps">
+        ${exp.steps.map((s,i)=>`<div class="exp-step"><div class="exp-step-num">${i+1}</div><div class="exp-step-txt">${s}</div></div>`).join('')}
+      </div>
+    </div>`:''}
+
+    ${exp.tip?`
+    <div class="exp-card exp-card-tip">
+      <div class="exp-label" style="color:var(--purple);">💡 次に活かそう</div>
+      <div class="exp-body" style="color:var(--purple);">${exp.tip}</div>
+    </div>`:''}
+  `;
+  document.getElementById('grade-result').innerHTML=resultHtml;
+  document.getElementById('step-result').classList.remove('hidden');
+  document.getElementById('step-result').scrollIntoView({behavior:'smooth'});
+  if(isCorrect){
+    const subj=document.getElementById('k-subj').value;
+    const map={算数:'math1',国語:'jp1',理科:'sci1',社会:'soc1'};
+    const mid=map[subj];if(mid&&!medals.find(m=>m.id===mid))await earnMedal(mid);
+  }
+}
+function resetQuest(){
+  uploadedImg=null;uploadedMime=null;genProblemText='';currentProblemData=null;
+  document.getElementById('upload-preview').classList.add('hidden');
+  document.getElementById('step-problem').classList.add('hidden');
+  document.getElementById('step-result').classList.add('hidden');
+  document.getElementById('gen-problem-opts').innerHTML='';
+  document.getElementById('gen-problem-q').textContent='';
+  document.getElementById('grade-result').innerHTML='';
+  document.getElementById('fupload').value='';
+  window.scrollTo(0,0);
+}
+async function loadMedals(){const d=await sGet('medals');medals=d||[];}
+async function earnMedal(id){
+  if(medals.find(m=>m.id===id))return;const def=MEDAL_DEFS.find(m=>m.id===id);if(!def)return;
+  medals.push({id,earned:new Date().toLocaleDateString('ja-JP'),label:def.label});await sSet('medals',medals);
+  renderMedals();renderMedalGuides();showToast('🎉 メダル獲得！「'+def.label+'」');
+}
+function renderMedals(){
+  document.getElementById('mgrid').innerHTML=MEDAL_DEFS.map(def=>{const e=medals.find(m=>m.id===def.id);return`<div class="mcard${e?' earned':''}"><span class="mico">${def.icon}</span><div class="mlbl">${def.label}</div>${!e?'<span class="mlck">🔒</span>':''}</div>`;}).join('');
+  document.getElementById('medal-count').textContent=medals.length+' / '+MEDAL_DEFS.length+' メダル獲得';
+  const dl=document.getElementById('medal-detail-list');if(dl)dl.innerHTML=MEDAL_DEFS.map(def=>{const e=medals.find(m=>m.id===def.id);return`<div class="mdet${e?' earned':''}"><div class="mdico">${def.icon}</div><div class="mdinf"><div class="mdnm">${def.label}</div><div class="mdcd">${def.cond}</div></div><div class="mdst ${e?'got':'not'}">${e?'✓ 獲得済':'未獲得'}</div></div>`;}).join('');
+}
+function renderMedalGuides(){
+  ['medal-guide-natsuki','medal-guide-parent'].forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    el.innerHTML=MEDAL_DEFS.map(def=>{const e=medals.find(m=>m.id===def.id);return`<div class="mdet${e?' earned':''}" style="margin-bottom:8px;"><div class="mdico">${def.icon}</div><div class="mdinf"><div class="mdnm">${def.label}</div><div class="mdcd">${def.cond}</div>${e?`<div style="font-size:11px;color:var(--text3);margin-top:2px;">${e.earned}に獲得</div>`:''}</div><div class="mdst ${e?'got':'not'}">${e?'✓':'未'}</div></div>`;}).join('');
+  });
+}
+async function loadMessages(){const d=await sGet('messages');messages=d||[];}
+function renderMessages(){
+  const el=document.getElementById('fam-msgs');const fc={夏伎:'var(--teal)',Yasuhiro:'var(--gold)',Yuko:'var(--purple)'};
+  if(!messages.length){el.innerHTML='<div style="color:var(--text3);font-size:15px;">まだメッセージがありません</div>';return;}
+  el.innerHTML=messages.slice(-12).map(m=>`<div class="msgitem"><div class="msgh"><span class="msgfrom" style="color:${fc[m.from]||'var(--text2)'}">${m.from}</span><span class="msgtime">${m.time}</span></div><div class="msgbody">${m.text}</div></div>`).join('');
+  el.scrollTop=el.scrollHeight;
+}
+async function sendMsg(){
+  const txt=document.getElementById('msg-input').value.trim();if(!txt)return;
+  const now=new Date();const t=(now.getMonth()+1)+'/'+now.getDate()+' '+now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+  messages.push({from:document.getElementById('msg-from').value,text:txt,time:t});
+  await sSet('messages',messages.slice(-50));document.getElementById('msg-input').value='';renderMessages();
+}
+function renderFamilySummary(){
+  const el=document.getElementById('fam-summary');if(!el)return;
+  const tot=Object.values(studyData).reduce((s,v)=>s+v,0);const qd=QUEST_DEFS.filter(q=>questData[q.id]).length;const xp=QUEST_DEFS.filter(q=>questData[q.id]).reduce((s,q)=>s+q.xp,0);
+  el.innerHTML=`<div class="srow"><span class="sl">📚 今日の学習時間</span><span class="sv" style="color:var(--teal)">${tot}分</span></div><div class="srow"><span class="sl">⚔️ クエスト</span><span class="sv" style="color:var(--gold)">${qd} / ${QUEST_DEFS.length} 完了</span></div><div class="srow"><span class="sl">⭐ 獲得XP</span><span class="sv" style="color:var(--purple)">${xp} XP</span></div><div class="srow"><span class="sl">🏅 メダル</span><span class="sv">${medals.length} / ${MEDAL_DEFS.length}</span></div><div class="srow"><span class="sl">🔥 ストリーク</span><span class="sv" style="color:var(--orange)">${streakDays}日連続</span></div><div class="srow"><span class="sl">✅ チェックイン</span><span class="sv" style="color:${checkedIn?'var(--green)':'var(--text3)'}">${checkedIn?checkinTime+'にチェックイン':'まだ未チェックイン'}</span></div>`;
+}
+function toggleHelp(header){const body=header.nextElementSibling;const open=body.classList.contains('open');header.classList.toggle('open',!open);body.classList.toggle('open',!open);}
+function showToast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .4s';setTimeout(()=>t.remove(),400);},2800);}
+function todayKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+
+// ── GOOGLE CALENDAR SYNC ──────────────────────────────────────
+async function loadGCalSetup(){
+  const url=await sGet('gcal-url');
+  if(url){
+    document.getElementById('gcal-setup').classList.add('hidden');
+    document.getElementById('gcal-toggle').classList.remove('hidden');
+    document.getElementById('gcal-saved-label').textContent='✅ 連携済み（Yasuhiroのカレンダー）';
+  }
+}
+async function saveGCalUrl(){
+  const url=document.getElementById('gcal-url').value.trim();
+  if(!url||!url.includes('calendar.google.com')){
+    alert('正しいGoogleカレンダーのiCalアドレスを入力してください。\n（https://calendar.google.com/calendar/ical/… で始まるURL）');return;
+  }
+  await sSet('gcal-url',url);
+  document.getElementById('gcal-setup').classList.add('hidden');
+  document.getElementById('gcal-toggle').classList.remove('hidden');
+  document.getElementById('gcal-saved-label').textContent='✅ 連携済み（Yasuhiroのカレンダー）';
+  await syncGCal();
+}
+async function syncGCal(){
+  const url=await sGet('gcal-url');
+  if(!url)return;
+  const res=document.getElementById('gcal-sync-result');
+  res.textContent='同期中…';res.style.color='var(--text3)';
+  try{
+    const proxy='https://corsproxy.io/?'+encodeURIComponent(url);
+    const r=await fetch(proxy,{signal:AbortSignal.timeout(10000)});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const text=await r.text();
+    const gcEvents=parseIcal(text);
+    // Merge with existing events
+    let evts=await loadCalEvents();
+    // Remove previously synced gcal events
+    evts=evts.filter(e=>!e.gcal);
+    // Add new ones
+    gcEvents.forEach(e=>{
+      if(e.date&&e.title){
+        evts.push({id:'gc_'+e.uid,date:e.date,title:e.title,type:classifyGcalEvent(e.title),time:e.time||'',gcal:true});
+      }
+    });
+    await saveCalEvents(evts);
+    renderCalendar();
+    res.textContent='✅ '+gcEvents.length+'件のイベントを取り込みました（'+new Date().toLocaleTimeString('ja-JP')+'）';
+    res.style.color='var(--green)';
+    showToast('Googleカレンダーを同期しました！📅');
+  }catch(err){
+    res.textContent='⚠️ 同期できませんでした。URLを確認してください。（'+err.message+')';
+    res.style.color='var(--red)';
+  }
+}
+function parseIcal(text){
+  const events=[];
+  // Unfold lines (RFC 5545: continuation lines start with space/tab)
+  const unfolded=text.replace(/\r\n[ \t]/g,'').replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+  const lines=unfolded.split('\n');
+  let evt=null;
+  for(const line of lines){
+    if(line.trim()==='BEGIN:VEVENT'){evt={};continue;}
+    if(line.trim()==='END:VEVENT'&&evt){events.push(evt);evt=null;continue;}
+    if(!evt)continue;
+    const colon=line.indexOf(':');if(colon<0)continue;
+    const key=line.slice(0,colon).split(';')[0].trim().toUpperCase();
+    const val=line.slice(colon+1).trim().replace(/\\n/g,'\n').replace(/\\,/g,',').replace(/\\\\/g,'\\');
+    if(key==='SUMMARY')evt.title=val;
+    else if(key==='UID')evt.uid=val;
+    else if(key==='DTSTART'||key==='DTSTART')evt.dtstart=val;
+    else if(key==='DTEND')evt.dtend=val;
+    else if(key==='LOCATION')evt.location=val;
+  }
+  // Convert dtstart to date key YYYY-MM-DD
+  return events.map(e=>{
+    if(!e.dtstart)return e;
+    const raw=e.dtstart.replace(/[TZ]/g,'');
+    const d=raw.slice(0,8);
+    e.date=d.slice(0,4)+'-'+d.slice(4,6)+'-'+d.slice(6,8);
+    // Extract time if datetime
+    if(e.dtstart.includes('T')&&e.dtstart.length>8){
+      const t=raw.slice(8,12);
+      if(t.length>=4){
+        const hh=t.slice(0,2),mm=t.slice(2,4);
+        e.time=hh+':'+mm;
+      }
+    }
+    return e;
+  }).filter(e=>e.date&&e.title);
+}
+function classifyGcalEvent(title){
+  const t=title;
+  if(/テスト|試験|模試|確認|答案/.test(t))return'test';
+  if(/特訓|特別|合宿/.test(t))return'special';
+  return'class';
+}
+
+// ── API KEY MANAGEMENT ────────────────────────────────────────
+function getApiKey(){return localStorage.getItem('nk_apikey')||'';}
+function saveApiKey(){
+  const v=document.getElementById('apikey-inp').value.trim();
+  if(!v.startsWith('sk-ant-')){alert('正しいAPIキーを入力してください。\n「sk-ant-」で始まるキーです。');return;}
+  localStorage.setItem('nk_apikey',v);
+  document.getElementById('apikey-inp').value='';
+  renderApiKeyStatus();
+  showToast('🔑 APIキーを保存しました！AI機能が使えます');
+}
+function clearApiKey(){
+  if(!confirm('APIキーを削除しますか？AI機能が使えなくなります。'))return;
+  localStorage.removeItem('nk_apikey');
+  renderApiKeyStatus();
+}
+function renderApiKeyStatus(){
+  const key=getApiKey();const el=document.getElementById('apikey-status');
+  const clearBtn=document.getElementById('apikey-clear-btn');
+  if(key){
+    el.style.background='rgba(68,217,142,.08)';el.style.border='1px solid rgba(68,217,142,.25)';
+    el.style.color='var(--green)';
+    el.innerHTML='✅ APIキー設定済み — AI機能が使えます';
+    if(clearBtn)clearBtn.style.display='';
+  }else{
+    el.style.background='rgba(255,96,96,.07)';el.style.border='1px solid rgba(255,96,96,.2)';
+    el.style.color='var(--red)';
+    el.innerHTML='⚠️ APIキー未設定 — 攻略の道のAI機能が使えません';
+    if(clearBtn)clearBtn.style.display='none';
+  }
+}
+function checkApiKeyForKouryaku(){
+  if(!getApiKey()){
+    showToast('⚠️ まず「家族」タブでAPIキーを設定してください');
+    return false;
+  }
+  return true;
+}
+
+init();
+</script>
+</body>
+</html>
