@@ -70,7 +70,7 @@ body{max-width:480px;margin:0 auto;position:relative;overflow-x:hidden;}
 }
 .hidden{display:none!important;}
 .header{background:var(--surface);padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50;gap:10px;}
-.hbrand .en{font-size:9px;color:var(--text3);letter-spacing:2px;}
+.hbrand .en{font-size:10px;color:var(--text3);letter-spacing:1.5px;}
 .hbrand .jp{font-size:18px;font-weight:800;color:var(--gold);}
 .cright{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;}
 .cbox{text-align:right;}
@@ -89,17 +89,42 @@ body{max-width:480px;margin:0 auto;position:relative;overflow-x:hidden;}
 #sound-toggle-btn.on .sound-x-line{display:none;}
 .sound-wave{display:none;}
 #sound-toggle-btn.on .sound-wave{display:block;}
-/* Bottom nav - 6 tabs */
+/* Bottom nav */
 .bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--surface);border-top:1.5px solid var(--border);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom);}
-.ni{flex:1;padding:8px 1px 10px;background:none;border:none;color:var(--text3);cursor:pointer;font-size:8.5px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px;transition:color .2s;font-family:inherit;letter-spacing:.2px;-webkit-tap-highlight-color:transparent;}
+.ni{flex:1;padding:8px 2px 10px;background:none;border:none;color:var(--text3);cursor:pointer;font-size:10px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px;transition:color .15s;font-family:inherit;letter-spacing:.2px;-webkit-tap-highlight-color:transparent;position:relative;}
 .ni.active{color:var(--teal);}
-.ni .ico{font-size:19px;line-height:1;transition:transform .2s;}
-.ni.active .ico{transform:scale(1.15);}
-.ni:active .ico{transform:scale(.9);}
-/* Content scroll fix */
-.content{padding:16px 16px 100px;display:none;scroll-behavior:smooth;}
+.ni.active::after{content:'';position:absolute;top:0;left:15%;right:15%;height:2px;background:var(--teal);border-radius:0 0 3px 3px;}
+.ni .ico{font-size:20px;line-height:1;transition:transform .15s;}
+.ni.active .ico{transform:scale(1.1);}
+.ni:active .ico{transform:scale(.88);}
+/* Content */
+.content{padding:16px 16px 100px;display:none;scroll-behavior:smooth;scrollbar-width:none;}
+.content::-webkit-scrollbar{display:none;}
 .content.active{display:block;}
+/* Card entrance per tab switch */
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.content.active .card:nth-child(1){animation:fadeUp .2s ease both 0s;}
+.content.active .card:nth-child(2){animation:fadeUp .2s ease both .04s;}
+.content.active .card:nth-child(3){animation:fadeUp .2s ease both .08s;}
+.content.active .card:nth-child(n+4){animation:fadeUp .2s ease both .12s;}
 .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:14px;}
+/* Card title */
+.ctitle{font-size:11px;font-weight:800;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:6px;}
+/* Toast with fade animation */
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(8px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+@keyframes toastOut{from{opacity:1;}to{opacity:0;transform:translateX(-50%) translateY(-6px);}}
+.toast{position:fixed;bottom:110px;left:50%;transform:translateX(-50%);background:var(--gold);color:#040b18;padding:12px 22px;border-radius:24px;font-weight:800;font-size:15px;z-index:9999;white-space:nowrap;pointer-events:none;animation:toastIn .2s ease;}
+.toast.out{animation:toastOut .25s ease forwards;}
+/* Checkin done - clear success state */
+.chkbtn.done{background:linear-gradient(135deg,rgba(0,224,181,.12),rgba(0,184,150,.08));border:1.5px solid rgba(0,224,181,.35);color:var(--teal);opacity:1;font-size:15px;}
+/* Label */
+.lbl{font-size:12px;color:var(--text3);font-weight:700;margin-bottom:5px;display:block;}
+.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
+/* Weekly stats readable */
+.wkday{font-size:12px;color:var(--text3);font-weight:700;width:24px;flex-shrink:0;text-align:center;}
+.wkmins{font-size:12px;color:var(--text2);font-weight:700;width:36px;text-align:right;flex-shrink:0;}
+/* Medal label readable */
+.mlbl{font-size:11px;color:var(--text3);line-height:1.3;font-weight:700;}
 .card-hi{border-color:var(--teal);border-width:1.5px;}
 .ctitle{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:6px;}
 .qopts{display:flex;flex-direction:column;gap:8px;margin-top:12px;}
@@ -2578,7 +2603,12 @@ function renderFamilySummary(){
   el.innerHTML=`<div class="srow"><span class="sl">📚 今日の学習時間</span><span class="sv" style="color:var(--teal)">${tot}分</span></div><div class="srow"><span class="sl">⚔️ クエスト</span><span class="sv" style="color:var(--gold)">${qd} / ${QUEST_DEFS.length} 完了</span></div><div class="srow"><span class="sl">⭐ 獲得XP</span><span class="sv" style="color:var(--purple)">${xp} XP</span></div><div class="srow"><span class="sl">🏅 メダル</span><span class="sv">${medals.length} / ${MEDAL_DEFS.length}</span></div><div class="srow"><span class="sl">🔥 ストリーク</span><span class="sv" style="color:var(--orange)">${streakDays}日連続</span></div><div class="srow"><span class="sl">✅ チェックイン</span><span class="sv" style="color:${checkedIn?'var(--green)':'var(--text3)'}">${checkedIn?checkinTime+'にチェックイン':'まだ未チェックイン'}</span></div>`;
 }
 function toggleHelp(header){const body=header.nextElementSibling;const open=body.classList.contains('open');header.classList.toggle('open',!open);body.classList.toggle('open',!open);}
-function showToast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .4s';setTimeout(()=>t.remove(),400);},2800);}
+function showToast(msg){
+  const old=document.querySelector('.toast');if(old)old.remove();
+  const t=document.createElement('div');t.className='toast';t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(()=>{t.classList.add('out');setTimeout(()=>t.remove(),300);},2200);
+}
 function todayKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 
 // ── GOOGLE CALENDAR SYNC ──────────────────────────────────────
