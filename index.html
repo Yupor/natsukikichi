@@ -714,6 +714,33 @@ input:focus,textarea:focus,select:focus{border-color:var(--teal);box-shadow:0 0 
       </div>
     </div>
   </div>
+
+  <div class="card" style="border-color:rgba(90,171,255,.3);border-width:1.5px;">
+    <div class="ctitle">📧 メール通知設定（Yuko専用）</div>
+    <div id="email-status" style="font-size:14px;margin-bottom:12px;padding:10px 12px;border-radius:8px;"></div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.7;">
+      チェックイン通知・日次学習サマリー・金曜週間レポートを<br>
+      <strong style="color:var(--text);">ucccotanaka@gmail.com</strong> と <strong style="color:var(--text);">yasuhiro.tsuno@hakuhodo.co.jp</strong> に自動送信します。
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px;">
+      <div>
+        <span class="lbl">EmailJS Public Key</span>
+        <input type="text" id="ejs-pubkey" placeholder="例: user_xxxxxxxxxxx" autocomplete="off"/>
+      </div>
+      <div>
+        <span class="lbl">Service ID</span>
+        <input type="text" id="ejs-service" placeholder="例: service_xxxxxxx" autocomplete="off"/>
+      </div>
+      <div>
+        <span class="lbl">Template ID（通知用）</span>
+        <input type="text" id="ejs-template" placeholder="例: template_xxxxxxx" autocomplete="off"/>
+      </div>
+    </div>
+    <button class="btn btn-teal btn-full" onclick="saveEmailConfig()">📧 保存する</button>
+    <div style="margin-top:10px;">
+      <button class="btn btn-outline btn-full btn-sm" onclick="testEmail()">テストメールを送る</button>
+    </div>
+  </div>
 </div>
 
 <!-- ══ TAB: 使い方 ══ -->
@@ -1114,8 +1141,11 @@ async function init(){
   await loadGCalSetup();
   await renderWeeklyStats();
   renderApiKeyStatus();
+  renderEmailStatus();
   initSound();
   setTimeout(showWelcomeMessage,600);
+  // Check scheduled emails (daily summary, weekly report)
+  setTimeout(checkAndSendScheduledEmails, 3000);
 
   // AI系はバックグラウンドで
   initRadioCorner();
@@ -1338,18 +1368,19 @@ async function initRadioCorner(){
 
     const jsonExample='{"title":"今日のテーマ（短く）","topic":"'+t.topic+'","icon":"'+t.icon+'","content":"本文","highlights":["重要語句1","重要語句2"]}';
     const promptLines2=[
-      'あなたは中学受験（早稲田・麻布・開成・武蔵・慶應レベル）の歴史・地理の講師です。',
+      'あなたは中学受験（早稲田・麻布・開成レベル）の歴史・地理の講師です。',
       '「そーだったのかラジオ」という小学5年生向けの読み物を書いてください。',
       '',
       'テーマ：「'+t.name+'」',
       '',
       '条件：',
-      '・難易度は早稲田中学・難関中学受験レベル。基本知識（例：「織田信長が戦国武将」程度）は省く',
+      '・難易度は難関中学受験レベル。基本的すぎる内容（「信長が戦国武将」等）は省く',
       '・受験生がつまずきやすいポイント・よく出る切り口を中心に解説する',
-      '・話し言葉、タメ口ぎみで読みやすく。でも内容はしっかり本格的に',
-      '・今の小学5年生が「え、そういうこと？」とおもしろがれる視点（意外性・逆説・対比など）を入れる',
+      '・必ず「例えるなら〜」「ざっくり言うと〜」など、身近なもので例える（食べ物・ゲーム・スポーツ・学校生活など）',
+      '・難しい概念は絵や図で説明するように、「イメージするとこんな感じ→」などの表現を使う',
+      '・話し言葉でサクサク読める。専門用語は必ず言い換えてから使う',
       '・重要な語句・人名・制度名は★語句★で囲む',
-      '・入試で問われやすい重要ポイントは【重要】〜 で始めるブロックで1〜2個入れる',
+      '・受験で絶対おさえるポイントは【ポイント】〜 で始めるブロックで1個だけ',
       '・難しい漢字にはふりがなをつける',
       '・250〜300文字でコンパクトに',
       '',
@@ -1395,12 +1426,13 @@ function renderRadio(data){
   badge.style.border=isGeo?'1px solid rgba(68,217,142,.3)':'1px solid rgba(255,154,80,.3)';
   badge.textContent=isGeo?'🗺️ 地理':'⚔️ 歴史';
 
-  // Rich text - highlight ★語句★ in gold bold
+  // Rich text rendering
   const contentEl=document.getElementById('radio-content');
   if(data.content){
     const html=data.content
-      .replace(/★([^★]+)★/g,'<strong style="color:var(--gold);font-weight:800;">$1</strong>')
-      .replace(/【重要】([^\n]+)/g,'<span style="display:inline-block;background:rgba(255,96,96,.12);color:var(--red);border-left:3px solid var(--red);padding:4px 10px;border-radius:0 6px 6px 0;margin:4px 0;font-weight:700;">⚠️ 重要 $1</span>')
+      .replace(/★([^★]+)★/g,'<strong style="color:var(--gold);font-weight:800;background:rgba(255,210,63,.08);padding:1px 4px;border-radius:4px;">$1</strong>')
+      .replace(/【ポイント】([^\n]+)/g,'<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(0,224,181,.1);color:var(--teal);border-left:3px solid var(--teal);padding:6px 12px;border-radius:0 8px 8px 0;margin:6px 0;font-weight:700;font-size:14px;">⭐ 受験ポイント $1</span>')
+      .replace(/【重要】([^\n]+)/g,'<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(0,224,181,.1);color:var(--teal);border-left:3px solid var(--teal);padding:6px 12px;border-radius:0 8px 8px 0;margin:6px 0;font-weight:700;font-size:14px;">⭐ 受験ポイント $1</span>')
       .replace(/\n/g,'<br>');
     contentEl.innerHTML=html;
   }
@@ -1630,6 +1662,8 @@ async function doCheckin(){
   if(!medals.find(m=>m.id==='first'))await earnMedal('first');
   if(nc>=3&&!medals.find(m=>m.id==='streak3'))await earnMedal('streak3');
   if(nc>=7&&!medals.find(m=>m.id==='streak7'))await earnMedal('streak7');
+  // メール通知
+  sendCheckinEmail();
 }
 async function loadStudyData(){
   const d=await sGet('study-'+todayKey());studyData=d||{国語:0,算数:0,理科:0,社会:0};
@@ -2674,6 +2708,168 @@ celebrate=(tier,icon,title,subtitle)=>{
   const sounds=['','checkin','medal','fanfare','epic'];
   playSound(sounds[tier]||'medal');
 };
+
+// ── EMAIL NOTIFICATIONS ───────────────────────────────────────
+const EMAIL_TO_1 = 'ucccotanaka@gmail.com';
+const EMAIL_TO_2 = 'yasuhiro.tsuno@hakuhodo.co.jp';
+
+function getEmailConfig(){
+  return {
+    pubkey: localStorage.getItem('nk_ejs_pubkey')||'',
+    service: localStorage.getItem('nk_ejs_service')||'',
+    template: localStorage.getItem('nk_ejs_template')||''
+  };
+}
+function saveEmailConfig(){
+  const pk=document.getElementById('ejs-pubkey').value.trim();
+  const sv=document.getElementById('ejs-service').value.trim();
+  const tp=document.getElementById('ejs-template').value.trim();
+  if(!pk||!sv||!tp){showToast('3つすべて入力してください');return;}
+  localStorage.setItem('nk_ejs_pubkey',pk);
+  localStorage.setItem('nk_ejs_service',sv);
+  localStorage.setItem('nk_ejs_template',tp);
+  renderEmailStatus();
+  showToast('📧 メール設定を保存しました！');
+}
+function renderEmailStatus(){
+  const cfg=getEmailConfig();
+  const el=document.getElementById('email-status');
+  if(!el)return;
+  if(cfg.pubkey&&cfg.service&&cfg.template){
+    el.style.background='rgba(68,217,142,.08)';el.style.border='1px solid rgba(68,217,142,.25)';el.style.color='var(--green)';
+    el.textContent='✅ メール通知設定済み';
+  } else {
+    el.style.background='rgba(90,171,255,.07)';el.style.border='1px solid rgba(90,171,255,.2)';el.style.color='var(--blue)';
+    el.textContent='📋 未設定 — 下のEmailJS情報を入力してください';
+  }
+  // Restore saved values
+  if(cfg.pubkey)document.getElementById('ejs-pubkey').value=cfg.pubkey;
+  if(cfg.service)document.getElementById('ejs-service').value=cfg.service;
+  if(cfg.template)document.getElementById('ejs-template').value=cfg.template;
+}
+
+async function _sendEmail(subject, body){
+  const cfg=getEmailConfig();
+  if(!cfg.pubkey||!cfg.service||!cfg.template)return false;
+  try{
+    const res=await fetch('https://api.emailjs.com/api/v1.0/email/send',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        service_id: cfg.service,
+        template_id: cfg.template,
+        user_id: cfg.pubkey,
+        template_params:{
+          to_email_1: EMAIL_TO_1,
+          to_email_2: EMAIL_TO_2,
+          subject: subject,
+          message: body,
+          from_name: '夏伎の受験基地'
+        }
+      })
+    });
+    return res.ok;
+  }catch(e){console.warn('Email send failed:',e);return false;}
+}
+
+async function sendCheckinEmail(){
+  const now=new Date();
+  const hm=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+  const subject='✅ 夏伎がチェックイン！（'+hm+'）';
+  const body='夏伎くんが今日の自習を始めました！\n\n'
+    +'チェックイン時刻：'+hm+'\n'
+    +'連続日数：'+streakDays+'日目\n'
+    +'日付：'+todayKey()+'\n\n'
+    +'このまま頑張れるようにサポートしてあげてください 📚';
+  await _sendEmail(subject, body);
+}
+
+async function sendDailySummaryEmail(targetDay){
+  // targetDay: YYYY-MM-DD string of the day to report
+  const studyKey='study-'+targetDay;
+  const studyDetailKey='study-detail-'+targetDay;
+  const checkinKey='checkin-'+targetDay;
+  const questKey='quests-'+targetDay;
+  const [sd, sdd, ci, qd] = await Promise.all([
+    sGet(studyKey), sGet(studyDetailKey), sGet(checkinKey), sGet(questKey)
+  ]);
+  if(!ci)return; // チェックインしていない日は送らない
+  const totalMins=sd?Object.values(sd).reduce((a,b)=>a+b,0):0;
+  const h=Math.floor(totalMins/60),m=totalMins%60;
+  const timeStr=h>0?h+'時間'+(m>0?m+'分':''):m+'分';
+  const subjects=sd?Object.entries(sd).filter(([,v])=>v>0).map(([k,v])=>k+' '+v+'分').join('、'):'記録なし';
+  const xp=qd?Object.values(qd).filter(Boolean).length*20:0;
+  const subject='📚 夏伎の昨日の学習報告（'+targetDay+'）';
+  const body='【昨日の学習サマリー】\n\n'
+    +'学習時間合計：'+timeStr+'\n'
+    +'教科別：'+subjects+'\n'
+    +'チェックイン：'+ci.time+'\n'
+    +'連続日数：'+streakDays+'日\n\n'
+    +(totalMins===0?'昨日は学習記録がありませんでした。\n今日はぜひ声がけしてみてください！\n':'よく頑張りました！継続して応援しましょう 🎉\n');
+  await _sendEmail(subject, body);
+}
+
+async function sendWeeklyReportEmail(){
+  // Friday weekly report using AI
+  if(!getApiKey())return;
+  // Gather last 7 days
+  const days=[];
+  for(let i=6;i>=0;i--){
+    const d=new Date();d.setDate(d.getDate()-i);
+    const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    const sd=await sGet('study-'+key);
+    const ci=await sGet('checkin-'+key);
+    const tot=sd?Object.values(sd).reduce((a,b)=>a+b,0):0;
+    days.push({date:key,mins:tot,checkin:!!ci});
+  }
+  const totalMins=days.reduce((a,b)=>a+b.mins,0);
+  const checkinDays=days.filter(d=>d.checkin).length;
+  const summary=days.map(d=>d.date+': '+d.mins+'分'+(d.checkin?' ✅':'')).join('\n');
+  const h=Math.floor(totalMins/60),m=totalMins%60;
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':getApiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({
+        model:'claude-haiku-4-5-20251001',
+        max_tokens:800,
+        messages:[{role:'user',content:'あなたは夏伎くん（小学5年生・早稲田アカデミー・中学受験生）の学習コーチです。\n以下の1週間の学習データを元に、パパ（Yasuhiro）とママ（Yuko）への週間学習レポートを書いてください。\n\n【今週のデータ】\n合計学習時間：'+(h>0?h+'時間'+m+'分':m+'分')+'\nチェックイン日数：'+checkinDays+'/7日\n日別記録：\n'+summary+'\n\n以下を含めてください：\n1. 今週の振り返り（良かった点・改善点）\n2. 土日にすべきこと（具体的に）\n3. 来週の目標\n4. 親からの声がけアドバイス\n\n温かく前向きなトーンで、200〜300文字程度でまとめてください。'}]
+      })
+    });
+    const data=await res.json();
+    const aiText=data.content?.[0]?.text||'';
+    const subject='📊 夏伎 週間学習レポート（'+days[0].date+' 〜 '+days[6].date+'）';
+    const body='【今週の学習レポート】\n\n'
+      +'合計：'+(h>0?h+'時間'+m+'分':m+'分')+' / チェックイン '+checkinDays+'日\n\n'
+      +aiText;
+    await _sendEmail(subject, body);
+    showToast('📊 週間レポートを送信しました！');
+  }catch(e){console.warn('Weekly report failed:',e);}
+}
+
+async function testEmail(){
+  const ok=await _sendEmail('🧪 テスト：夏伎の受験基地','メール通知の設定が完了しました！\n\nチェックイン通知・学習サマリー・週間レポートが自動で届きます。');
+  showToast(ok?'✅ テストメールを送信しました！':'❌ 送信失敗。設定を確認してください');
+}
+
+// Check if daily summary or weekly report should be sent
+async function checkAndSendScheduledEmails(){
+  const cfg=getEmailConfig();
+  if(!cfg.pubkey)return;
+  const today=todayKey();
+  const lastSent=localStorage.getItem('nk_email_last_sent')||'';
+  if(lastSent===today)return; // 今日は送信済み
+  // Get yesterday
+  const yd=new Date();yd.setDate(yd.getDate()-1);
+  const yesterday=yd.getFullYear()+'-'+String(yd.getMonth()+1).padStart(2,'0')+'-'+String(yd.getDate()).padStart(2,'0');
+  // Send yesterday's summary
+  await sendDailySummaryEmail(yesterday);
+  // If today is Friday (5), send weekly report
+  const dow=new Date().getDay();
+  if(dow===5)await sendWeeklyReportEmail();
+  localStorage.setItem('nk_email_last_sent',today);
+}
 
 init();
 </script>
