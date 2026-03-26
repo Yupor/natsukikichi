@@ -1423,31 +1423,35 @@ async function initRadioCorner(){
     ];
     const t=topics[seed%topics.length];
 
-    const jsonExample='{"title":"今日のテーマ（短く）","topic":"'+t.topic+'","icon":"'+t.icon+'","content":"本文","highlights":["重要語句1"],"illust_type":"timeline OR compare OR flow OR map OR none","illust_data":{"labels":["ラベル1","ラベル2"],"values":["値1","値2"],"note":"補足"}}';
+    const jsonExample='{"title":"短いテーマ名","topic":"'+t.topic+'","icon":"'+t.icon+'","hook":"つかみ文（1〜2文・驚き・例え）","point":"ここが超重要！（1〜2文）","exam":"試験ではこう出る（問われ方を1問だけ具体的に）","illust_type":"timeline OR compare OR flow OR map","illust_data":{"labels":["A","B","C"],"values":["説明1","説明2","説明3"],"note":"図の補足"}}';
     const promptLines2=[
-      'あなたは中学受験の歴史・地理をめちゃくちゃわかりやすく教える先生です。',
-      '「そーだったのかラジオ」という小学5年生向けの読み物を書いてください。',
-      '',
+      'あなたは中学受験の歴史・地理の先生です。',
       'テーマ：「'+t.name+'」',
       '',
-      '【文章のルール】',
-      '・タメ口・話し言葉で書く（「〜だよ」「〜なんだよね」「〜って感じ」）',
-      '・必ず身近な例えを入れる（ゲーム・サッカー・コンビニ・YouTube・スマホ等）',
-      '・専門用語はすぐ「つまり〜」と言い換える',
-      '・受験で狙われる意外なポイントやひっかけに触れる',
-      '・重要語句は★語句★で囲む',
-      '・受験ポイントは【ポイント】〜 で1個だけ（短く！）',
-      '・難しい漢字はふりがなをつける',
-      '・180〜220文字でコンパクトに',
+      '以下の3つのフィールドを埋めてください：',
       '',
-      '【イラスト指定】絶対にnone以外を選ぶこと！',
-      '- timeline: 時代の流れ（labelsに出来事名、valuesに年代や短い説明）',
-      '- compare: 2つのものの違い（labelsに比較項目、valuesに対応する値）',
-      '- flow: 仕組みの流れA→B→C（labelsに各ステップ名）',
-      '- map: 中心と周辺の関係（labels[0]が中心、以降が周辺）',
+      '1. hook（つかみ）',
+      '・「えっそうなの？」と思わせる驚きや逆説から入る',
+      '・身近な例え必須（ゲーム・サッカー・コンビニ・スマホ等）',
+      '・タメ口・話し言葉',
+      '・60文字以内',
       '',
-      'labels・valuesは各5文字以内の短い言葉で。2〜4個。',
-      'noteには図全体の一言補足を入れる。',
+      '2. point（重要ポイント）',
+      '・受験生がつまずきやすい核心を1つだけ',
+      '・「つまり〜」「ポイントは〜」で始める',
+      '・難しい漢字はふりがな',
+      '・50文字以内',
+      '',
+      '3. exam（試験で出るとこ）',
+      '・実際の入試で問われる形式をそのまま書く',
+      '・例：「Q. 参勤交代を制度化した将軍は？ → 徳川家光」',
+      '・1問だけ。答えも書く',
+      '・40文字以内',
+      '',
+      '4. illust_type（図）',
+      '・内容に合う図を必ず選ぶ（noneは禁止）',
+      '・timeline=時代の流れ / compare=2つの違い / flow=仕組み / map=場所の関係',
+      '・labels・valuesは4文字以内・2〜4個',
       '',
       'JSONのみで返す：',
       jsonExample
@@ -1456,7 +1460,7 @@ async function initRadioCorner(){
     const res=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':getApiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1200,messages:[{role:'user',content:prompt}]})
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1000,messages:[{role:'user',content:prompt}]})
     });
     const data=await res.json();
     const raw=data.content?.[0]?.text||'{}';
@@ -1486,16 +1490,41 @@ function renderRadio(data){
   badge.textContent=isGeo?'🗺️ 地理':'⚔️ 歴史';
 
   const contentEl=document.getElementById('radio-content');
-  if(data.content){
+
+  // 3ブロック構造で表示
+  if(data.hook||data.point||data.exam){
+    let html='';
+    // ① つかみ
+    if(data.hook){
+      const hookHtml=data.hook.replace(/★([^★]+)★/g,'<strong style="color:var(--gold);font-weight:800;">$1</strong>');
+      html+='<div style="font-size:15px;line-height:1.8;color:var(--text);margin-bottom:12px;">'+hookHtml+'</div>';
+    }
+    // ② 重要ポイント
+    if(data.point){
+      const pointHtml=data.point.replace(/★([^★]+)★/g,'<strong style="color:var(--gold);font-weight:800;">$1</strong>');
+      html+='<div style="background:rgba(0,224,181,.08);border-left:3px solid var(--teal);border-radius:0 10px 10px 0;padding:10px 14px;margin-bottom:10px;">'
+        +'<div style="font-size:10px;font-weight:800;color:var(--teal);letter-spacing:1.5px;margin-bottom:4px;">⭐ 受験ポイント</div>'
+        +'<div style="font-size:14px;color:var(--text);font-weight:700;line-height:1.7;">'+pointHtml+'</div>'
+        +'</div>';
+    }
+    // ③ 試験で出るとこ
+    if(data.exam){
+      html+='<div style="background:rgba(255,210,63,.07);border:1.5px solid rgba(255,210,63,.2);border-radius:10px;padding:10px 14px;">'
+        +'<div style="font-size:10px;font-weight:800;color:var(--gold);letter-spacing:1.5px;margin-bottom:5px;">📝 試験で出るとこ</div>'
+        +'<div style="font-size:14px;color:var(--text2);line-height:1.7;">'+data.exam+'</div>'
+        +'</div>';
+    }
+    contentEl.innerHTML=html;
+  } else if(data.content){
+    // フォールバック（旧形式）
     const html=data.content
       .replace(/★([^★]+)★/g,'<strong style="color:var(--gold);font-weight:800;background:rgba(255,210,63,.08);padding:1px 4px;border-radius:4px;">$1</strong>')
-      .replace(/【ポイント】([^\n]+)/g,'<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(0,224,181,.1);color:var(--teal);border-left:3px solid var(--teal);padding:6px 12px;border-radius:0 8px 8px 0;margin:6px 0;font-weight:700;font-size:14px;">⭐ 受験ポイント $1</span>')
-      .replace(/【重要】([^\n]+)/g,'<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(0,224,181,.1);color:var(--teal);border-left:3px solid var(--teal);padding:6px 12px;border-radius:0 8px 8px 0;margin:6px 0;font-weight:700;font-size:14px;">⭐ 受験ポイント $1</span>')
+      .replace(/【ポイント】([^\n]+)/g,'<div style="background:rgba(0,224,181,.08);border-left:3px solid var(--teal);border-radius:0 8px 8px 0;padding:8px 12px;margin:8px 0;font-weight:700;font-size:14px;color:var(--teal);">⭐ $1</div>')
       .replace(/\n/g,'<br>');
     contentEl.innerHTML=html;
   }
 
-  // Draw illustration
+  // イラスト
   const illustEl=document.getElementById('radio-illust');
   if(illustEl&&data.illust_type&&data.illust_type!=='none'&&data.illust_data){
     const svg=buildRadioIllust(data.illust_type,data.illust_data);
