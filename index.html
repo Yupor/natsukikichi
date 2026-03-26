@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>夏伎の受験基地</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 :root{
@@ -1045,7 +1043,7 @@ let medals=[],messages=[],examDate=new Date('2027-02-01');
 let hChart=null,curHS='総合';
 let genProblemText='',uploadedImg=null,uploadedMime=null;
 
-// ── STORAGE: localStorage-first, Firebase background sync ──────
+// ── STORAGE: localStorage only (fast & reliable) ──────────────
 const _FB_CFG={
   apiKey:'AIzaSyAWKQMRQREp765mBbjHHvntnkPF-PV3MMs',
   authDomain:'natsukikich.firebaseapp.com',
@@ -1059,7 +1057,6 @@ const _m={};
 let _db=null;
 let _fbReady=false;
 
-// Initialize Firebase immediately (scripts are in <head>)
 function _fbInitSync(){
   try{
     if(typeof firebase==='undefined')return;
@@ -1069,57 +1066,45 @@ function _fbInitSync(){
   }catch(e){console.warn('Firebase init failed:',e);}
 }
 
-// localStorage key helper
 function _lsKey(k){return 'nk:'+k;}
 
-// sGet: read from localStorage instantly, then pull from Firebase in background
 async function sGet(k){
-  // 1. Try localStorage first (instant)
   try{
-    const cached=localStorage.getItem(_lsKey(k));
-    if(cached!==null)return JSON.parse(cached);
+    const v=localStorage.getItem(_lsKey(k));
+    if(v!==null)return JSON.parse(v);
   }catch(e){}
-  // 2. Try in-memory
   if(_m[k]!==undefined)return _m[k];
-  // 3. Try Firebase (with 3s timeout)
   if(_fbReady&&_db){
     try{
-      const result=await Promise.race([
-        _db.ref('natsuki/'+k).get(),
-        new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),3000))
-      ]);
-      if(result&&result.exists()){
-        const val=result.val();
+      const snap=await _db.ref('natsuki/'+k).get();
+      if(snap.exists()){
+        const val=snap.val();
         _m[k]=val;
         try{localStorage.setItem(_lsKey(k),JSON.stringify(val));}catch(e){}
         return val;
       }
-    }catch(e){console.warn('sGet FB err:',e.message);}
+    }catch(e){}
   }
   return null;
 }
 
-// sSet: write to localStorage and memory immediately, Firebase in background
 async function sSet(k,v){
   _m[k]=v;
-  // Write localStorage immediately (sync)
   try{localStorage.setItem(_lsKey(k),JSON.stringify(v));}catch(e){}
-  // Write Firebase in background (don't await)
   if(_fbReady&&_db){
-    _db.ref('natsuki/'+k).set(v).catch(e=>console.warn('sSet FB err:',e));
+    _db.ref('natsuki/'+k).set(v).catch(()=>{});
   }
 }
 
 async function init(){
-  // Firebase: sync init (scripts already in <head>)
   _fbInitSync();
   const fbStatus=document.getElementById('fb-status');
   if(fbStatus){
     fbStatus.textContent=_fbReady?'🟢':'🔴';
-    fbStatus.title=_fbReady?'Firebaseに接続中':'オフライン（localStorageで動作中）';
+    fbStatus.title=_fbReady?'Firebase接続中':'localStorageモード';
   }
 
-  // ── UI全部を即座に描画 ──
+  // UI全部を即座に描画
   await loadExamDate();updateCountdown();
   applySeasonalTheme();
   await loadCheckin();await loadStudyData();await loadQuests();await loadStreak();
@@ -1130,11 +1115,27 @@ async function init(){
   await renderWeeklyStats();
   renderApiKeyStatus();
   initSound();
-  setTimeout(showWelcomeMessage, 600);
+  setTimeout(showWelcomeMessage,600);
 
-  // ── AI系はバックグラウンドで（UIをブロックしない）──
+  // AI系はバックグラウンドで
   initRadioCorner();
   initProverbQuiz();
+
+  // Firebase遅延ロード（UIブロックしない）
+  setTimeout(()=>{
+    const s1=document.createElement('script');
+    s1.src='https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js';
+    s1.onload=()=>{
+      const s2=document.createElement('script');
+      s2.src='https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js';
+      s2.onload=()=>{
+        _fbInitSync();
+        if(fbStatus)fbStatus.textContent=_fbReady?'🟢':'🔴';
+      };
+      document.head.appendChild(s2);
+    };
+    document.head.appendChild(s1);
+  },2000);
 }
 function applySeasonalTheme(){
   const d=new Date();const m=d.getMonth()+1,day=d.getDate();
@@ -1233,20 +1234,24 @@ async function _fetchDailyQuestions(reviewItems=[]){
   // If we have review items, replace 1-2 slots
   const reviewCount=Math.min(reviewItems.length,2);
   const freshCount=5-reviewCount;
-  const reviewNote=reviewCount>0?`\n\n【復習問題】${reviewCount}問分は以下の分野の類似問題を作ること：${reviewItems.map(r=>r.type+' / '+r.exp?.slice(0,20)).join('、')}`:'';
+  const areaList=areas.slice(0,freshCount).map((a,i)=>(i+1)+'問目：'+a).join('、');
+  const reviewNote=reviewCount>0?'\n\n【復習問題】'+reviewCount+'問分は以下の分野の類似問題を作ること：'+reviewItems.map(r=>r.type+' / '+(r.exp||'').slice(0,20)).join('、'):'';
 
-  const prompt=`あなたは中学受験の国語専門講師です。以下の条件で問題を${freshCount}問作成してください。${reviewNote}
-
-【条件】
-・小学5年生（早稲田アカデミー生）向け
-・実際の中学入試（開成・麻布・武蔵・早稲田・慶應・桜蔭など）に頻出のもの
-・ジャンルを以下のように割り当てる：${areas.slice(0,freshCount).map((a,i)=>`${i+1}問目：${a}`).join('、')}
-・難易度：1問目は標準、2〜3問目は応用、4〜5問目は難問
-・中学生以上で習う漢字には必ずふりがなをつけること
-・問題ごとに出題傾向のある学校名を必ず入れること
-
-以下のJSON形式のみで返してください：
-[{"type":"ことわざ","school":"開成中学 頻出","lv":1,"q":"問題文","opts":["A","B","C","D"],"a":0,"exp":"解説"}]`;
+  const promptLines=[
+    'あなたは中学受験の国語専門講師です。以下の条件で問題を'+freshCount+'問作成してください。'+reviewNote,
+    '',
+    '【条件】',
+    '・小学5年生（早稲田アカデミー生）向け',
+    '・実際の中学入試（開成・麻布・武蔵・早稲田・慶應・桜蔭など）に頻出のもの',
+    '・ジャンルを以下のように割り当てる：'+areaList,
+    '・難易度：1問目は標準、2〜3問目は応用、4〜5問目は難問',
+    '・中学生以上で習う漢字には必ずふりがなをつけること',
+    '・問題ごとに出題傾向のある学校名を必ず入れること',
+    '',
+    '以下のJSON形式のみで返してください：',
+    '[{"type":"ことわざ","school":"開成中学 頻出","lv":1,"q":"問題文","opts":["A","B","C","D"],"a":0,"exp":"解説"}]'
+  ];
+  const prompt=promptLines.join('\n');
 
   const res=await fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
@@ -1281,7 +1286,7 @@ async function _getReviewItems(){
 }
 async function _saveWrongItem(p){
   const bank=await sGet('quiz-wrong-bank')||[];
-  // Don't add duplicates
+  // Skip duplicates
   if(bank.find(b=>b.q===p.q))return;
   const due=new Date();due.setDate(due.getDate()+3);
   bank.push({...p,dueDate:due.toISOString(),addedDate:todayKey()});
@@ -1331,24 +1336,27 @@ async function initRadioCorner(){
     ];
     const t=topics[seed%topics.length];
 
-    const prompt=`あなたは中学受験（早稲田・麻布・開成・武蔵・慶應レベル）の歴史・地理の講師です。
-「そーだったのかラジオ」という小学5年生向けの読み物を書いてください。
-
-テーマ：「${t.name}」
-
-条件：
-・難易度は早稲田中学・難関中学受験レベル。基本知識（例：「織田信長が戦国武将」程度）は省く
-・受験生がつまずきやすいポイント・よく出る切り口を中心に解説する
-・話し言葉、タメ口ぎみで読みやすく。でも内容はしっかり本格的に
-・今の小学5年生が「え、そういうこと？」とおもしろがれる視点（意外性・逆説・対比など）を入れる
-・重要な語句・人名・制度名は★語句★で囲む
-・入試で問われやすい重要ポイントは【重要】〜 で始めるブロックで1〜2個入れる
-・難しい漢字にはふりがなをつける
-・250〜300文字でコンパクトに
-
-JSONのみで返す：
-{"title":"今日のテーマ（短く）","topic":"${t.topic}","icon":"${t.icon}","content":"本文","highlights":["重要語句1","重要語句2"]}`;
-
+    const jsonExample='{"title":"今日のテーマ（短く）","topic":"'+t.topic+'","icon":"'+t.icon+'","content":"本文","highlights":["重要語句1","重要語句2"]}';
+    const promptLines2=[
+      'あなたは中学受験（早稲田・麻布・開成・武蔵・慶應レベル）の歴史・地理の講師です。',
+      '「そーだったのかラジオ」という小学5年生向けの読み物を書いてください。',
+      '',
+      'テーマ：「'+t.name+'」',
+      '',
+      '条件：',
+      '・難易度は早稲田中学・難関中学受験レベル。基本知識（例：「織田信長が戦国武将」程度）は省く',
+      '・受験生がつまずきやすいポイント・よく出る切り口を中心に解説する',
+      '・話し言葉、タメ口ぎみで読みやすく。でも内容はしっかり本格的に',
+      '・今の小学5年生が「え、そういうこと？」とおもしろがれる視点（意外性・逆説・対比など）を入れる',
+      '・重要な語句・人名・制度名は★語句★で囲む',
+      '・入試で問われやすい重要ポイントは【重要】〜 で始めるブロックで1〜2個入れる',
+      '・難しい漢字にはふりがなをつける',
+      '・250〜300文字でコンパクトに',
+      '',
+      'JSONのみで返す：',
+      jsonExample
+    ];
+    const prompt=promptLines2.join('\n');
     const res=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':getApiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
@@ -1979,13 +1987,12 @@ async function selectAnswer(chosen,prob){
     const hype=STREAK_HYPE[sc];
     if(sc>=2){
       const badgeCol=sc>=10?'var(--gold)':sc>=7?'var(--orange)':sc>=5?'var(--purple)':sc>=3?'var(--teal)':'var(--green)';
-      streakBadgeHtml=`
-        <div style="text-align:center;padding:14px 0 6px;animation:cardPop .4s cubic-bezier(.34,1.56,.64,1);">
-          <div style="font-size:${sc>=7?36:sc>=5?30:24}px;font-weight:800;color:${badgeCol};line-height:1.2;">${hype.msg}</div>
-          <div style="font-size:14px;color:var(--text2);margin-top:4px;">${hype.sub}</div>
-          <div style="display:inline-block;background:rgba(255,255,255,.07);border:1px solid ${badgeCol}44;border-radius:20px;padding:4px 14px;font-size:12px;font-weight:800;color:${badgeCol};margin-top:8px;">🔥 ${sc}連続正解！</div>
-        </div>`;
-      // Trigger celebration for big streaks
+      const fsize=sc>=7?36:sc>=5?30:24;
+      streakBadgeHtml='<div style="text-align:center;padding:14px 0 6px;animation:cardPop .4s cubic-bezier(.34,1.56,.64,1);">'
+        +'<div style="font-size:'+fsize+'px;font-weight:800;color:'+badgeCol+';line-height:1.2;">'+hype.msg+'</div>'
+        +'<div style="font-size:14px;color:var(--text2);margin-top:4px;">'+hype.sub+'</div>'
+        +'<div style="display:inline-block;background:rgba(255,255,255,.07);border:1px solid '+badgeCol+'44;border-radius:20px;padding:4px 14px;font-size:12px;font-weight:800;color:'+badgeCol+';margin-top:8px;">🔥 '+sc+'連続正解！</div>'
+        +'</div>';
       if(sc===5)celebrate(2,'🔥','5連続！神じゃん！','受験プロへの道を歩んでる');
       else if(sc===7)celebrate(3,'💥','7連続！鬼強すぎ！！','これが本物の実力や');
       else if(sc===10)celebrate(4,'👑','10連続！完全に神！！！','受験界の怪物誕生🏆');
@@ -1994,40 +2001,30 @@ async function selectAnswer(chosen,prob){
     _correctStreak=0;
   }
 
-  const resultHtml=`
-    ${streakBadgeHtml}
-    <div class="result-verdict">
-      <div class="result-circle" style="border-color:${isCorrect?'var(--green)':'var(--red)'};color:${isCorrect?'var(--green)':'var(--red)'};">${isCorrect?'○':'×'}</div>
-      <div style="font-size:22px;font-weight:800;color:${isCorrect?'var(--green)':'var(--red)'};">${isCorrect?(_correctStreak===1?'正解！すごい！':''):'惜しい！もう少し！'}</div>
-      ${!isCorrect?`<div style="font-size:14px;color:var(--text2);margin-top:4px;">正解は <strong style="color:var(--green)">${labels[prob.answer]} ${prob.answer_text||prob.options[prob.answer]}</strong></div>`:''}
-    </div>
-
-    ${exp.point?`
-    <div class="exp-card exp-card-key">
-      <div class="exp-label" style="color:var(--gold);">📌 この問題のポイント</div>
-      <div class="exp-body" style="font-size:17px;font-weight:700;color:var(--gold);">${exp.point}</div>
-    </div>`:''}
-
-    ${exp.formula?`
-    <div class="exp-card exp-card-info">
-      <div class="exp-label" style="color:var(--blue);">📐 公式・考え方</div>
-      <div class="exp-body" style="font-family:monospace;font-size:16px;font-weight:700;color:var(--blue);letter-spacing:.5px;">${exp.formula}</div>
-    </div>`:''}
-
-    ${exp.steps&&exp.steps.length?`
-    <div class="exp-card exp-card-correct">
-      <div class="exp-label" style="color:var(--green);">🔢 解き方のステップ</div>
-      <div class="exp-steps">
-        ${exp.steps.map((s,i)=>`<div class="exp-step"><div class="exp-step-num">${i+1}</div><div class="exp-step-txt">${s}</div></div>`).join('')}
-      </div>
-    </div>`:''}
-
-    ${exp.tip?`
-    <div class="exp-card exp-card-tip">
-      <div class="exp-label" style="color:var(--purple);">💡 次に活かそう</div>
-      <div class="exp-body" style="color:var(--purple);">${exp.tip}</div>
-    </div>`:''}
-  `;
+  const gc=isCorrect?'var(--green)':'var(--red)';
+  const wrongAnswerHtml=!isCorrect
+    ?'<div style="font-size:14px;color:var(--text2);margin-top:4px;">正解は <strong style="color:var(--green)">'+labels[prob.answer]+' '+(prob.answer_text||prob.options[prob.answer])+'</strong></div>'
+    :'';
+  const verdictHtml='<div class="result-verdict">'
+    +'<div class="result-circle" style="border-color:'+gc+';color:'+gc+';">'+(isCorrect?'○':'×')+'</div>'
+    +'<div style="font-size:22px;font-weight:800;color:'+gc+';">'+(isCorrect?(_correctStreak===1?'正解！すごい！':''):'惜しい！もう少し！')+'</div>'
+    +wrongAnswerHtml
+    +'</div>';
+  const pointHtml=exp.point
+    ?'<div class="exp-card exp-card-key"><div class="exp-label" style="color:var(--gold);">📌 この問題のポイント</div><div class="exp-body" style="font-size:17px;font-weight:700;color:var(--gold);">'+exp.point+'</div></div>'
+    :'';
+  const formulaHtml=exp.formula
+    ?'<div class="exp-card exp-card-info"><div class="exp-label" style="color:var(--blue);">📐 公式・考え方</div><div class="exp-body" style="font-family:monospace;font-size:16px;font-weight:700;color:var(--blue);">'+exp.formula+'</div></div>'
+    :'';
+  const stepsHtml=(exp.steps&&exp.steps.length)
+    ?'<div class="exp-card exp-card-correct"><div class="exp-label" style="color:var(--green);">🔢 解き方のステップ</div><div class="exp-steps">'
+      +exp.steps.map(function(s,i){return '<div class="exp-step"><div class="exp-step-num">'+(i+1)+'</div><div class="exp-step-txt">'+s+'</div></div>';}).join('')
+      +'</div></div>'
+    :'';
+  const tipHtml=exp.tip
+    ?'<div class="exp-card exp-card-tip"><div class="exp-label" style="color:var(--purple);">💡 次に活かそう</div><div class="exp-body" style="color:var(--purple);">'+exp.tip+'</div></div>'
+    :'';
+  const resultHtml=streakBadgeHtml+verdictHtml+pointHtml+formulaHtml+stepsHtml+tipHtml;
   document.getElementById('grade-result').innerHTML=resultHtml;
   document.getElementById('step-result').classList.remove('hidden');
   document.getElementById('step-result').scrollIntoView({behavior:'smooth'});
@@ -2197,16 +2194,17 @@ function renderWeakPanel(subj){
   if(d.practice_problems&&d.practice_problems.length){
     practiceEl.classList.remove('hidden');
     practiceList.innerHTML='';
-    d.practice_problems.forEach((p,pi)=>{
+    d.practice_problems.forEach(function(p,pi){
       const labels=['①','②','③','④'];
       const div=document.createElement('div');div.className='wproblem';
-      div.innerHTML=`
-        <div style="font-size:10px;color:var(--purple);font-weight:800;letter-spacing:1px;margin-bottom:6px;">⚔️ 弱点克服 ${pi+1}問目 — ${p.topic}</div>
-        <div class="wproblem-q">${p.question}</div>
-        <div class="wproblem-opts" id="wopts-${pi}">
-          ${(p.options||[]).map((o,i)=>`<button class="wproblem-opt" onclick="answerWeakProblem(${pi},${i},${p.answer},'${(p.explanation||'').replace(/'/g,'&#39;')}')">${labels[i]} ${o}</button>`).join('')}
-        </div>
-        <div class="wproblem-exp" id="wexp-${pi}">${p.explanation||''}</div>`;
+      const expSafe=(p.explanation||'').replace(/'/g,'&#39;');
+      const optsHtml=(p.options||[]).map(function(o,i){
+        return '<button class="wproblem-opt" onclick="answerWeakProblem('+pi+','+i+','+p.answer+',\''+expSafe+'\')">'+labels[i]+' '+o+'</button>';
+      }).join('');
+      div.innerHTML='<div style="font-size:10px;color:var(--purple);font-weight:800;letter-spacing:1px;margin-bottom:6px;">⚔️ 弱点克服 '+(pi+1)+'問目 — '+p.topic+'</div>'
+        +'<div class="wproblem-q">'+p.question+'</div>'
+        +'<div class="wproblem-opts" id="wopts-'+pi+'">'+optsHtml+'</div>'
+        +'<div class="wproblem-exp" id="wexp-'+pi+'">'+(p.explanation||'')+'</div>';
       practiceList.appendChild(div);
     });
   }
@@ -2254,13 +2252,13 @@ function celebrate(tier, icon, title, subtitle){
 
   card.style.cssText=`position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#0c1a2e;border:2.5px solid ${borderCol};border-radius:24px;padding:28px 30px 24px;text-align:center;z-index:9995;pointer-events:none;min-width:240px;max-width:290px;width:80%;box-shadow:0 0 48px ${glowCol},0 8px 32px rgba(0,0,0,.6);animation:cardPop .35s cubic-bezier(.34,1.56,.64,1);`;
 
-  card.innerHTML=`
-    <div style="font-size:${iconSz}px;line-height:1;margin-bottom:12px;">${icon}</div>
-    <div style="font-size:${titleSz}px;font-weight:800;color:${titleCol};line-height:1.3;">${title}</div>
-    ${subtitle?`<div style="font-size:15px;color:#a8c0e0;margin-top:8px;line-height:1.6;font-weight:500;">${subtitle}</div>`:''}
-    ${tier===4?`<div style="font-size:11px;color:#ffd23f;margin-top:14px;letter-spacing:2.5px;opacity:.9;">★ EPIC ACHIEVEMENT ★</div>`:''}
-    <div style="margin-top:16px;height:3px;border-radius:2px;background:linear-gradient(90deg,transparent,${borderCol},transparent);opacity:.6;"></div>
-  `;
+  const subtitleHtml=subtitle?'<div style="font-size:15px;color:#a8c0e0;margin-top:8px;line-height:1.6;font-weight:500;">'+subtitle+'</div>':'';
+  const epicHtml=tier===4?'<div style="font-size:11px;color:#ffd23f;margin-top:14px;letter-spacing:2.5px;opacity:.9;">★ EPIC ACHIEVEMENT ★</div>':'';
+  card.innerHTML=
+    '<div style="font-size:'+iconSz+'px;line-height:1;margin-bottom:12px;">'+icon+'</div>'
+    +'<div style="font-size:'+titleSz+'px;font-weight:800;color:'+titleCol+';line-height:1.3;">'+title+'</div>'
+    +subtitleHtml+epicHtml
+    +'<div style="margin-top:16px;height:3px;border-radius:2px;background:linear-gradient(90deg,transparent,'+borderCol+',transparent);opacity:.6;"></div>';
   document.body.appendChild(card);
 
   // Confetti (behind card, above backdrop)
@@ -2329,7 +2327,14 @@ function renderMedals(){
 function renderMedalGuides(){
   ['medal-guide-natsuki','medal-guide-parent'].forEach(id=>{
     const el=document.getElementById(id);if(!el)return;
-    el.innerHTML=MEDAL_DEFS.map(def=>{const e=medals.find(m=>m.id===def.id);return`<div class="mdet${e?' earned':''}" style="margin-bottom:8px;"><div class="mdico">${def.icon}</div><div class="mdinf"><div class="mdnm">${def.label}</div><div class="mdcd">${def.cond}</div>${e?`<div style="font-size:11px;color:var(--text3);margin-top:2px;">${e.earned}に獲得</div>`:''}</div><div class="mdst ${e?'got':'not'}">${e?'✓':'未'}</div></div>`;}).join('');
+    el.innerHTML=MEDAL_DEFS.map(function(def){
+      const e=medals.find(m=>m.id===def.id);
+      const earnedHtml=e?'<div style="font-size:11px;color:var(--text3);margin-top:2px;">'+e.earned+'に獲得</div>':'';
+      return '<div class="mdet'+(e?' earned':'')+'" style="margin-bottom:8px;">'
+        +'<div class="mdico">'+def.icon+'</div>'
+        +'<div class="mdinf"><div class="mdnm">'+def.label+'</div><div class="mdcd">'+def.cond+'</div>'+earnedHtml+'</div>'
+        +'<div class="mdst '+(e?'got':'not')+'">'+(e?'✓':'未')+'</div></div>';
+    }).join('');
   });
 }
 async function loadMessages(){const d=await sGet('messages');messages=d||[];}
