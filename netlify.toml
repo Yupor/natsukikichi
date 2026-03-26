@@ -2,12 +2,4 @@
   publish = "."
 
 [build.processing]
-  skip_processing = false
-
-[build.processing.html]
-  pretty_urls = false
-
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Robots-Tag = "noindex"
+  skip_processing = true
