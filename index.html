@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>夏伎の受験基地</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 :root{
@@ -1043,7 +1045,7 @@ let medals=[],messages=[],examDate=new Date('2027-02-01');
 let hChart=null,curHS='総合';
 let genProblemText='',uploadedImg=null,uploadedMime=null;
 
-// ── FIREBASE ─────────────────────────────────────────────────
+// ── STORAGE: localStorage-first, Firebase background sync ──────
 const _FB_CFG={
   apiKey:'AIzaSyAWKQMRQREp765mBbjHHvntnkPF-PV3MMs',
   authDomain:'natsukikich.firebaseapp.com',
@@ -1053,59 +1055,73 @@ const _FB_CFG={
   messagingSenderId:'897484879290',
   appId:'1:897484879290:web:dd104398870f0209801983'
 };
-// Fallback in-memory cache
 const _m={};
 let _db=null;
+let _fbReady=false;
 
-async function _fbInit(){
-  if(_db)return _db;
+// Initialize Firebase immediately (scripts are in <head>)
+function _fbInitSync(){
   try{
-    // Load Firebase SDKs from CDN
-    await Promise.all([
-      _loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js'),
-      _loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js')
-    ]);
+    if(typeof firebase==='undefined')return;
     if(!firebase.apps.length)firebase.initializeApp(_FB_CFG);
     _db=firebase.database();
-    return _db;
-  }catch(e){console.warn('Firebase init failed:',e);return null;}
+    _fbReady=true;
+  }catch(e){console.warn('Firebase init failed:',e);}
 }
-function _loadScript(src){
-  return new Promise((res,rej)=>{
-    if(document.querySelector(`script[src="${src}"]`)){res();return;}
-    const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);
-  });
-}
+
+// localStorage key helper
+function _lsKey(k){return 'nk:'+k;}
+
+// sGet: read from localStorage instantly, then pull from Firebase in background
 async function sGet(k){
+  // 1. Try localStorage first (instant)
   try{
-    const db=await _fbInit();
-    if(db){
-      const snap=await db.ref('natsuki/'+k).get();
-      if(snap.exists())return snap.val();
-    }
-  }catch(e){console.warn('sGet FB err',e);}
-  return _m[k]??null;
+    const cached=localStorage.getItem(_lsKey(k));
+    if(cached!==null)return JSON.parse(cached);
+  }catch(e){}
+  // 2. Try in-memory
+  if(_m[k]!==undefined)return _m[k];
+  // 3. Try Firebase (with 3s timeout)
+  if(_fbReady&&_db){
+    try{
+      const result=await Promise.race([
+        _db.ref('natsuki/'+k).get(),
+        new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),3000))
+      ]);
+      if(result&&result.exists()){
+        const val=result.val();
+        _m[k]=val;
+        try{localStorage.setItem(_lsKey(k),JSON.stringify(val));}catch(e){}
+        return val;
+      }
+    }catch(e){console.warn('sGet FB err:',e.message);}
+  }
+  return null;
 }
+
+// sSet: write to localStorage and memory immediately, Firebase in background
 async function sSet(k,v){
   _m[k]=v;
-  try{
-    const db=await _fbInit();
-    if(db)await db.ref('natsuki/'+k).set(v);
-  }catch(e){console.warn('sSet FB err',e);}
+  // Write localStorage immediately (sync)
+  try{localStorage.setItem(_lsKey(k),JSON.stringify(v));}catch(e){}
+  // Write Firebase in background (don't await)
+  if(_fbReady&&_db){
+    _db.ref('natsuki/'+k).set(v).catch(e=>console.warn('sSet FB err:',e));
+  }
 }
 
 async function init(){
+  // Firebase: sync init (scripts already in <head>)
+  _fbInitSync();
   const fbStatus=document.getElementById('fb-status');
-  if(fbStatus)fbStatus.textContent='🔄';
-  try{
-    await _fbInit();
-    if(_db&&fbStatus){fbStatus.textContent='🟢';fbStatus.title='Firebaseに接続中';}
-    else if(fbStatus){fbStatus.textContent='🔴';fbStatus.title='オフライン';}
-  }catch{if(fbStatus)fbStatus.textContent='🔴';}
+  if(fbStatus){
+    fbStatus.textContent=_fbReady?'🟢':'🔴';
+    fbStatus.title=_fbReady?'Firebaseに接続中':'オフライン（localStorageで動作中）';
+  }
+
+  // ── UI全部を即座に描画 ──
   await loadExamDate();updateCountdown();
   applySeasonalTheme();
-  initRadioCorner();
-  await initProverbQuiz();
   await loadCheckin();await loadStudyData();await loadQuests();await loadStreak();
   renderSubjectGrid();renderQuests();renderStreakBadge();renderCalendar();
   await loadMedals();renderMedals();renderMedalGuides();
@@ -1115,6 +1131,10 @@ async function init(){
   renderApiKeyStatus();
   initSound();
   setTimeout(showWelcomeMessage, 600);
+
+  // ── AI系はバックグラウンドで（UIをブロックしない）──
+  initRadioCorner();
+  initProverbQuiz();
 }
 function applySeasonalTheme(){
   const d=new Date();const m=d.getMonth()+1,day=d.getDate();
@@ -1288,55 +1308,62 @@ async function initRadioCorner(){
   try{
     const d=new Date();const seed=(d.getMonth()+1)*100+d.getDate();
     const topics=[
-      {name:'織田信長と楽市楽座',topic:'歴史',icon:'⚔️'},
-      {name:'江戸幕府の参勤交代',topic:'歴史',icon:'🏯'},
-      {name:'明治維新と廃藩置県',topic:'歴史',icon:'🗾'},
-      {name:'日本の都道府県と県庁所在地',topic:'地理',icon:'🗺️'},
-      {name:'縄文・弥生時代の違い',topic:'歴史',icon:'🏺'},
-      {name:'源頼朝と鎌倉幕府',topic:'歴史',icon:'⛩️'},
-      {name:'太平洋ベルトと三大工業地帯',topic:'地理',icon:'🏭'},
-      {name:'豊臣秀吉と朝鮮出兵',topic:'歴史',icon:'⚔️'},
-      {name:'日本の気候と季節風',topic:'地理',icon:'🌦️'},
-      {name:'第二次世界大戦と終戦',topic:'歴史',icon:'✌️'},
-      {name:'奈良の大仏と聖武天皇',topic:'歴史',icon:'🦌'},
-      {name:'日本の河川・山地',topic:'地理',icon:'🗻'},
-      {name:'関ヶ原の戦いと徳川家康',topic:'歴史',icon:'🏯'},
-      {name:'日本の農業と食料自給率',topic:'地理',icon:'🌾'},
+      {name:'楽市楽座と座の廃止が経済に与えた影響',topic:'歴史',icon:'⚔️'},
+      {name:'参勤交代の財政的意図と藩の経済的打撃',topic:'歴史',icon:'🏯'},
+      {name:'廃藩置県と中央集権体制の確立',topic:'歴史',icon:'🗾'},
+      {name:'太平洋ベルトと工業地帯の分布と成因',topic:'地理',icon:'🏭'},
+      {name:'縄文・弥生の社会構造の違いと遺跡',topic:'歴史',icon:'🏺'},
+      {name:'鎌倉幕府の守護・地頭制度と武家政権の本質',topic:'歴史',icon:'⛩️'},
+      {name:'日本の季節風・梅雨・台風と気候区分',topic:'地理',icon:'🌦️'},
+      {name:'朝鮮出兵の目的と文禄・慶長の役の違い',topic:'歴史',icon:'⚔️'},
+      {name:'日本の農業地帯と食料自給率の問題',topic:'地理',icon:'🌾'},
+      {name:'ポツダム宣言・太平洋戦争終結の経緯',topic:'歴史',icon:'✌️'},
+      {name:'聖武天皇の仏教政策と天平文化',topic:'歴史',icon:'🦌'},
+      {name:'日本の川・平野・山脈の地形的特徴',topic:'地理',icon:'🗻'},
+      {name:'関ヶ原の戦いの政治的意味と西軍敗因',topic:'歴史',icon:'🏯'},
+      {name:'江戸の三大改革の比較と幕府衰退の流れ',topic:'歴史',icon:'📜'},
+      {name:'律令制度と班田収授法の仕組み',topic:'歴史',icon:'📋'},
+      {name:'日清・日露戦争の背景と条約の内容',topic:'歴史',icon:'⚓'},
+      {name:'日本の工業の変化と産業の空洞化',topic:'地理',icon:'🏭'},
+      {name:'室町幕府の守護大名と下剋上の構造',topic:'歴史',icon:'⚔️'},
+      {name:'明治の文明開化と四民平等の実態',topic:'歴史',icon:'🎩'},
+      {name:'日本の人口問題・少子高齢化と過疎',topic:'地理',icon:'📊'},
     ];
     const t=topics[seed%topics.length];
 
-    const funRefs=[
-      'Minecraftでいうと城は最強の砦でさ',
-      'サッカーのワールドカップみたいにリーグ戦で争ってたんだよ',
-      '夏伎んちの近く（東京中央区）って昔は武士がうろうろしてた場所なんだよ',
-      'チワワも飼えるくらい平和になったのはこの時代のおかげだったりするんよ',
-      '車のF1レースみたいに各藩がスピードを競って移動してたんよ',
-      'Youtubeのチャンネル登録みたいに、みんな将軍に「忠誠」を誓ってたわけ',
-      '獅子座生まれの夏伎くんは、戦国武将でいったら豊臣秀吉タイプな気がするw',
-      'サッカーで言う「試合前のミーティング」みたいなのが参勤交代だった説',
-    ];
-    const funRef=funRefs[seed%funRefs.length];
+    const prompt=`あなたは中学受験（早稲田・麻布・開成・武蔵・慶應レベル）の歴史・地理の講師です。
+「そーだったのかラジオ」という小学5年生向けの読み物を書いてください。
 
-    const prompt=`あなたは小学生向けの面白い知識系コンテンツ「そーだったのかラジオ」の台本ライターです。
-中学受験に頻出の「${t.name}」について書いてください。
+テーマ：「${t.name}」
 
-読者：小学5年生の男の子・夏伎くん（東京都中央区・サッカーと車が好き・チワワ飼い・獅子座・2014年8月生まれ）
-
-ルール：
-・話し言葉、タメ口ぎみで親しみやすく
-・小学5年男子がクスッとなるネタを1個使う（例：「${funRef}」）
-・受験頻出の重要ポイントを**【重要】タグ**で1つ明示する
-・難しい漢字にはふりがな
-・全体250文字以内
+条件：
+・難易度は早稲田中学・難関中学受験レベル。基本知識（例：「織田信長が戦国武将」程度）は省く
+・受験生がつまずきやすいポイント・よく出る切り口を中心に解説する
+・話し言葉、タメ口ぎみで読みやすく。でも内容はしっかり本格的に
+・今の小学5年生が「え、そういうこと？」とおもしろがれる視点（意外性・逆説・対比など）を入れる
+・重要な語句・人名・制度名は★語句★で囲む
+・入試で問われやすい重要ポイントは【重要】〜 で始めるブロックで1〜2個入れる
+・難しい漢字にはふりがなをつける
+・250〜300文字でコンパクトに
 
 JSONのみで返す：
-{
-  "title": "今日のテーマ名（短く）",
-  "topic": "${t.topic}",
-  "icon": "${t.icon}",
-  "content": "本文テキスト（重要な語句を★語句★で囲む）",
-  "highlights": ["重要語句1", "重要語句2"]
-}`;
+{"title":"今日のテーマ（短く）","topic":"${t.topic}","icon":"${t.icon}","content":"本文","highlights":["重要語句1","重要語句2"]}`;
+
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':getApiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:800,messages:[{role:'user',content:prompt}]})
+    });
+    const data=await res.json();
+    const raw=data.content?.[0]?.text||'{}';
+    const parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    await sSet('radio-'+todayKey(),parsed);
+    renderRadio(parsed);
+  }catch(e){
+    renderRadio({title:'今日のネタ',topic:'歴史',icon:'⚔️',content:'読み込めなかったよ。また後でリロードしてみて！',highlights:[]});
+  }
+  document.getElementById('radio-loading').classList.add('hidden');
+}
 
     const res=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
@@ -1408,7 +1435,6 @@ function _renderQuizPips(idx,answers){
 
 function _renderQuizQuestion(p,idx,showAnswer=false){
   document.getElementById('quiz-generating').classList.add('hidden');
-  document.getElementById('quiz-main-area').style.display='';
   // Badge
   const badge=document.getElementById('quiz-school-badge');
   if(badge){
@@ -1452,33 +1478,38 @@ function _renderQuizQuestion(p,idx,showAnswer=false){
 
 async function initProverbQuiz(){
   const saved=await sGet('quiz3-'+todayKey());
-  if(saved&&saved.questions&&saved.questions.length===5){
+  if(saved&&saved.questions&&saved.questions.length>=3){
     _quizState=saved;
-    _renderQuizPips(_quizState.done?5:_quizState.idx,_quizState.answers);
+    _renderQuizPips(_quizState.done?(saved.questions.length):_quizState.idx,_quizState.answers);
     if(_quizState.done){_showQuizAllDone();return;}
     _renderQuizQuestion(_quizState.questions[_quizState.idx],_quizState.idx);
     return;
   }
-  // No saved — fetch
+  // No saved — show loading, fetch
+  document.getElementById('quiz-generating').classList.remove('hidden');
+  document.getElementById('quiz-school-badge').innerHTML='';
+  document.getElementById('proverb-text').textContent='';
+  document.getElementById('quiz-opts').innerHTML='';
+  document.getElementById('quiz-exp').classList.add('hidden');
+  document.getElementById('quiz-all-done').classList.add('hidden');
+
   if(!getApiKey()){
+    document.getElementById('quiz-generating').classList.add('hidden');
     const qs=_selectDailyQuizzesFallback();
     _quizState={idx:0,questions:qs,answers:[],_chosen:[],done:false};
     await sSet('quiz3-'+todayKey(),_quizState);
     _renderQuizPips(0,[]);_renderQuizQuestion(qs[0],0);return;
   }
-  document.getElementById('quiz-generating').classList.remove('hidden');
-  document.getElementById('quiz-main-area').style.display='none';
-  document.getElementById('quiz-all-done').classList.add('hidden');
   try{
     const reviewItems=await _getReviewItems();
     const qs=await _fetchDailyQuestions(reviewItems);
     if(!qs||qs.length<3)throw new Error('問題不足');
-    // Pad to 5 if needed
     while(qs.length<5)qs.push(..._selectDailyQuizzesFallback().slice(0,5-qs.length));
     _quizState={idx:0,questions:qs.slice(0,5),answers:[],_chosen:[],done:false};
     await sSet('quiz3-'+todayKey(),_quizState);
     _renderQuizPips(0,[]);_renderQuizQuestion(qs[0],0);
   }catch(e){
+    document.getElementById('quiz-generating').classList.add('hidden');
     const qs=_selectDailyQuizzesFallback();
     _quizState={idx:0,questions:qs,answers:[],_chosen:[],done:false};
     await sSet('quiz3-'+todayKey(),_quizState);
