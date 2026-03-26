@@ -2833,8 +2833,9 @@ celebrate=(tier,icon,title,subtitle)=>{
 };
 
 // ── EMAIL NOTIFICATIONS ───────────────────────────────────────
-const EMAIL_TO_1 = 'ucccotanaka@gmail.com';
-const EMAIL_TO_2 = 'yasuhiro.tsuno@hakuhodo.co.jp';
+// メールアドレスを分割して Netlify の難読化を回避
+const EMAIL_TO_1 = ['ucccotanaka','gmail.com'].join('@');
+const EMAIL_TO_2 = ['yasuhiro.tsuno','hakuhodo.co.jp'].join('@');
 
 function getEmailConfig(){
   return {
