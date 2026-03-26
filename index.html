@@ -363,6 +363,8 @@ input:focus,textarea:focus,select:focus{border-color:var(--teal);box-shadow:0 0 
     </div>
     <!-- content rendered as rich HTML -->
     <div id="radio-content" style="font-size:15px;line-height:1.95;color:var(--text2);"></div>
+    <!-- illustration area -->
+    <div id="radio-illust" style="margin-top:14px;display:none;"></div>
   </div>
 
   <div class="card">
@@ -399,10 +401,12 @@ input:focus,textarea:focus,select:focus{border-color:var(--teal);box-shadow:0 0 
   </div>
 
   <div class="card">
-    <div class="ctitle">✅ 自習チェックイン</div>
-    <div style="margin-bottom:12px;" id="streak-display"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div class="ctitle" style="margin-bottom:0;">✅ 自習チェックイン</div>
+      <div id="streak-display"></div>
+    </div>
     <button class="chkbtn" id="chkbtn" onclick="doCheckin()">📍 今日の自習をはじめる！</button>
-    <div id="chktime" style="text-align:center;font-size:14px;color:var(--text3);margin-top:10px;"></div>
+    <div id="chktime" style="text-align:center;font-size:13px;color:var(--text3);margin-top:8px;"></div>
   </div>
 
   <div class="card">
@@ -720,7 +724,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--teal);box-shadow:0 0 
     <div id="email-status" style="font-size:14px;margin-bottom:12px;padding:10px 12px;border-radius:8px;"></div>
     <div style="font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.7;">
       チェックイン通知・日次学習サマリー・金曜週間レポートを<br>
-      <strong style="color:var(--text);">ucccotanaka@gmail.com</strong> と <strong style="color:var(--text);">yasuhiro.tsuno@hakuhodo.co.jp</strong> に自動送信します。
+      <strong style="color:var(--text);"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="0a7f696969657e6b646b616b4a6d676b636624696567">[email&#160;protected]</a></strong> と <strong style="color:var(--text);"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="760f1705031e1f0419580205031819361e171d031e191219581519581c06">[email&#160;protected]</a></strong> に自動送信します。
     </div>
     <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px;">
       <div>
@@ -968,7 +972,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--teal);box-shadow:0 0 
   <button class="ni" id="nb-guide" onclick="showTab('guide')"><span class="ico">📖</span>使い方</button>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 const EXAM_QUIZ=[
   {type:'ことわざ',school:'早稲田中学 頻出',lv:1,q:'「七転（ななころ）び八起（やお）き」の意味として正しいものはどれ？',opts:['七と八は幸運な数字という意味','何度失敗しても諦めずに立ち上がること','七回転んで八回休むこと','転ばないように気をつけること'],a:1,exp:'何度失敗しても、そのたびに立ち上がる強さが大切だという意味。受験でも失敗を恐れずに挑戦しよう！'},
   {type:'四字熟語',school:'慶應中等部 頻出',lv:1,q:'「一期一会（いちごいちえ）」の意味として正しいものはどれ？',opts:['一生に一度しかない大切な出会い','一つの期間に一度会うこと','一年に一回の行事','一人で一つの仕事をすること'],a:0,exp:'茶道（さどう）から生まれた言葉で、「この出会いは二度と繰り返されない」という意味。すべての出会いを大切にする心が込められている。'},
@@ -1366,7 +1370,7 @@ async function initRadioCorner(){
     ];
     const t=topics[seed%topics.length];
 
-    const jsonExample='{"title":"今日のテーマ（短く）","topic":"'+t.topic+'","icon":"'+t.icon+'","content":"本文","highlights":["重要語句1","重要語句2"]}';
+    const jsonExample='{"title":"今日のテーマ（短く）","topic":"'+t.topic+'","icon":"'+t.icon+'","content":"本文","highlights":["重要語句1"],"illust_type":"timeline OR compare OR flow OR map OR none","illust_data":{"labels":["ラベル1","ラベル2"],"values":["値1","値2"],"note":"補足"}}';
     const promptLines2=[
       'あなたは中学受験（早稲田・麻布・開成レベル）の歴史・地理の講師です。',
       '「そーだったのかラジオ」という小学5年生向けの読み物を書いてください。',
@@ -1374,15 +1378,24 @@ async function initRadioCorner(){
       'テーマ：「'+t.name+'」',
       '',
       '条件：',
-      '・難易度は難関中学受験レベル。基本的すぎる内容（「信長が戦国武将」等）は省く',
-      '・受験生がつまずきやすいポイント・よく出る切り口を中心に解説する',
-      '・必ず「例えるなら〜」「ざっくり言うと〜」など、身近なもので例える（食べ物・ゲーム・スポーツ・学校生活など）',
-      '・難しい概念は絵や図で説明するように、「イメージするとこんな感じ→」などの表現を使う',
-      '・話し言葉でサクサク読める。専門用語は必ず言い換えてから使う',
-      '・重要な語句・人名・制度名は★語句★で囲む',
-      '・受験で絶対おさえるポイントは【ポイント】〜 で始めるブロックで1個だけ',
-      '・難しい漢字にはふりがなをつける',
-      '・250〜300文字でコンパクトに',
+      '・難易度は難関中学受験レベル。基本的すぎる内容は省く',
+      '・受験生がつまずきやすいポイントを中心に',
+      '・必ず身近なもので例える（ゲーム・スポーツ・食べ物など）',
+      '・話し言葉でサクサク読める',
+      '・重要語句は★語句★で囲む',
+      '・受験ポイントは【ポイント】〜 で1個だけ',
+      '・難しい漢字にはふりがな',
+      '・200〜250文字',
+      '',
+      '【イラスト指定】illust_typeを以下から1つ選ぶ：',
+      '- timeline: 年代の流れ（例：○年→△年→□年）',
+      '- compare: 2つの比較（例：AとBの違い）',
+      '- flow: 仕組みの流れ（例：A→B→C→D）',
+      '- map: 地域・場所の関係',
+      '- none: 図が不要な場合',
+      '',
+      'illust_dataにはイラスト描画に必要なラベル・値・補足を入れる。',
+      'labels/valuesは最大4つまで。日本語で短く。',
       '',
       'JSONのみで返す：',
       jsonExample
@@ -1407,18 +1420,12 @@ async function initRadioCorner(){
 function renderRadio(data){
   document.getElementById('radio-loading').classList.add('hidden');
 
-  // Icon
   const iconEl=document.getElementById('radio-icon');
   if(iconEl)iconEl.textContent=data.icon||'📖';
 
-  // Title
   const titleEl=document.getElementById('radio-title');
-  if(titleEl&&data.title){
-    titleEl.textContent='📌 '+data.title;
-    titleEl.style.display='';
-  }
+  if(titleEl&&data.title){titleEl.textContent='📌 '+data.title;titleEl.style.display='';}
 
-  // Topic badge with geo/history specific icon
   const badge=document.getElementById('radio-topic-badge');
   const isGeo=data.topic==='地理';
   badge.style.background=isGeo?'rgba(68,217,142,.15)':'rgba(255,154,80,.15)';
@@ -1426,7 +1433,6 @@ function renderRadio(data){
   badge.style.border=isGeo?'1px solid rgba(68,217,142,.3)':'1px solid rgba(255,154,80,.3)';
   badge.textContent=isGeo?'🗺️ 地理':'⚔️ 歴史';
 
-  // Rich text rendering
   const contentEl=document.getElementById('radio-content');
   if(data.content){
     const html=data.content
@@ -1436,6 +1442,123 @@ function renderRadio(data){
       .replace(/\n/g,'<br>');
     contentEl.innerHTML=html;
   }
+
+  // Draw illustration
+  const illustEl=document.getElementById('radio-illust');
+  if(illustEl&&data.illust_type&&data.illust_type!=='none'&&data.illust_data){
+    const svg=buildRadioIllust(data.illust_type,data.illust_data);
+    if(svg){illustEl.innerHTML=svg;illustEl.style.display='';}
+    else{illustEl.style.display='none';}
+  } else if(illustEl){
+    illustEl.style.display='none';
+  }
+}
+
+function buildRadioIllust(type, d){
+  const labels=d.labels||[];
+  const values=d.values||[];
+  const note=d.note||'';
+  const BLUE='#5aabff';const GOLD='#ffd23f';const TEAL='#00e0b5';const PURPLE='#b394ff';const ORANGE='#ff9a50';
+  const colors=[TEAL,GOLD,BLUE,PURPLE];
+  const W=340;
+
+  if(type==='timeline'&&labels.length>=2){
+    // Horizontal timeline
+    const n=Math.min(labels.length,4);
+    const H=100;
+    const step=W/(n+1);
+    let dots='',texts='',vals='';
+    for(let i=0;i<n;i++){
+      const x=step*(i+1);
+      const col=colors[i%4];
+      dots+='<circle cx="'+x+'" cy="46" r="10" fill="'+col+'" opacity=".9"/>'
+           +'<text x="'+x+'" y="51" text-anchor="middle" font-size="11" font-weight="800" fill="#040b18">'+( i+1)+'</text>';
+      texts+='<text x="'+x+'" y="72" text-anchor="middle" font-size="10" fill="'+col+'" font-weight="700">'+labels[i]+'</text>';
+      vals+='<text x="'+x+'" y="86" text-anchor="middle" font-size="9" fill="#a8c0e0">'+values[i]+'</text>';
+    }
+    const lineX1=step;const lineX2=step*n;
+    return '<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;border-radius:10px;background:rgba(255,255,255,.04);padding:8px 0;">'
+      +'<line x1="'+lineX1+'" y1="46" x2="'+lineX2+'" y2="46" stroke="#2a4470" stroke-width="2"/>'
+      +dots+texts+vals
+      +(note?'<text x="'+(W/2)+'" y="'+( H-4)+'" text-anchor="middle" font-size="9" fill="#5a7a9a">'+note+'</text>':'')
+      +'</svg>';
+  }
+
+  if(type==='compare'&&labels.length>=2){
+    // Two column compare
+    const H=labels.length<=2?110:130;
+    const mid=W/2;
+    let rows='';
+    const n=Math.min(labels.length,4);
+    for(let i=0;i<n;i++){
+      const y=30+i*22;
+      rows+='<rect x="10" y="'+(y-14)+'" width="'+(mid-18)+'" height="18" rx="4" fill="rgba(90,171,255,.12)"/>'
+           +'<text x="'+( mid/2)+'" y="'+y+'" text-anchor="middle" font-size="11" fill="'+BLUE+'" font-weight="700">'+labels[i]+'</text>'
+           +'<rect x="'+(mid+8)+'" y="'+(y-14)+'" width="'+(mid-18)+'" height="18" rx="4" fill="rgba(255,154,80,.12)"/>'
+           +'<text x="'+(mid+mid/2)+'" y="'+y+'" text-anchor="middle" font-size="11" fill="'+ORANGE+'" font-weight="700">'+(values[i]||'')+'</text>';
+    }
+    return '<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;border-radius:10px;background:rgba(255,255,255,.04);padding:6px 0;">'
+      +'<text x="'+(mid/2)+'" y="16" text-anchor="middle" font-size="10" fill="'+BLUE+'" font-weight="800">'+( labels[0]||'A')+'</text>'
+      +'<line x1="'+mid+'" y1="4" x2="'+mid+'" y2="'+(H-8)+'" stroke="#2a4470" stroke-width="1.5" stroke-dasharray="4,3"/>'
+      +'<text x="'+(mid+mid/2)+'" y="16" text-anchor="middle" font-size="10" fill="'+ORANGE+'" font-weight="800">'+( values[0]||'B')+'</text>'
+      +rows
+      +(note?'<text x="'+(W/2)+'" y="'+(H-4)+'" text-anchor="middle" font-size="9" fill="#5a7a9a">'+note+'</text>':'')
+      +'</svg>';
+  }
+
+  if(type==='flow'&&labels.length>=2){
+    // Flow arrows
+    const n=Math.min(labels.length,4);
+    const H=72;
+    const boxW=Math.min(68, (W-20)/(n)-(n>2?16:20));
+    const totalW=(boxW+24)*n-24;
+    const startX=(W-totalW)/2;
+    let boxes='',arrows='';
+    for(let i=0;i<n;i++){
+      const x=startX+i*(boxW+24);
+      const col=colors[i%4];
+      boxes+='<rect x="'+x+'" y="18" width="'+boxW+'" height="28" rx="7" fill="'+col+'" opacity=".18"/>'
+            +'<rect x="'+x+'" y="18" width="'+boxW+'" height="28" rx="7" fill="none" stroke="'+col+'" stroke-width="1.5"/>'
+            +'<text x="'+(x+boxW/2)+'" y="36" text-anchor="middle" font-size="10" fill="'+col+'" font-weight="800">'+labels[i]+'</text>';
+      if(i>0){
+        const ax=x-22;
+        arrows+='<line x1="'+(ax)+'" y1="32" x2="'+(ax+14)+'" y2="32" stroke="#2a4470" stroke-width="2"/>'
+               +'<polygon points="'+(ax+18)+',32 '+(ax+12)+',28 '+(ax+12)+',36" fill="#2a4470"/>';
+      }
+    }
+    return '<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;border-radius:10px;background:rgba(255,255,255,.04);">'
+      +boxes+arrows
+      +(note?'<text x="'+(W/2)+'" y="'+(H-4)+'" text-anchor="middle" font-size="9" fill="#5a7a9a">'+note+'</text>':'')
+      +'</svg>';
+  }
+
+  if(type==='map'&&labels.length>=1){
+    // Simple bubble map
+    const H=130;const cx=W/2,cy=H/2-10;
+    const r=28;
+    let nodes='',lines='';
+    nodes+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="rgba(90,171,255,.15)" stroke="'+BLUE+'" stroke-width="2"/>'
+          +'<text x="'+cx+'" y="'+(cy-4)+'" text-anchor="middle" font-size="10" fill="'+BLUE+'" font-weight="800">'+labels[0]+'</text>'
+          +'<text x="'+cx+'" y="'+(cy+10)+'" text-anchor="middle" font-size="9" fill="#a8c0e0">'+(values[0]||'')+'</text>';
+    const sub=labels.slice(1,5);
+    const angles=[315,45,135,225];
+    sub.forEach(function(lbl,i){
+      const ang=angles[i]*Math.PI/180;
+      const sx=cx+Math.cos(ang)*80,sy=cy+Math.sin(ang)*70;
+      const col=colors[(i+1)%4];
+      lines+='<line x1="'+cx+'" y1="'+cy+'" x2="'+sx+'" y2="'+sy+'" stroke="#2a4470" stroke-width="1.5" stroke-dasharray="4,3"/>';
+      nodes+='<circle cx="'+sx+'" cy="'+sy+'" r="22" fill="'+col+'" opacity=".15"/>'
+            +'<circle cx="'+sx+'" cy="'+sy+'" r="22" fill="none" stroke="'+col+'" stroke-width="1.5"/>'
+            +'<text x="'+sx+'" y="'+(sy-3)+'" text-anchor="middle" font-size="9" fill="'+col+'" font-weight="800">'+lbl+'</text>'
+            +'<text x="'+sx+'" y="'+(sy+10)+'" text-anchor="middle" font-size="8" fill="#a8c0e0">'+(values[i+1]||'')+'</text>';
+    });
+    return '<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;border-radius:10px;background:rgba(255,255,255,.04);">'
+      +lines+nodes
+      +(note?'<text x="'+(W/2)+'" y="'+(H-4)+'" text-anchor="middle" font-size="9" fill="#5a7a9a">'+note+'</text>':'')
+      +'</svg>';
+  }
+
+  return null;
 }
 
 
@@ -2764,10 +2887,17 @@ async function _sendEmail(subject, body){
           to_email_2: EMAIL_TO_2,
           subject: subject,
           message: body,
-          from_name: '夏伎の受験基地'
+          name: '夏伎の受験基地',
+          from_name: '夏伎の受験基地',
+          email: EMAIL_TO_1,
+          time: new Date().toLocaleString('ja-JP')
         }
       })
     });
+    if(!res.ok){
+      const txt=await res.text();
+      console.warn('EmailJS error:',res.status,txt);
+    }
     return res.ok;
   }catch(e){console.warn('Email send failed:',e);return false;}
 }
@@ -2862,16 +2992,4 @@ async function checkAndSendScheduledEmails(){
   if(lastSent===today)return; // 今日は送信済み
   // Get yesterday
   const yd=new Date();yd.setDate(yd.getDate()-1);
-  const yesterday=yd.getFullYear()+'-'+String(yd.getMonth()+1).padStart(2,'0')+'-'+String(yd.getDate()).padStart(2,'0');
-  // Send yesterday's summary
-  await sendDailySummaryEmail(yesterday);
-  // If today is Friday (5), send weekly report
-  const dow=new Date().getDay();
-  if(dow===5)await sendWeeklyReportEmail();
-  localStorage.setItem('nk_email_last_sent',today);
-}
-
-init();
-</script>
-</body>
-</html>
+  const yesterday=yd.getFullYear()+'-'+Stri
