@@ -17,36 +17,56 @@
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,'Hiragino Sans','Yu Gothic UI',sans-serif;font-size:16px;line-height:1.6;}
 body{max-width:480px;margin:0 auto;position:relative;overflow-x:hidden;}
 
-/* ── Desktop layout (768px+) ── */
+/* ── タブレット縦（768px〜） ── */
 @media(min-width:768px){
-  body{max-width:100%;margin:0;}
-  /* Wrapper for 2-col layout */
-  .desktop-layout{display:flex;height:100vh;overflow:hidden;}
-  /* Left sidebar: nav + header */
-  .sidebar{width:220px;flex-shrink:0;background:var(--surface);border-right:1.5px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;}
-  .sidebar .header{border-bottom:1.5px solid var(--border);border-right:none;position:static;padding:18px 16px;}
-  .sidebar .bnav{position:static;width:100%;max-width:100%;border-top:1.5px solid var(--border);border-right:none;flex-direction:column;padding-bottom:0;flex:1;justify-content:flex-start;padding-top:8px;}
-  .sidebar .ni{flex:none;flex-direction:row;justify-content:flex-start;padding:10px 16px;font-size:13px;font-weight:700;letter-spacing:.3px;border-radius:10px;margin:2px 8px;gap:10px;}
-  .sidebar .ni .ico{font-size:20px;}
-  .sidebar .ni.active{background:rgba(0,224,181,.1);color:var(--teal);}
-  .sidebar .ni.active .ico{transform:none;}
-  /* Main content area */
-  .main-content{margin-left:220px;flex:1;overflow-y:auto;height:100vh;}
-  .main-content .header{display:none;}/* hide duplicate header */
-  .content{padding:24px 32px 40px;max-width:720px;}
-  .content.active{display:block;}
-  /* Cards get a bit more breathing room */
-  .card{border-radius:18px;padding:22px;}
-  /* Subject grid - more columns */
-  .sgrid{grid-template-columns:repeat(4,1fr);}
-  /* Quiz options - 2 columns on desktop */
+  body{max-width:640px;font-size:16px;}
+  .content{padding:20px 28px 100px;}
+  .card{padding:20px 22px;border-radius:18px;}
+  .bnav{max-width:640px;}
+  /* ナビのラベルを少し大きく */
+  .ni{font-size:10px;padding:9px 2px 11px;}
+  .ni .ico{font-size:21px;}
+  /* クイズ選択肢 2列 */
   .qopts{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-  /* Wider modals */
-  #welcome-inner{max-width:400px;}
+  .qopt{font-size:15px;padding:12px 14px;}
+  /* 教科グリッド */
+  .sgrid{grid-template-columns:repeat(4,1fr);gap:10px;}
+  /* ヘッダー少し大きく */
+  .hbrand .jp{font-size:20px;}
+  /* カード間隔 */
+  .card{margin-bottom:16px;}
+  /* ウィークリーグラフ */
+  .wkbar-row{height:28px;}
 }
-@media(min-width:1100px){
-  .content{max-width:800px;}
+
+/* ── タブレット横・小型PC（1024px〜） ── */
+@media(min-width:1024px){
+  body{max-width:760px;}
+  .content{padding:24px 32px 100px;}
+  .card{padding:24px 26px;}
+  .bnav{max-width:760px;}
+  .ni{font-size:11px;}
+  .ni .ico{font-size:22px;}
+  /* ホームのラジオ+クイズを横並び */
+  #tab-home .card:nth-child(1),
+  #tab-home .card:nth-child(2){max-width:100%;}
+  .sgrid{grid-template-columns:repeat(4,1fr);gap:12px;}
+  .sbtn{padding:16px 6px;}
+  /* ファミリータブの入力を横並び */
+  #fam-msgs{max-height:320px;}
+}
+
+/* ── デスクトップ（1280px〜） ── */
+@media(min-width:1280px){
+  body{max-width:900px;}
+  .bnav{max-width:900px;}
+  .content{padding:28px 40px 100px;}
+  .card{padding:26px 28px;border-radius:20px;}
   .sgrid{grid-template-columns:repeat(8,1fr);}
+  .ni{font-size:11px;padding:10px 2px 12px;}
+  /* フォントサイズ少し上げる */
+  .ctitle{font-size:12px;}
+  .qopt{font-size:16px;}
 }
 .hidden{display:none!important;}
 .header{background:var(--surface);padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50;gap:10px;}
@@ -327,10 +347,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--teal);box-shadow:0 0 
 </style>
 </head>
 <body>
-<div class="desktop-layout">
 
-<!-- SIDEBAR (desktop) / HEADER (mobile) -->
-<div class="sidebar">
 <!-- HEADER -->
 <div class="header">
   <div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1;">
@@ -1006,9 +1023,6 @@ input:focus,textarea:focus,select:focus{border-color:var(--teal);box-shadow:0 0 
   <button class="ni" id="nb-family" onclick="showTab('family')"><span class="ico">👨‍👩‍👦</span>家族</button>
   <button class="ni" id="nb-guide" onclick="showTab('guide')"><span class="ico">📖</span>使い方</button>
 </div>
-</div><!-- /sidebar -->
-
-<div class="main-content">
 
 <script data-cfasync="false">
 const EXAM_QUIZ=[
@@ -3041,7 +3055,5 @@ async function checkAndSendScheduledEmails(){
 
 init();
 </script>
-</div><!-- /main-content -->
-</div><!-- /desktop-layout -->
 </body>
 </html>
