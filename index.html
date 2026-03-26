@@ -2993,4 +2993,15 @@ async function checkAndSendScheduledEmails(){
   if(lastSent===today)return; // 今日は送信済み
   // Get yesterday
   const yd=new Date();yd.setDate(yd.getDate()-1);
-  const yesterday=yd.getFullYear()+'-'+Stri
+  const yesterday=yd.getFullYear()+'-'+String(yd.getMonth()+1).padStart(2,'0')+'-'+String(yd.getDate()).padStart(2,'0');
+  await sendDailySummaryEmail(yesterday);
+  const dow=new Date().getDay();
+  if(dow===5)await sendWeeklyReportEmail();
+  localStorage.setItem('nk_email_last_sent',today);
+}
+
+
+init();
+</script>
+</body>
+</html>
