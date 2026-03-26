@@ -30,11 +30,22 @@ body{max-width:480px;margin:0 auto;position:relative;overflow-x:hidden;}
 .scdn-w{background:rgba(90,171,255,.1);border-color:rgba(90,171,255,.3);color:var(--blue);}
 .scdn-k{background:rgba(179,148,255,.1);border-color:rgba(179,148,255,.3);color:var(--purple);}
 .scdn .dn{font-size:14px;font-weight:800;}
-.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--surface);border-top:2px solid var(--border);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom);}
-.ni{flex:1;padding:9px 2px 11px;background:none;border:none;color:var(--text3);cursor:pointer;font-size:9px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px;transition:color .2s;font-family:inherit;letter-spacing:.3px;}
+/* Sound button in header */
+#sound-toggle-btn{background:none;border:1px solid var(--border);border-radius:8px;cursor:pointer;padding:6px;line-height:0;color:var(--text3);transition:all .2s;display:flex;align-items:center;justify-content:center;}
+#sound-toggle-btn:hover{border-color:var(--teal);color:var(--teal);}
+#sound-toggle-btn.on{border-color:var(--teal);color:var(--teal);}
+#sound-toggle-btn.on .sound-x-line{display:none;}
+.sound-wave{display:none;}
+#sound-toggle-btn.on .sound-wave{display:block;}
+/* Bottom nav - 6 tabs */
+.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--surface);border-top:1.5px solid var(--border);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom);}
+.ni{flex:1;padding:8px 1px 10px;background:none;border:none;color:var(--text3);cursor:pointer;font-size:8.5px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px;transition:color .2s;font-family:inherit;letter-spacing:.2px;-webkit-tap-highlight-color:transparent;}
 .ni.active{color:var(--teal);}
-.ni .ico{font-size:20px;line-height:1;}
-.content{padding:16px 16px 100px;display:none;}
+.ni .ico{font-size:19px;line-height:1;transition:transform .2s;}
+.ni.active .ico{transform:scale(1.15);}
+.ni:active .ico{transform:scale(.9);}
+/* Content scroll fix */
+.content{padding:16px 16px 100px;display:none;scroll-behavior:smooth;}
 .content.active{display:block;}
 .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:14px;}
 .card-hi{border-color:var(--teal);border-width:1.5px;}
@@ -242,49 +253,75 @@ body.season-halloween .header{background:rgba(20,8,0,.95);}
 @keyframes bdFadeIn{from{opacity:0;}to{opacity:1;}}
 @keyframes bdFadeOut{to{opacity:0;}}
 /* UX IMPROVEMENTS */
-/* Quote card italic */
 #dquote{font-style:italic;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
-/* Smooth card entrance - only in active tab */
-.content.active .card{animation:fadeUp .3s ease both;}
-/* Quest item hover */
-.qitem:hover{background:rgba(255,255,255,.02);border-radius:8px;}
-/* Subject button active press */
-.sbtn:active{transform:scale(.95);}
-/* Btn press */
-.btn:active{transform:scale(.97);}
-/* Better scrollbar */
-::-webkit-scrollbar{width:4px;}
+/* Staggered card entrance per tab open */
+.content.active .card:nth-child(1){animation:fadeUp .22s ease both 0s;}
+.content.active .card:nth-child(2){animation:fadeUp .22s ease both .04s;}
+.content.active .card:nth-child(3){animation:fadeUp .22s ease both .08s;}
+.content.active .card:nth-child(4){animation:fadeUp .22s ease both .12s;}
+.content.active .card:nth-child(n+5){animation:fadeUp .22s ease both .16s;}
+/* Buttons */
+.btn{transition:transform .12s,opacity .12s;}
+.btn:active{transform:scale(.95);opacity:.88;}
+/* Quest rows */
+.qitem{border-radius:8px;transition:background .15s;}
+.qitem:hover{background:rgba(255,255,255,.03);}
+/* Subject btn */
+.sbtn:active{transform:scale(.93);}
+/* Quiz option */
+.qopt:active:not(:disabled){transform:scale(.98);}
+/* Upload */
+.upload-area:active{transform:scale(.98);}
+/* Calendar day */
+.calday:active{transform:scale(.88);}
+/* PIN keys */
+.pkey:active{transform:scale(.9);}
+/* Better focus */
+input:focus,textarea:focus,select:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(0,224,181,.1);}
+/* Done checkin */
+.chkbtn.done{opacity:.7;cursor:default;}
+/* Checkin pulse */
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(0,224,181,.25);}50%{box-shadow:0 0 0 10px transparent;}}
+.chkbtn:not(.done){animation:glow 2.5s infinite;}
+/* Scrollbar */
+::-webkit-scrollbar{width:3px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
-/* Upload area active */
-.upload-area:active{border-color:var(--teal);background:rgba(0,224,181,.06);}
-/* Quiz option press */
-.qopt:active:not(:disabled){transform:scale(.99);}
-/* Checkin button pulse when not checked in */
-@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(0,224,181,.3);}50%{box-shadow:0 0 0 8px rgba(0,224,181,.0);}}
-.chkbtn:not(.done){animation:glow 2.5s infinite;}
-/* milestone hit animation */
+/* Milestone */
 .wkmile.hit{animation:fadeUp .4s ease both;}
+/* Help accordion smooth */
+.hbody{animation:fadeUp .2s ease;}
 </style>
 </head>
 <body>
 
 <!-- HEADER -->
 <div class="header">
-  <div class="hbrand">
-    <div class="en">WASEDA ACADEMY / 受験基地 <span id="fb-status" title="接続状態" style="font-size:10px;margin-left:4px;">🔄</span></div>
-    <div class="jp">🚀 夏伎の受験基地</div>
-  </div>
-  <div class="cright">
-    <div class="cbox">
-      <div class="cl">入試まで</div>
-      <div class="cn" id="cdays">---</div>
-      <div class="cu">日</div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div class="hbrand">
+      <div class="en">WASEDA ACADEMY / 受験基地 <span id="fb-status" title="接続状態" style="font-size:10px;margin-left:4px;">🔄</span></div>
+      <div class="jp">🚀 夏伎の受験基地</div>
     </div>
-    <div class="school-cdns">
-      <div class="scdn scdn-w">早稲田 2/1 <span class="dn" id="cd-waseda">--</span>日</div>
-      <div class="scdn scdn-k">慶應 2/3 <span class="dn" id="cd-keio">--</span>日</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <button id="sound-toggle-btn" onclick="toggleSound()" title="サウンドON/OFF" aria-label="サウンド切り替え">
+      <svg id="sound-svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+        <line x1="23" y1="9" x2="17" y2="15" class="sound-x-line"></line>
+        <line x1="17" y1="9" x2="23" y2="15" class="sound-x-line"></line>
+      </svg>
+    </button>
+    <div class="cright">
+      <div class="cbox">
+        <div class="cl">入試まで</div>
+        <div class="cn" id="cdays">---</div>
+        <div class="cu">日</div>
+      </div>
+      <div class="school-cdns">
+        <div class="scdn scdn-w">早稲田 2/1 <span class="dn" id="cd-waseda">--</span>日</div>
+        <div class="scdn scdn-k">慶應 2/3 <span class="dn" id="cd-keio">--</span>日</div>
+      </div>
     </div>
   </div>
 </div>
@@ -304,29 +341,61 @@ body.season-halloween .header{background:rgba(20,8,0,.95);}
 <!-- ══ TAB: ホーム ══ -->
 <div id="tab-home" class="content active">
 
-  <!-- サウンドトグル -->
-  <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
-    <button id="sound-toggle-btn" onclick="toggleSound()" style="background:var(--surface);border:1.5px solid var(--border);border-radius:20px;padding:6px 14px;color:var(--text2);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;transition:all .2s;">
-      <span id="sound-icon">🔇</span><span id="sound-label">サウンドOFF</span>
-    </button>
-  </div>
-
-  <div class="card card-hi">
-    <div class="ctitle">💬 今日の名言</div>
-    <div style="font-size:36px;color:var(--teal);opacity:.3;line-height:1;margin-bottom:-6px;font-family:Georgia,serif;">"</div>
-    <div id="dquote" style="font-size:16px;line-height:1.9;color:var(--text);font-style:italic;padding:0 8px;"></div>
-    <div id="dquote-author" style="font-size:13px;color:var(--text3);margin-top:10px;text-align:right;padding-top:8px;border-top:1px solid var(--border);"></div>
+  <!-- ラジオコーナー -->
+  <div class="card" id="radio-card" style="background:linear-gradient(135deg,#0c1830 0%,#141428 100%);border:1.5px solid rgba(90,171,255,.25);overflow:hidden;position:relative;">
+    <!-- decorative bg circle -->
+    <div style="position:absolute;top:-20px;right:-20px;width:100px;height:100px;background:radial-gradient(circle,rgba(90,171,255,.12),transparent);border-radius:50%;pointer-events:none;"></div>
+    <!-- header row -->
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+      <div id="radio-icon" style="width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">⚔️</div>
+      <div style="flex:1;">
+        <div style="font-size:10px;font-weight:800;letter-spacing:2px;color:var(--blue);margin-bottom:1px;">DAILY KNOWLEDGE</div>
+        <div style="font-size:17px;font-weight:800;color:var(--text);">そーだったのか<span style="color:var(--blue);">ラジオ</span></div>
+      </div>
+      <div id="radio-topic-badge" style="font-size:10px;font-weight:800;padding:4px 10px;border-radius:8px;white-space:nowrap;flex-shrink:0;"></div>
+    </div>
+    <!-- topic title -->
+    <div id="radio-title" style="font-size:13px;font-weight:800;color:var(--blue);margin-bottom:8px;padding:6px 10px;background:rgba(90,171,255,.08);border-radius:8px;display:none;"></div>
+    <!-- loading -->
+    <div id="radio-loading" class="hidden" style="text-align:center;padding:16px 0;">
+      <div class="ldots"><span></span><span></span><span></span></div>
+      <div style="font-size:13px;color:var(--text3);margin-top:8px;">今日のネタ準備中…</div>
+    </div>
+    <!-- content rendered as rich HTML -->
+    <div id="radio-content" style="font-size:15px;line-height:1.95;color:var(--text2);"></div>
   </div>
 
   <div class="card">
-    <div class="ctitle">🎓 今日の中学受験クイズ</div>
-    <div id="quiz-school-badge" style="margin-bottom:8px;"></div>
-    <div style="background:rgba(255,210,63,.07);border:1.5px solid rgba(255,210,63,.2);border-radius:12px;padding:14px;margin-bottom:6px;">
-      <div id="proverb-text" style="font-size:15px;font-weight:700;color:var(--text);line-height:1.7;"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div class="ctitle" style="margin-bottom:0;">🎓 今日の中学受験クイズ</div>
+      <div id="quiz-progress-badge" style="font-size:12px;font-weight:800;color:var(--gold);background:rgba(255,210,63,.1);border:1px solid rgba(255,210,63,.25);border-radius:12px;padding:3px 10px;"></div>
     </div>
-    <div id="quiz-done-msg" class="hidden" style="text-align:center;font-size:15px;padding:8px 0;font-weight:700;"></div>
-    <div class="qopts" id="quiz-opts"></div>
-    <div id="quiz-exp" class="hidden" style="margin-top:12px;padding:14px;background:rgba(0,224,181,.06);border-radius:10px;font-size:14px;color:var(--text2);line-height:1.8;border-left:3px solid var(--teal);"></div>
+    <div style="display:flex;gap:3px;margin-bottom:12px;">
+      <div class="qpip" id="qpip0" style="flex:1;height:4px;border-radius:2px;background:var(--border);transition:background .3s;cursor:pointer;" onclick="reviewQuiz(0)"></div>
+      <div class="qpip" id="qpip1" style="flex:1;height:4px;border-radius:2px;background:var(--border);transition:background .3s;cursor:pointer;" onclick="reviewQuiz(1)"></div>
+      <div class="qpip" id="qpip2" style="flex:1;height:4px;border-radius:2px;background:var(--border);transition:background .3s;cursor:pointer;" onclick="reviewQuiz(2)"></div>
+      <div class="qpip" id="qpip3" style="flex:1;height:4px;border-radius:2px;background:var(--border);transition:background .3s;cursor:pointer;" onclick="reviewQuiz(3)"></div>
+      <div class="qpip" id="qpip4" style="flex:1;height:4px;border-radius:2px;background:var(--border);transition:background .3s;cursor:pointer;" onclick="reviewQuiz(4)"></div>
+    </div>
+    <div id="quiz-generating" class="hidden" style="text-align:center;padding:20px 0;">
+      <div class="ldots"><span></span><span></span><span></span></div>
+      <div style="font-size:14px;color:var(--text3);margin-top:10px;">AIが今日の問題を準備中…</div>
+    </div>
+    <div id="quiz-main-area">
+      <div id="quiz-school-badge" style="margin-bottom:8px;"></div>
+      <div style="background:rgba(255,210,63,.07);border:1.5px solid rgba(255,210,63,.2);border-radius:12px;padding:14px;margin-bottom:6px;">
+        <div id="proverb-text" style="font-size:15px;font-weight:700;color:var(--text);line-height:1.9;"></div>
+      </div>
+      <div id="quiz-done-msg" class="hidden" style="text-align:center;font-size:15px;padding:8px 0;font-weight:700;"></div>
+      <div class="qopts" id="quiz-opts"></div>
+      <div id="quiz-exp" class="hidden" style="margin-top:12px;padding:14px;background:rgba(0,224,181,.06);border-radius:10px;font-size:14px;color:var(--text2);line-height:1.8;border-left:3px solid var(--teal);"></div>
+    </div>
+    <div id="quiz-all-done" class="hidden" style="margin-top:12px;text-align:center;padding:16px;background:rgba(68,217,142,.07);border:1.5px solid rgba(68,217,142,.2);border-radius:12px;">
+      <div style="font-size:22px;margin-bottom:6px;">🎉</div>
+      <div style="font-size:16px;font-weight:800;color:var(--green);">今日のクイズ全部完了！</div>
+      <div id="quiz-score-display" style="font-size:14px;color:var(--text2);margin-top:6px;margin-bottom:12px;"></div>
+      <div style="font-size:12px;color:var(--text3);">↑ 上のドットをタップすると各問の解説を見直せるよ</div>
+    </div>
   </div>
 
   <div class="card">
@@ -349,7 +418,7 @@ body.season-halloween .header{background:rgba(20,8,0,.95);}
       <div class="timerdisp" id="timerdisp" style="text-align:center;">00:00</div>
       <div style="display:flex;gap:10px;margin-top:14px;justify-content:center;">
         <button class="btn btn-teal" id="timer-toggle" onclick="toggleTimer()">▶ スタート</button>
-        <button class="btn btn-outline" onclick="stopTimer()">✓ 終了して記録</button>
+        <button class="btn btn-gold" onclick="stopTimer()">✓ 記録する</button>
       </div>
     </div>
   </div>
@@ -614,15 +683,15 @@ body.season-halloween .header{background:rgba(20,8,0,.95);}
   <div class="card">
     <div class="ctitle">💌 ファミリーメッセージ</div>
     <div id="fam-msgs" style="margin-bottom:12px;max-height:240px;overflow-y:auto;"></div>
-    <div style="display:flex;gap:8px;margin-bottom:10px;">
-      <select id="msg-from" style="width:88px;flex-shrink:0;padding:12px 6px;">
+    <div style="display:flex;gap:8px;margin-bottom:10px;align-items:flex-end;">
+      <input type="text" id="msg-input" placeholder="メッセージを入力…" style="flex:1;" onkeydown="if(event.key==='Enter')sendMsg()"/>
+      <select id="msg-from" style="width:82px;flex-shrink:0;padding:12px 6px;">
         <option value="夏伎">🧒 夏伎</option>
         <option value="Yasuhiro">👨 パパ</option>
         <option value="Yuko">👩 ママ</option>
       </select>
-      <input type="text" id="msg-input" placeholder="メッセージを送る…" style="flex:1;"/>
     </div>
-    <button class="btn btn-teal btn-full" onclick="sendMsg()">送信する</button>
+    <button class="btn btn-teal btn-full" onclick="sendMsg()">送信する 📨</button>
   </div>
   <div class="card">
     <div class="ctitle">⚙️ 入試日設定</div>
@@ -631,7 +700,7 @@ body.season-halloween .header{background:rgba(20,8,0,.95);}
   </div>
 
   <div class="card" style="border-color:rgba(255,96,96,.3);border-width:1.5px;">
-    <div class="ctitle">🔑 AI機能の設定（Yuko専用）</div>
+    <div class="ctitle">🔑 AI機能の設定</div>
     <div id="apikey-status" style="font-size:14px;margin-bottom:12px;padding:10px 12px;border-radius:8px;"></div>
     <div id="apikey-form">
       <div style="margin-bottom:10px;">
@@ -757,7 +826,7 @@ body.season-halloween .header{background:rgba(20,8,0,.95);}
       <div class="hbody">
         <div class="hstep">
           <div class="hnum hnum-gold">1</div>
-          <div><div class="hstit">PINでロック解除</div><div class="hsdesc">「偏差値」タブを開くとPIN入力画面になります。PIN番号「<strong style="color:var(--gold)">0201</strong>」を入力してロック解除してください。</div></div>
+          <div><div class="hstit">PINでロック解除</div><div class="hsdesc">「偏差値」タブを開くとPIN入力画面になります。PIN番号「<strong style="color:var(--gold)">0819</strong>」を入力してロック解除してください。</div></div>
         </div>
         <div class="hstep">
           <div class="hnum hnum-gold">2</div>
@@ -826,8 +895,24 @@ body.season-halloween .header{background:rgba(20,8,0,.95);}
         <div class="hstep">
           <div class="hnum hnum-gold">4</div>
           <div>
-            <div class="hstit">🔑 AI機能の設定（Yuko専用）</div>
-            <div class="hsdesc">攻略の道のAI問題生成・採点に必要なAnthropicのAPIキーを設定する場所です。<br>①<a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--blue);">console.anthropic.com</a>でAPIキーを作成<br>②「sk-ant-...」で始まるキーをコピー<br>③ここに貼り付けて「保存する」<br><br>一度設定すればそのスマホではずっと使えます。夏伎くんとYasuhiroのスマホそれぞれで設定が必要です。</div>
+            <div class="hstit">🔑 AI機能の設定（Yasuhiro・Yuko）</div>
+            <div class="hsdesc">
+              攻略の道のAI問題生成・採点、テスト弱点分析、毎日の受験クイズ生成に必要なAPIキーの設定方法です。<br><br>
+              <strong style="color:var(--gold);">【Yukoが最初に行う作業】</strong><br><br>
+              <strong style="color:var(--gold);">① APIキーを取得する</strong><br>
+              <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--blue);">console.anthropic.com/settings/keys</a> を開く → 「＋ Create Key」→ 名前（例：natsuki-kichi）を入力して作成 → 表示された「sk-ant-...」のキーをコピー<br><br>
+              <strong style="color:var(--gold);">② 自分のスマホのアプリに設定する</strong><br>
+              このアプリの「家族」タブ → 一番下「🔑 AI機能の設定」→ コピーしたキーを貼り付けて「保存する」<br><br>
+              <strong style="color:var(--gold);">③ YasuhiroのスマホへLINEなどで共有する</strong><br>
+              コピーしたAPIキーをLINEでYasuhiroに送る → YasuhiroもアプリのファミリータブでAPIキーを同じように入力する<br><br>
+              <strong style="color:var(--gold);">【Yasuhiroが行う作業】</strong><br><br>
+              <strong style="color:var(--gold);">④ 自分のスマホに設定する</strong><br>
+              YukoからLINEで届いたAPIキー（sk-ant-...）をコピー → このアプリの「家族」タブ → 「🔑 AI機能の設定」→ 貼り付けて「保存する」<br><br>
+              <strong style="color:var(--gold);">⑤ 夏伎のスマホにも設定する（どちらかが）</strong><br>
+              夏伎くんのスマホでも同じ手順でAPIキーを設定する。これで攻略の道・クイズ・弱点分析が使えるようになる。<br><br>
+              <strong style="color:var(--gold);">⑥ クレジットが切れたら補充する（Yuko）</strong><br>
+              <a href="https://console.anthropic.com/settings/billing" target="_blank" style="color:var(--blue);">console.anthropic.com/settings/billing</a> で残高確認・チャージ。$5（約750円）で数百回使えます。
+            </div>
           </div>
         </div>
         <div class="htip htip-gold">💡 <strong>すべてのデータはFirebaseで家族共有</strong>されています。どの端末からでも同じデータが確認できます。</div>
@@ -858,107 +943,51 @@ body.season-halloween .header{background:rgba(20,8,0,.95);}
 
 <script>
 const EXAM_QUIZ=[
-  {type:'ことわざ',school:'早稲田中学 頻出',
-   q:'「七転び八起き」の意味として正しいものはどれ？',
-   opts:['七と八は幸運な数字という意味','何度失敗しても諦めずに立ち上がること','七回転んで八回休むこと','転ばないように気をつけること'],
-   a:1,exp:'何度失敗しても、そのたびに立ち上がる強さが大切だという意味。受験でも失敗を恐れずに挑戦しよう！'},
-  {type:'四字熟語',school:'慶應中等部 頻出',
-   q:'「一期一会」の意味として正しいものはどれ？',
-   opts:['一生に一度しかない大切な出会い','一つの期間に一度会うこと','一年に一回の行事','一人で一つの仕事をすること'],
-   a:0,exp:'茶道から生まれた言葉で、「この出会いは二度と繰り返されない」という意味。すべての出会いを大切にする心が込められている。'},
-  {type:'ことわざ',school:'麻布中学 出題傾向',
-   q:'「情けは人の為ならず」の本当の意味はどれ？',
-   opts:['人に親切にしても無駄だ','人に親切にすると巡り巡って自分に良いことが返ってくる','情けをかけると相手のためにならない','人の情けは信用できない'],
-   a:1,exp:'よく「人に甘くするのは良くない」と誤解されるが、本当の意味は「人に親切にすることは、回り回って自分のためになる」という意味！'},
-  {type:'四字熟語',school:'開成中学 頻出',
-   q:'「温故知新」の意味として正しいものはどれ？',
-   opts:['古いものは温めて新しくすること','昔のことを学び直して新しい知識や考え方を見つけること','古い友人と新しい友人を大切にすること','温かい心で新しいことに挑戦すること'],
-   a:1,exp:'孔子の言葉で「古いことをよく研究して、そこから新しい知識を得る」という意味。歴史や古典を学ぶ大切さを教えている。'},
-  {type:'ことわざ',school:'武蔵中学 出題傾向',
-   q:'「三人寄れば文殊の知恵」の意味として正しいものはどれ？',
-   opts:['三人で集まれば必ずけんかになる','普通の人でも三人集まって考えれば、すばらしい考えが生まれる','文殊様は三人の神様である','三人では多すぎて意見がまとまらない'],
-   a:1,exp:'文殊菩薩は知恵の神様。「凡人でも三人集まれば、知恵の神様のような素晴らしいアイデアが出せる」という意味だよ。'},
-  {type:'四字熟語',school:'海城中学 出題傾向',
-   q:'「自業自得」の意味として正しいものはどれ？',
-   opts:['自分で仕事をして得をすること','良いことも悪いことも自分の行いの結果として自分に返ってくること','自分勝手に得をしようとすること','仕事は自分でやるのが一番いいこと'],
-   a:1,exp:'仏教の言葉で「自分の行いの結果は自分に帰ってくる」という意味。良い行いも悪い行いも、最後は自分に返ってくる。'},
-  {type:'ことわざ',school:'早稲田実業中 頻出',
-   q:'「亀の甲より年の功」の意味として正しいものはどれ？',
-   opts:['亀は甲羅があるので長生きする','年をとった人の経験や知恵は非常に価値がある','年をとると甲羅のように硬くなる','亀のようにゆっくり生きることが大切だ'],
-   a:1,exp:'「亀の甲」は縁起の良いもの。それよりも、年長者が長い経験で積み上げた知恵の方が価値があるという意味。'},
-  {type:'四字熟語',school:'慶應普通部 頻出',
-   q:'「臨機応変」の意味として正しいものはどれ？',
-   opts:['機械を使って変化に対応すること','その場その場の状況に応じて、適切な対処をすること','いつでも変化することが大切だということ','機会を見て急いで変えること'],
-   a:1,exp:'「臨機」はその場に臨むこと、「応変」は変化に応じること。決まった方法にとらわれず、状況に合わせて柔軟に対応する大切さを表している。'},
-  {type:'ことわざ',school:'芝中学 出題傾向',
-   q:'「猿も木から落ちる」と同じ意味のことわざはどれ？',
-   opts:['七転び八起き','弘法も筆の誤り','急がば回れ','千里の道も一歩から'],
-   a:1,exp:'「弘法も筆の誤り」も同じ意味。どちらも「名人や達人でも時には失敗することがある」という意味。失敗を恐れずチャレンジしよう！'},
-  {type:'四字熟語',school:'雙葉中学 出題傾向',
-   q:'「以心伝心」の意味として正しいものはどれ？',
-   opts:['心と心が紙で伝わること','言葉を使わなくても気持ちが通じ合うこと','心の伝言ゲームをすること','心を伝えるために手紙を書くこと'],
-   a:1,exp:'禅宗の言葉。「言葉や文字を使わなくても、心と心で通じ合える」という意味。親友や家族との深い絆を表す言葉だよ。'},
-  {type:'ことわざ',school:'慶應中等部 頻出',
-   q:'「百聞は一見に如かず」の意味として正しいものはどれ？',
-   opts:['百回見るより一回聞いた方がいい','百回聞くよりも一回自分の目で見た方がよくわかる','百人に聞いた方が一人に見せるよりいい','見ることより聞くことの方が大切だ'],
-   a:1,exp:'中国の歴史書「漢書」にある言葉。どんなに多く話に聞いても、実際に自分の目で見ることには及ばないという意味。'},
-  {type:'四字熟語',school:'早稲田中学 頻出',
-   q:'「起承転結」の説明として正しいものはどれ？',
-   opts:['文章の書き方で、始め・続き・変化・まとめの四つの構成','起きて、受けて、転んで、結果が出ること','四人が力を合わせて一つのことをすること','四つの季節のこと'],
-   a:0,exp:'漢詩の構成から来た言葉。「起」＝テーマを提示、「承」＝展開、「転」＝変化、「結」＝まとめ。文章を書く時の基本の型だよ。'},
-  {type:'ことわざ',school:'桐朋中学 出題傾向',
-   q:'「聞くは一時の恥、聞かぬは一生の恥」の意味として正しいものはどれ？',
-   opts:['恥ずかしいことは一生忘れない','知らないことを聞くのは一時的な恥だが、聞かずにいる方が一生恥ずかしいままだ','一生に一度だけ恥をかいてもいい','聞くことよりも見ることが大切だ'],
-   a:1,exp:'知らないことは素直に聞いた方がいい。黙っていても知識は増えない。「聞くことは恥ずかしい」と思っているうちは成長できない！'},
-  {type:'四字熟語',school:'武蔵中学 出題傾向',
-   q:'「四面楚歌」の意味として正しいものはどれ？',
-   opts:['四方から楽しい歌が聞こえてくること','周りが全て敵になって、孤立した状態','四つの面にそれぞれ歌を書くこと','四人で楚という国の歌を歌うこと'],
-   a:1,exp:'中国の「楚」という国の将軍・項羽が四方を敵に囲まれ、故郷の歌が聞こえてきた故事から。「完全に孤立して助けがない状況」を表す。'},
-  {type:'ことわざ',school:'女子学院 出題傾向',
-   q:'「親の心子知らず」の意味として正しいものはどれ？',
-   opts:['親は子どもの気持ちを理解できない','親が子どものために深く心配しているのに、子どもはそれを理解しない','子どもは親の言うことを聞かない','親と子どもは考え方が違う'],
-   a:1,exp:'親は子どものことを深く心配しているのに、子どもはそれに気づかない。家族への感謝を忘れずに過ごしたいね。'},
-  {type:'四字熟語',school:'桜蔭中学 頻出',
-   q:'「大器晩成」の意味として正しいものはどれ？',
-   opts:['大きな器は晩ご飯の時に使うこと','才能のある人は若い頃は目立たなくても、後になって大きく成長すること','大きな成果は夕方になって出ること','晩年になって器を作り始めること'],
-   a:1,exp:'「大きな器は完成するのに時間がかかる」という意味。焦らなくていい。じっくり実力をつけていけば必ず開花する！'},
-  {type:'四字熟語',school:'早稲田中学 出題傾向',
-   q:'「有言実行」の意味として正しいものはどれ？',
-   opts:['言葉だけで行動しないこと','言ったことを必ず実行すること','有名な言葉を実際に使うこと','言葉があれば何でも実現する'],
-   a:1,exp:'「言ったことは必ずやる」という意味。「不言実行（黙って行動する）」と対になる言葉。約束や宣言したことは必ず守ろう。'},
-  {type:'ことわざ',school:'海城中学 出題傾向',
-   q:'「塵も積もれば山となる」と同じ意味のことわざはどれ？',
-   opts:['急がば回れ','千里の道も一歩から','猿も木から落ちる','一石二鳥'],
-   a:1,exp:'「千里の道も一歩から」も「小さな積み重ねが大きな結果につながる」という同じ意味。毎日少しずつの勉強が合格への道！'},
-  {type:'四字熟語',school:'慶應中等部 出題傾向',
-   q:'「一石二鳥」の意味として正しいものはどれ？',
-   opts:['石で鳥を二羽捕まえること','一つの行動で二つの利益を得ること','一羽の鳥が石の上にいること','二羽の鳥が石を運ぶこと'],
-   a:1,exp:'英語では "Kill two birds with one stone" と言うよ。一つの努力で二つの目的が達成できる時に使う表現だ。'},
-  {type:'ことわざ',school:'麻布中学 頻出',
-   q:'「急がば回れ」の意味として正しいものはどれ？',
-   opts:['急ぐときは全力で走れ','焦らず確実な方法をとった方が、結果的に早く目的に達せる','急いでいる時は回り道をしてはいけない','急ぐ時こそゆっくり走れ'],
-   a:1,exp:'琵琶湖を渡る時、嵐の日は近道の渡し舟より遠くても陸路の方が早いという実体験から生まれたことわざ。焦らず着実に！'},
-  {type:'四字熟語',school:'開成中学 出題傾向',
-   q:'次の文の（　）にあてはまる四字熟語はどれか。「試験の前日に一夜漬けで勉強するのは（　）のやり方だ。」',
-   opts:['一石二鳥','付け焼き刃','温故知新','一期一会'],
-   a:1,exp:'「付け焼き刃」は「刃物の切れ味を一時的によく見せるために焼いて研ぐこと」から。実力のない表面だけの準備のことを言う。'},
-  {type:'ことわざ',school:'桜蔭中学 出題傾向',
-   q:'「石橋を叩いて渡る」の意味として正しいものはどれ？',
-   opts:['石橋は壊れやすいので叩いて確かめること','十分に安全を確認してから行動すること','石橋を壊してしまうこと','叩かないと橋は渡れないこと'],
-   a:1,exp:'丈夫な石橋でも叩いて安全を確かめてから渡るという意味。慎重すぎるほど用心して物事を行うことを表す。テストも見直しが大事！'},
-  {type:'四字熟語',school:'女子学院 頻出',
-   q:'「一生懸命」の元々の漢字として正しいものはどれ？',
-   opts:['一生懸命','一所懸命','一心懸命','一途懸命'],
-   a:1,exp:'元々は「一所懸命」！武士が自分の領地（一か所）を命がけで守ることから来た。今は「一生懸命」と書くことが多いが、元の形も覚えておこう。'},
-  {type:'ことわざ',school:'慶應普通部 出題傾向',
-   q:'「二兎を追う者は一兎をも得ず」の意味として正しいものはどれ？',
-   opts:['二羽のウサギは一羽より速い','二つのことを同時に狙うと、どちらも成功しない','ウサギを二羽飼うと一羽になってしまう','二つ目標があれば一つは達成できる'],
-   a:1,exp:'二匹のウサギを同時に追いかけると両方逃げてしまう。「欲張って二つのことを同時に狙うと、どちらも失敗する」という教え。一つに集中しよう！'},
-  {type:'四字熟語',school:'早稲田中学 出題傾向',
-   q:'「切磋琢磨」の意味として正しいものはどれ？',
-   opts:['石や玉を切って磨いて美しくするように、互いに励まし合って向上すること','一人で黙々と努力すること','先生から厳しく指導されること','競争で相手を負かすこと'],
-   a:0,exp:'「切」「磋」は骨・象牙を加工すること、「琢」「磨」は玉・石を磨くこと。友達と切磋琢磨して、お互い高め合っていこう！'}
+  {type:'ことわざ',school:'早稲田中学 頻出',lv:1,q:'「七転（ななころ）び八起（やお）き」の意味として正しいものはどれ？',opts:['七と八は幸運な数字という意味','何度失敗しても諦めずに立ち上がること','七回転んで八回休むこと','転ばないように気をつけること'],a:1,exp:'何度失敗しても、そのたびに立ち上がる強さが大切だという意味。受験でも失敗を恐れずに挑戦しよう！'},
+  {type:'四字熟語',school:'慶應中等部 頻出',lv:1,q:'「一期一会（いちごいちえ）」の意味として正しいものはどれ？',opts:['一生に一度しかない大切な出会い','一つの期間に一度会うこと','一年に一回の行事','一人で一つの仕事をすること'],a:0,exp:'茶道（さどう）から生まれた言葉で、「この出会いは二度と繰り返されない」という意味。すべての出会いを大切にする心が込められている。'},
+  {type:'ことわざ',school:'麻布中学 出題傾向',lv:1,q:'「情（なさ）けは人（ひと）の為（ため）ならず」の本当の意味はどれ？',opts:['人に親切にしても無駄だ','人に親切にすると巡り巡って自分に良いことが返ってくる','情けをかけると相手のためにならない','人の情けは信用できない'],a:1,exp:'よく「人に甘くするのは良くない」と誤解されるが、本当の意味は「人に親切にすることは、回り回って自分のためになる」という意味！'},
+  {type:'四字熟語',school:'開成中学 頻出',lv:2,q:'「温故知新（おんこちしん）」の意味として正しいものはどれ？',opts:['古いものは温めて新しくすること','昔のことを学び直して新しい知識や考え方を見つけること','古い友人と新しい友人を大切にすること','温かい心で新しいことに挑戦すること'],a:1,exp:'孔子（こうし）の言葉で「古いことをよく研究して、そこから新しい知識を得る」という意味。歴史や古典を学ぶ大切さを教えている。'},
+  {type:'ことわざ',school:'武蔵中学 出題傾向',lv:1,q:'「三人寄（よ）れば文殊（もんじゅ）の知恵（ちえ）」の意味として正しいものはどれ？',opts:['三人で集まれば必ずけんかになる','普通の人でも三人集まって考えれば、すばらしい考えが生まれる','文殊様は三人の神様である','三人では多すぎて意見がまとまらない'],a:1,exp:'文殊菩薩（もんじゅぼさつ）は知恵の神様。凡人（ぼんじん）でも三人集まれば知恵の神様のような素晴らしいアイデアが出せるという意味だよ。'},
+  {type:'四字熟語',school:'海城中学 出題傾向',lv:1,q:'「自業自得（じごうじとく）」の意味として正しいものはどれ？',opts:['自分で仕事をして得をすること','良いことも悪いことも自分の行いの結果として自分に返ってくること','自分勝手に得をしようとすること','仕事は自分でやるのが一番いいこと'],a:1,exp:'仏教（ぶっきょう）の言葉で「自分の行いの結果は自分に帰ってくる」という意味。良い行いも悪い行いも、最後は自分に返ってくる。'},
+  {type:'ことわざ',school:'慶應普通部 出題傾向',lv:1,q:'「急（いそ）がば回（まわ）れ」の意味として正しいものはどれ？',opts:['急ぐときは走ること','急ぐ時こそ安全な道を選ぶ方が早い','ぐるぐる回ること','急いで帰ること'],a:1,exp:'琵琶湖（びわこ）を渡る時、嵐の日は近道より陸路の方が早いという実体験から生まれたことわざ。焦らず着実に！'},
+  {type:'四字熟語',school:'慶應普通部 頻出',lv:1,q:'「臨機応変（りんきおうへん）」の意味として正しいものはどれ？',opts:['機械を使って変化に対応すること','その場その場の状況に応じて、適切な対処をすること','いつでも変化することが大切だということ','機会を見て急いで変えること'],a:1,exp:'「臨機」はその場に臨むこと、「応変」は変化に応じること。状況に合わせて柔軟（じゅうなん）に対応する大切さを表している。'},
+  {type:'ことわざ',school:'開成中学 出題傾向',lv:2,q:'「亀（かめ）の甲（こう）より年（とし）の功（こう）」の意味として正しいものはどれ？',opts:['亀は甲羅があるので長生きする','年をとった人の経験や知恵は非常に価値がある','年をとると甲羅のように硬くなる','亀のようにゆっくり生きることが大切だ'],a:1,exp:'「亀の甲」は縁起（えんぎ）の良いもの。それよりも年長者が長い経験で積み上げた知恵の方が価値があるという意味。'},
+  {type:'四字熟語',school:'武蔵中学 出題傾向',lv:2,q:'「四面楚歌（しめんそか）」の意味として正しいものはどれ？',opts:['四方から楽しい歌が聞こえてくること','周りが全て敵になって、孤立（こりつ）した状態','四つの面にそれぞれ歌を書くこと','四人で楚という国の歌を歌うこと'],a:1,exp:'中国の将軍・項羽（こうう）が四方を敵に囲まれ、故郷の歌が聞こえてきた故事（こじ）から。「完全に孤立して助けがない状況」を表す。'},
+  {type:'ことわざ',school:'桜蔭中学 出題傾向',lv:2,q:'「石橋（いしばし）を叩（たた）いて渡（わた）る」の意味として正しいものはどれ？',opts:['石橋は壊れやすいので叩いて確かめること','十分に安全を確認してから行動すること','石橋を壊してしまうこと','叩かないと橋は渡れないこと'],a:1,exp:'丈夫な石橋でも叩いて安全を確かめてから渡るという意味。慎重（しんちょう）すぎるほど用心して物事を行うことを表すよ。'},
+  {type:'四字熟語',school:'女子学院 頻出',lv:2,q:'「一生懸命（いっしょうけんめい）」の元々の漢字として正しいものはどれ？',opts:['一生懸命','一所懸命（いっしょけんめい）','一心懸命（いっしんけんめい）','一途懸命（いっときけんめい）'],a:1,exp:'元々は「一所懸命」！武士（ぶし）が自分の領地（りょうち）（一か所）を命がけで守ることから来た言葉だよ。'},
+  {type:'ことわざ',school:'慶應中等部 頻出',lv:1,q:'「百聞（ひゃくぶん）は一見（いっけん）に如（し）かず」の意味として正しいものはどれ？',opts:['百回見るより一回聞いた方がいい','百回聞くよりも一回自分の目で見た方がよくわかる','百人に聞いた方が一人に見せるよりいい','見ることより聞くことの方が大切だ'],a:1,exp:'中国の歴史書「漢書（かんじょ）」にある言葉。どんなに多く話に聞いても、実際に自分の目で見ることには及ばないという意味。'},
+  {type:'四字熟語',school:'早稲田中学 出題傾向',lv:1,q:'「有言実行（ゆうげんじっこう）」の意味として正しいものはどれ？',opts:['言葉だけで行動しないこと','言ったことを必ず実行すること','有名な言葉を実際に使うこと','言葉があれば何でも実現する'],a:1,exp:'「言ったことは必ずやる」という意味。「不言実行（ふげんじっこう）」と対になる言葉。約束や宣言（せんげん）したことは必ず守ろう。'},
+  {type:'ことわざ',school:'女子学院 出題傾向',lv:1,q:'「親（おや）の心（こころ）子知（こしら）らず」の意味として正しいものはどれ？',opts:['親は子どもの気持ちを理解できない','親が子どものために深く心配しているのに、子どもはそれを理解しない','子どもは親の言うことを聞かない','親と子どもは考え方が違う'],a:1,exp:'親は子どものことを深く心配しているのに、子どもはそれに気づかない。家族への感謝（かんしゃ）を忘れずに過ごしたいね。'},
+  {type:'四字熟語',school:'慶應中等部 頻出',lv:1,q:'「以心伝心（いしんでんしん）」の意味として正しいものはどれ？',opts:['心と心が紙で伝わること','言葉を使わなくても気持ちが通じ合うこと','心の伝言ゲームをすること','心を伝えるために手紙を書くこと'],a:1,exp:'禅宗（ぜんしゅう）の言葉。「言葉や文字を使わなくても、心と心で通じ合える」という意味。親友や家族との深い絆（きずな）を表す言葉だよ。'},
+  {type:'四字熟語',school:'桜蔭中学 頻出',lv:2,q:'「大器晩成（たいきばんせい）」の意味として正しいものはどれ？',opts:['大きな器は晩ご飯の時に使うこと','才能のある人は若い頃は目立たなくても、後になって大きく成長すること','大きな成果は夕方になって出ること','晩年（ばんねん）になって器を作り始めること'],a:1,exp:'「大きな器は完成するのに時間がかかる」という意味。焦らなくていい。じっくり実力をつけていけば必ず開花（かいか）する！'},
+  {type:'ことわざ',school:'慶應普通部 出題傾向',lv:2,q:'「二兎（にと）を追（お）う者（もの）は一兎（いっと）をも得（え）ず」の意味として正しいものはどれ？',opts:['二羽のウサギは一羽より速い','二つのことを同時に狙うと、どちらも成功しない','ウサギを二羽飼うと一羽になってしまう','二つ目標があれば一つは達成できる'],a:1,exp:'二匹のウサギを同時に追いかけると両方逃げてしまう。「欲張って二つのことを同時に狙うと、どちらも失敗する」という教えだよ。'},
+  {type:'四字熟語',school:'早稲田中学 出題傾向',lv:2,q:'「切磋琢磨（せっさたくま）」の意味として正しいものはどれ？',opts:['石や玉を切って磨いて美しくするように、互いに励まし合って向上すること','一人で黙々と努力すること','先生から厳しく指導されること','競争で相手を負かすこと'],a:0,exp:'「切」「磋」は骨・象牙（ぞうげ）を加工すること、「琢」「磨」は玉・石を磨くこと。友達と切磋琢磨して、お互い高め合っていこう！'},
+  {type:'四字熟語',school:'早稲田中学 頻出',lv:1,q:'「起承転結（きしょうてんけつ）」の説明として正しいものはどれ？',opts:['文章の書き方で、始め・続き・変化・まとめの四つの構成','起きて、受けて、転んで、結果が出ること','四人が力を合わせて一つのことをすること','四つの季節のこと'],a:0,exp:'漢詩（かんし）の構成から来た言葉。「起」＝テーマを提示（ていじ）、「承」＝展開（てんかい）、「転」＝変化、「結」＝まとめ。'},
+  {type:'故事成語',school:'麻布中学 頻出',lv:2,q:'「漁夫（ぎょふ）の利（り）」の意味として正しいものはどれ？',opts:['漁師が魚をたくさん捕ること','二者が争（あらそ）っている間に第三者が利益を得ること','努力して利益を得ること','海で見つけた宝物のこと'],a:1,exp:'シギとハマグリが争っている隙（すき）に漁師が両方を捕まえたという中国の故事から。二者が争う間に第三者が利益を得ることを表す。'},
+  {type:'故事成語',school:'開成中学 頻出',lv:2,q:'「蛇足（だそく）」の意味として正しいものはどれ？',opts:['蛇の足のように珍しいもの','あっても意味のない、余計なもの','大切な仕上げのこと','危険なものに近づくこと'],a:1,exp:'蛇の絵を描く競争で、終わった後に余計な「足」まで描いてしまい負けてしまった故事から。「余計（よけい）なもの、不必要（ふひつよう）な付け足し」を表す。'},
+  {type:'故事成語',school:'武蔵中学 頻出',lv:2,q:'「画竜点睛（がりょうてんせい）」の意味として正しいものはどれ？',opts:['竜の絵を上手に描くこと','物事を完成させるための大切な仕上げの一手','竜の目に点を入れること','絵の最後に署名（しょめい）すること'],a:1,exp:'竜の絵を描いて最後に目（瞳（ひとみ））を入れたら本物の竜が飛び去ったという故事から。「物事を完成させるための大切な最後の一手」を意味する。'},
+  {type:'四字熟語',school:'麻布中学 頻出',lv:3,q:'「付和雷同（ふわらいどう）」の意味として正しいものはどれ？',opts:['雷に打たれても同じ気持ちでいること','自分の意見を持たず、すぐに他人の意見に賛同（さんどう）すること','仲間と力を合わせること','大きな声で意見を述べること'],a:1,exp:'自分の信念（しんねん）を持たず、すぐに他人の意見に同調（どうちょう）してしまうこと。「付和」は他人の言葉に軽々しく同意すること。'},
+  {type:'漢字',school:'麻布中学 頻出',lv:3,q:'「蛍雪（けいせつ）の功（こう）」の意味として正しいものはどれ？',opts:['蛍と雪を観察して学ぶこと','苦労（くろう）して勉強に励（はげ）んだ成果','夏と冬の季節の変化','自然の中で遊ぶこと'],a:1,exp:'貧しくて灯油が買えない学生が、蛍の光と雪明かりで勉強したという中国の故事から。苦労して勉強に励んだ成果を表す言葉。'},
+  {type:'故事成語',school:'慶應中等部 頻出',lv:3,q:'「臥薪嘗胆（がしんしょうたん）」の意味として正しいものはどれ？',opts:['薪（まき）の上で眠ること','目的を達成するために苦労に耐えて努力し続けること','胆（きも）を鍛えること','薬草を毎日飲むこと'],a:1,exp:'「臥薪」は薪の上で寝て苦しみを忘れないこと、「嘗胆」は苦い胆をなめて苦しみを思い出すこと。目的達成のために苦難（くなん）に耐え努力し続けることを表す。'},
+  {type:'故事成語',school:'早稲田中学 頻出',lv:3,q:'「杞憂（きゆう）」の意味として正しいものはどれ？',opts:['心配事が実際に起こること','取り越し苦労（とりこしぐろう）、必要のない心配をすること','大切なことを心配すること','故郷を思い出すこと'],a:1,exp:'中国の「杞（き）」の国の人が「天が落ちてきたらどうしよう」と心配したという故事から。「あれこれ必要のない心配をすること」を表す。'},
+  {type:'故事成語',school:'麻布中学 頻出',lv:3,q:'「五十歩百歩（ごじっぽひゃっぽ）」の意味として正しいものはどれ？',opts:['少しの差は大きな差になること','大きな違いがあるように見えて、本質的（ほんしつてき）にはどちらも同じこと','競争では少しの差で勝負が決まること','百歩先を見て行動すること'],a:1,exp:'戦場で五十歩逃げた兵士が百歩逃げた兵士を笑ったという故事から。違いはあるように見えても、どちらも似たり寄ったりということを表す。'},
+  {type:'四字熟語',school:'開成中学 頻出',lv:3,q:'「傍若無人（ぼうじゃくぶじん）」の意味として正しいものはどれ？',opts:['周りに人がいない静かな場所','周囲（しゅうい）に人がいないかのように勝手（かって）に振る舞うこと','人の助けなしに何でもできること','一人で黙々と努力すること'],a:1,exp:'「傍（かたわ）ら若（ごと）し人（ひと）無（な）き」と読む。まるで周囲に人がいないかのように、好き勝手に振る舞う無礼（ぶれい）な態度を表す。'},
+  {type:'四字熟語',school:'慶應中等部 頻出',lv:3,q:'「玉石混交（ぎょくせきこんこう）」の意味として正しいものはどれ？',opts:['宝石と石を混ぜること','優れたものとそうでないものが入り混じっていること','様々な種類の石を集めること','本物と偽物（にせもの）を見分けること'],a:1,exp:'「玉」は宝石（ほうせき）、「石」は普通の石。優れたもの（価値があるもの）と劣（おと）ったもの（価値がないもの）が入り混じっている状態を表す。'},
+  {type:'四字熟語',school:'麻布中学 頻出',lv:3,q:'「朝三暮四（ちょうさんぼし）」の意味として正しいものはどれ？',opts:['朝に三回、夕方に四回練習すること','目先（めさき）の違いにとらわれて結果が同じことに気づかないこと','朝と夕方で気持ちが変わること','朝三時から夕四時まで勉強すること'],a:1,exp:'猿に木の実を「朝三つ、夕四つ」と言うと怒り、「朝四つ、夕三つ」と言うと喜んだという故事から。合計は同じなのに目先の違いに惑（まど）わされることを表す。'},
+  {type:'漢字',school:'慶應中等部 頻出',lv:2,q:'「矛盾（むじゅん）」の意味として正しいものはどれ？',opts:['武器の種類の名前','話や行動の前後がつじつまの合わないこと','真剣（しんけん）に物事を考えること','困難な問題を解決すること'],a:1,exp:'中国の故事（こじ）から。「どんな盾（たて）も貫（つらぬ）く矛（ほこ）」と「どんな矛も防ぐ盾」を同時に売ろうとした商人の話。'},
+  {type:'漢字',school:'桜蔭中学 頻出',lv:2,q:'「俯瞰（ふかん）する」の意味として正しいものはどれ？',opts:['深く考えること','高いところから見下ろすこと、または広い視野で全体を見ること','細かい部分を調べること','過去を振り返ること'],a:1,exp:'「俯（ふ）」は下を向くこと、「瞰（かん）」は見ること。高い視点から全体を見渡すことを表す。問題全体を俯瞰する力は受験に大切だよ。'},
+  {type:'慣用句',school:'開成中学 頻出',lv:3,q:'「足元（あしもと）を見る」の意味として正しいものはどれ？',opts:['自分の周囲をよく観察すること','相手の弱点や困っている状況につけ込んで有利に進めること','慎重（しんちょう）に歩くこと','歩き方を確かめること'],a:1,exp:'旅人が疲れているのを見て高い宿代を要求する宿屋の話から。相手の弱みにつけ込んで自分に都合よく進めることを表す。'},
+  {type:'慣用句',school:'武蔵中学 頻出',lv:2,q:'「水（みず）を得（え）た魚（さかな）」の意味として正しいものはどれ？',opts:['魚が水を飲むこと','自分に合った環境（かんきょう）で生き生きと活躍（かつやく）すること','水の中で泳ぐのが得意なこと','ようやく欲しいものが手に入ること'],a:1,exp:'水から出た魚が水に戻ったように、自分に合った環境で本来の力を発揮して生き生きと活躍することを表すよ。'},
+  {type:'慣用句',school:'慶應中等部 出題傾向',lv:2,q:'「青天（せいてん）の霹靂（へきれき）」の意味として正しいものはどれ？',opts:['晴れた空に突然（とつぜん）雷が落ちること','青空が広がって気持ちいいこと','突然の良い知らせのこと','予期（よき）しない出来事が突然起こること'],a:3,exp:'晴れた空に突然雷が落ちることから、「まったく予期しなかった出来事が突然起こること」を表す。良いことにも悪いことにも使うよ。'},
+  {type:'慣用句',school:'桜蔭中学 頻出',lv:3,q:'「苦肉（くにく）の策（さく）」の意味として正しいものはどれ？',opts:['体を痛めてまで敵に勝つ作戦','苦しまぎれに考えた策（さく）で、窮地（きゅうち）を脱するためのやむを得ない手段（しゅだん）','肉体的（にくたいてき）に強くなる方法','苦しい時に食べる料理のこと'],a:1,exp:'三国志（さんごくし）で黄蓋（こうがい）が味方に打たれたふりをして敵に近づき功績を挙げた故事から。苦しまぎれに考えた手段のことを表す。'},
+  {type:'四字熟語',school:'女子学院 頻出',lv:2,q:'「自画自賛（じがじさん）」の意味として正しいものはどれ？',opts:['自分で絵を描いて感動すること','自分で自分のことを褒（ほ）めること','良い作品を大切にすること','自分の作品を人に見せること'],a:1,exp:'絵（画）の上の余白に絵の説明（賛）を書くことから来た言葉。自分で自分を褒めること、自分の行動を自分で称賛（しょうさん）することを表す。'},
+  {type:'ことわざ',school:'桐朋中学 出題傾向',lv:1,q:'「聞くは一時（いっとき）の恥（はじ）、聞かぬは一生（いっしょう）の恥」の意味として正しいものはどれ？',opts:['恥ずかしいことは一生忘れない','知らないことを聞くのは一時的な恥だが、聞かずにいる方が一生恥ずかしいままだ','一生に一度だけ恥をかいてもいい','聞くことよりも見ることが大切だ'],a:1,exp:'知らないことは素直に聞いた方がいい。「聞くことは恥ずかしい」と思っているうちは成長できない！'},
+  {type:'ことわざ',school:'芝中学 出題傾向',lv:2,q:'「猿（さる）も木（き）から落（お）ちる」と同じ意味のことわざはどれ？',opts:['七転び八起き','弘法（こうぼう）も筆（ふで）の誤（あやま）り','急がば回れ','千里の道も一歩から'],a:1,exp:'「弘法も筆の誤り」も同じ意味。どちらも「名人や達人でも時には失敗することがある」という意味だよ。弘法大師（こうぼうだいし）は書道の名人だった。'},
+  {type:'ことわざ',school:'海城中学 出題傾向',lv:2,q:'「塵（ちり）も積（つ）もれば山（やま）となる」と同じ意味のことわざはどれ？',opts:['急がば回れ','千里（せんり）の道（みち）も一歩（いっぽ）から','猿も木から落ちる','一石二鳥（いっせきにちょう）'],a:1,exp:'「千里の道も一歩から」も「小さな積み重ねが大きな結果につながる」という同じ意味。毎日少しずつの勉強が合格への道！'},
+  {type:'四字熟語',school:'雙葉中学 出題傾向',lv:2,q:'次の四字熟語の中でほかの三つと意味のグループが違うものはどれ？',opts:['一石二鳥','一挙両得（いっきょりょうとく）','一心不乱（いっしんふらん）','一箭双雕（いっせんそうちょう）'],a:2,exp:'「一石二鳥」「一挙両得」「一箭双雕（いっせんそうちょう）」はすべて「一つの行動で二つの利益を得る」という意味。「一心不乱」だけが「ひとつのことに集中すること」を表す。'},
+  {type:'漢字',school:'開成中学 頻出',lv:3,q:'「慇懃無礼（いんぎんぶれい）」の意味として正しいものはどれ？',opts:['非常に礼儀正しいこと','表面（ひょうめん）は丁寧（ていねい）に見えるが、実は失礼なこと','礼儀知らずで騒がしいこと','怠（なま）けて無礼なこと'],a:1,exp:'「慇懃（いんぎん）」は丁寧なこと。表向きはとても丁寧に見えるが、実は相手を見下（みくだ）した無礼な態度を表す言葉。大人のずるさを表すことわざだよ。'}
 ];
+
 
 const QUOTES=[
   {q:'成功とは、情熱を失わずに失敗から失敗へと歩き続けることだ。',a:'ウィンストン・チャーチル',r:'うぃんすとん・ちゃーちる',meta:'イギリス / 政治家・首相 / 20世紀'},
@@ -984,9 +1013,9 @@ const SUBJECTS=[
 ];
 const QUEST_DEFS=[
   {id:'checkin',txt:'自習チェックインをする',xp:20,icon:'📍',auto:true},
-  {id:'proverb',txt:'中学受験クイズに正解する',xp:5,icon:'🎓',auto:true},
-  {id:'study30',txt:'どれかの教科を30分以上勉強する',xp:20,icon:'⏱',auto:true},
-  {id:'allsubjects',txt:'全教科の学習記録をつける',xp:5,icon:'📚',auto:true},
+  {id:'proverb',txt:'中学受験クイズに正解する',xp:10,icon:'🎓',auto:true},
+  {id:'study30',txt:'どれかの教科を30分以上勉強する',xp:25,icon:'⏱',auto:true},
+  {id:'allsubjects',txt:'全教科の学習記録をつける',xp:15,icon:'📚',auto:true},
   {id:'questpath',txt:'攻略の道で1問解く',xp:30,icon:'⚔️',auto:true}
 ];
 const MEDAL_DEFS=[
@@ -1075,7 +1104,8 @@ async function init(){
   }catch{if(fbStatus)fbStatus.textContent='🔴';}
   await loadExamDate();updateCountdown();
   applySeasonalTheme();
-  initDailyQuote();await initProverbQuiz();
+  initRadioCorner();
+  await initProverbQuiz();
   await loadCheckin();await loadStudyData();await loadQuests();await loadStreak();
   renderSubjectGrid();renderQuests();renderStreakBadge();renderCalendar();
   await loadMedals();renderMedals();renderMedalGuides();
@@ -1128,6 +1158,8 @@ function showTab(id){
   document.querySelectorAll('.ni').forEach(e=>e.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active');
   document.getElementById('nb-'+id).classList.add('active');
+  // Scroll to top smoothly
+  window.scrollTo({top:0,behavior:'smooth'});
   if(id==='hensachi'&&pinUnlocked){renderHChart();loadWeakData();}
   if(id==='calendar'){renderCalendar();loadGCalSetup();}
   if(id==='family'){renderFamilySummary();renderMessages();}
@@ -1163,38 +1195,386 @@ function initDailyQuote(){
   } else {el.textContent='';}
 }
 
-let quizAnswered=false;
-async function initProverbQuiz(){
-  const d=new Date();const i=(d.getFullYear()*366+d.getMonth()*31+d.getDate())%EXAM_QUIZ.length;const p=EXAM_QUIZ[i];
-  // Show school badge
+let _quizState={idx:0,questions:[],answers:[],done:false};
+let _reviewMode=false;
+
+// ── AI-GENERATED DAILY QUIZ ───────────────────────────────────
+async function _fetchDailyQuestions(reviewItems=[]){
+  const subjectAreas=[
+    'ことわざ（例：七転び八起き・急がば回れ）',
+    '四字熟語（例：一期一会・温故知新・臥薪嘗胆）',
+    '故事成語（例：漁夫の利・蛇足・五十歩百歩）',
+    '慣用句（例：青天の霹靂・足元を見る・水を得た魚）',
+    '漢字の読み書き・難読漢字・同音異義語'
+  ];
+  const d=new Date();const seed=d.getMonth()*100+d.getDate();
+  const areas=[];
+  for(let i=0;i<5;i++)areas.push(subjectAreas[(seed+i*2)%5]);
+  // If we have review items, replace 1-2 slots
+  const reviewCount=Math.min(reviewItems.length,2);
+  const freshCount=5-reviewCount;
+  const reviewNote=reviewCount>0?`\n\n【復習問題】${reviewCount}問分は以下の分野の類似問題を作ること：${reviewItems.map(r=>r.type+' / '+r.exp?.slice(0,20)).join('、')}`:'';
+
+  const prompt=`あなたは中学受験の国語専門講師です。以下の条件で問題を${freshCount}問作成してください。${reviewNote}
+
+【条件】
+・小学5年生（早稲田アカデミー生）向け
+・実際の中学入試（開成・麻布・武蔵・早稲田・慶應・桜蔭など）に頻出のもの
+・ジャンルを以下のように割り当てる：${areas.slice(0,freshCount).map((a,i)=>`${i+1}問目：${a}`).join('、')}
+・難易度：1問目は標準、2〜3問目は応用、4〜5問目は難問
+・中学生以上で習う漢字には必ずふりがなをつけること
+・問題ごとに出題傾向のある学校名を必ず入れること
+
+以下のJSON形式のみで返してください：
+[{"type":"ことわざ","school":"開成中学 頻出","lv":1,"q":"問題文","opts":["A","B","C","D"],"a":0,"exp":"解説"}]`;
+
+  const res=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':getApiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:2500,messages:[{role:'user',content:prompt}]})
+  });
+  const data=await res.json();
+  if(!res.ok)throw new Error(data?.error?.message||'API error');
+  const raw=data.content?.[0]?.text||'[]';
+  const fresh=JSON.parse(raw.replace(/```json|```/g,'').trim());
+  // Merge review items (marked with isReview flag)
+  const merged=[];
+  let ri=0,fi=0;
+  for(let i=0;i<5;i++){
+    if(ri<reviewCount&&(i===1||i===3)){
+      merged.push({...reviewItems[ri],isReview:true});ri++;
+    } else if(fi<fresh.length){
+      merged.push(fresh[fi]);fi++;
+    }
+  }
+  return merged;
+}
+
+// ── SPACED REPETITION ─────────────────────────────────────────
+async function _getReviewItems(){
+  const stored=await sGet('quiz-wrong-bank')||[];
+  const today=new Date();today.setHours(0,0,0,0);
+  return stored.filter(item=>{
+    const due=new Date(item.dueDate);due.setHours(0,0,0,0);
+    return due<=today;
+  }).slice(0,2);
+}
+async function _saveWrongItem(p){
+  const bank=await sGet('quiz-wrong-bank')||[];
+  // Don't add duplicates
+  if(bank.find(b=>b.q===p.q))return;
+  const due=new Date();due.setDate(due.getDate()+3);
+  bank.push({...p,dueDate:due.toISOString(),addedDate:todayKey()});
+  // Keep max 30 items
+  await sSet('quiz-wrong-bank',bank.slice(-30));
+}
+async function _markReviewDone(q){
+  let bank=await sGet('quiz-wrong-bank')||[];
+  bank=bank.filter(b=>b.q!==q);
+  await sSet('quiz-wrong-bank',bank);
+}
+
+// ── RADIO CORNER ──────────────────────────────────────────────
+async function initRadioCorner(){
+  const saved=await sGet('radio-'+todayKey());
+  if(saved){renderRadio(saved);return;}
+  if(!getApiKey()){
+    renderRadio({title:'APIキー未設定',topic:'歴史',icon:'⚙️',content:'ファミリータブ → 🔑AI機能の設定 でAPIキーを入れると、毎日新しいネタが届くよ！',highlights:[]});
+    return;
+  }
+  document.getElementById('radio-loading').classList.remove('hidden');
+  document.getElementById('radio-content').innerHTML='';
+  document.getElementById('radio-title').style.display='none';
+  try{
+    const d=new Date();const seed=(d.getMonth()+1)*100+d.getDate();
+    const topics=[
+      {name:'織田信長と楽市楽座',topic:'歴史',icon:'⚔️'},
+      {name:'江戸幕府の参勤交代',topic:'歴史',icon:'🏯'},
+      {name:'明治維新と廃藩置県',topic:'歴史',icon:'🗾'},
+      {name:'日本の都道府県と県庁所在地',topic:'地理',icon:'🗺️'},
+      {name:'縄文・弥生時代の違い',topic:'歴史',icon:'🏺'},
+      {name:'源頼朝と鎌倉幕府',topic:'歴史',icon:'⛩️'},
+      {name:'太平洋ベルトと三大工業地帯',topic:'地理',icon:'🏭'},
+      {name:'豊臣秀吉と朝鮮出兵',topic:'歴史',icon:'⚔️'},
+      {name:'日本の気候と季節風',topic:'地理',icon:'🌦️'},
+      {name:'第二次世界大戦と終戦',topic:'歴史',icon:'✌️'},
+      {name:'奈良の大仏と聖武天皇',topic:'歴史',icon:'🦌'},
+      {name:'日本の河川・山地',topic:'地理',icon:'🗻'},
+      {name:'関ヶ原の戦いと徳川家康',topic:'歴史',icon:'🏯'},
+      {name:'日本の農業と食料自給率',topic:'地理',icon:'🌾'},
+    ];
+    const t=topics[seed%topics.length];
+
+    const funRefs=[
+      'Minecraftでいうと城は最強の砦でさ',
+      'サッカーのワールドカップみたいにリーグ戦で争ってたんだよ',
+      '夏伎んちの近く（東京中央区）って昔は武士がうろうろしてた場所なんだよ',
+      'チワワも飼えるくらい平和になったのはこの時代のおかげだったりするんよ',
+      '車のF1レースみたいに各藩がスピードを競って移動してたんよ',
+      'Youtubeのチャンネル登録みたいに、みんな将軍に「忠誠」を誓ってたわけ',
+      '獅子座生まれの夏伎くんは、戦国武将でいったら豊臣秀吉タイプな気がするw',
+      'サッカーで言う「試合前のミーティング」みたいなのが参勤交代だった説',
+    ];
+    const funRef=funRefs[seed%funRefs.length];
+
+    const prompt=`あなたは小学生向けの面白い知識系コンテンツ「そーだったのかラジオ」の台本ライターです。
+中学受験に頻出の「${t.name}」について書いてください。
+
+読者：小学5年生の男の子・夏伎くん（東京都中央区・サッカーと車が好き・チワワ飼い・獅子座・2014年8月生まれ）
+
+ルール：
+・話し言葉、タメ口ぎみで親しみやすく
+・小学5年男子がクスッとなるネタを1個使う（例：「${funRef}」）
+・受験頻出の重要ポイントを**【重要】タグ**で1つ明示する
+・難しい漢字にはふりがな
+・全体250文字以内
+
+JSONのみで返す：
+{
+  "title": "今日のテーマ名（短く）",
+  "topic": "${t.topic}",
+  "icon": "${t.icon}",
+  "content": "本文テキスト（重要な語句を★語句★で囲む）",
+  "highlights": ["重要語句1", "重要語句2"]
+}`;
+
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':getApiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:700,messages:[{role:'user',content:prompt}]})
+    });
+    const data=await res.json();
+    const raw=data.content?.[0]?.text||'{}';
+    const parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    await sSet('radio-'+todayKey(),parsed);
+    renderRadio(parsed);
+  }catch(e){
+    renderRadio({title:'今日のネタ',topic:'歴史',icon:'⚔️',content:'読み込めなかったよ。また後でリロードしてみて！',highlights:[]});
+  }
+  document.getElementById('radio-loading').classList.add('hidden');
+}
+
+function renderRadio(data){
+  document.getElementById('radio-loading').classList.add('hidden');
+
+  // Icon
+  const iconEl=document.getElementById('radio-icon');
+  if(iconEl)iconEl.textContent=data.icon||'📖';
+
+  // Title
+  const titleEl=document.getElementById('radio-title');
+  if(titleEl&&data.title){
+    titleEl.textContent='📌 '+data.title;
+    titleEl.style.display='';
+  }
+
+  // Topic badge with geo/history specific icon
+  const badge=document.getElementById('radio-topic-badge');
+  const isGeo=data.topic==='地理';
+  badge.style.background=isGeo?'rgba(68,217,142,.15)':'rgba(255,154,80,.15)';
+  badge.style.color=isGeo?'var(--green)':'var(--orange)';
+  badge.style.border=isGeo?'1px solid rgba(68,217,142,.3)':'1px solid rgba(255,154,80,.3)';
+  badge.textContent=isGeo?'🗺️ 地理':'⚔️ 歴史';
+
+  // Rich text - highlight ★語句★ in gold bold
+  const contentEl=document.getElementById('radio-content');
+  if(data.content){
+    const html=data.content
+      .replace(/★([^★]+)★/g,'<strong style="color:var(--gold);font-weight:800;">$1</strong>')
+      .replace(/【重要】([^\n]+)/g,'<span style="display:inline-block;background:rgba(255,96,96,.12);color:var(--red);border-left:3px solid var(--red);padding:4px 10px;border-radius:0 6px 6px 0;margin:4px 0;font-weight:700;">⚠️ 重要 $1</span>')
+      .replace(/\n/g,'<br>');
+    contentEl.innerHTML=html;
+  }
+}
+
+
+function _renderQuizPips(idx,answers){
+  for(let i=0;i<5;i++){
+    const pip=document.getElementById('qpip'+i);if(!pip)continue;
+    if(i<answers.length)pip.style.background=answers[i]?'var(--green)':'var(--red)';
+    else if(i===idx&&!_quizState.done)pip.style.background='var(--gold)';
+    else pip.style.background='var(--border)';
+  }
+  const badge=document.getElementById('quiz-progress-badge');
+  if(badge){
+    if(_quizState.done){
+      const c=_quizState.answers.filter(Boolean).length;
+      badge.textContent=c+'/5 正解';
+    } else {
+      badge.textContent='問'+(_quizState.idx+1)+'/5';
+    }
+  }
+}
+
+function _renderQuizQuestion(p,idx,showAnswer=false){
+  document.getElementById('quiz-generating').classList.add('hidden');
+  document.getElementById('quiz-main-area').style.display='';
+  // Badge
   const badge=document.getElementById('quiz-school-badge');
   if(badge){
-    const typeColor=p.type==='四字熟語'?'var(--purple)':'var(--teal)';
-    const typeBg=p.type==='四字熟語'?'rgba(179,148,255,.12)':'rgba(0,224,181,.1)';
-    badge.innerHTML=`<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
-      <span style="display:inline-block;background:${typeBg};color:${typeColor};border:1px solid ${typeColor}44;border-radius:6px;padding:3px 9px;font-size:12px;font-weight:800;">${p.type}</span>
-      <span style="display:inline-block;background:rgba(255,210,63,.1);color:var(--gold);border:1px solid rgba(255,210,63,.25);border-radius:6px;padding:3px 9px;font-size:11px;font-weight:700;">📚 ${p.school}</span>
+    const typeColor=p.type==='四字熟語'?'var(--purple)':p.type==='故事成語'?'var(--orange)':p.type==='慣用句'?'#ff7eb3':p.type==='漢字'?'var(--blue)':'var(--teal)';
+    const lvLabel=p.lv>=3?'🔥難問':p.lv===2?'⚡標準':'🌱基本';
+    const lvColor=p.lv>=3?'var(--red)':p.lv===2?'var(--orange)':'var(--teal)';
+    badge.innerHTML=`<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+      <span style="background:${typeColor}22;color:${typeColor};border:1px solid ${typeColor}44;border-radius:6px;padding:3px 9px;font-size:12px;font-weight:800;">${p.type}</span>
+      <span style="background:rgba(255,210,63,.1);color:var(--gold);border:1px solid rgba(255,210,63,.25);border-radius:6px;padding:3px 9px;font-size:11px;font-weight:700;">📚 ${p.school||'中学受験頻出'}</span>
+      <span style="background:${lvColor}22;color:${lvColor};border:1px solid ${lvColor}44;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:800;">${lvLabel}</span>
+      ${p.isReview?'<span style="background:rgba(255,154,80,.15);color:var(--orange);border:1px solid rgba(255,154,80,.3);border-radius:6px;padding:3px 8px;font-size:11px;font-weight:800;">🔁 復習問題</span>':''}
+      ${_reviewMode?'<span style="background:rgba(179,148,255,.15);color:var(--purple);border:1px solid rgba(179,148,255,.3);border-radius:6px;padding:3px 8px;font-size:11px;font-weight:800;">📖 見直し</span>':''}
     </div>`;
   }
   document.getElementById('proverb-text').textContent=p.q;
-  const done=await sGet('proverb-'+todayKey());
-  if(done){quizAnswered=true;const m=document.getElementById('quiz-done-msg');m.textContent=done.correct?'✅ 正解！すばらしい！':'❌ 残念…正解は「'+p.opts[p.a]+'」';m.style.color=done.correct?'var(--green)':'var(--red)';m.classList.remove('hidden');document.getElementById('quiz-opts').innerHTML='';document.getElementById('quiz-exp').textContent=p.exp;document.getElementById('quiz-exp').classList.remove('hidden');return;}
+  document.getElementById('quiz-done-msg').classList.add('hidden');
+  document.getElementById('quiz-all-done').classList.add('hidden');
+  // Options
   const c=document.getElementById('quiz-opts');c.innerHTML='';
-  p.opts.forEach((o,i)=>{const btn=document.createElement('button');btn.className='qopt';btn.textContent=o;btn.onclick=()=>answerQuiz(i===p.a,p,i,c);c.appendChild(btn);});
-}
-async function answerQuiz(correct,p,chosen,container){
-  if(quizAnswered)return;quizAnswered=true;
-  container.querySelectorAll('.qopt').forEach((b,i)=>{b.disabled=true;if(i===p.a)b.classList.add('correct');else if(i===chosen&&!correct)b.classList.add('wrong');});
-  document.getElementById('quiz-exp').textContent=p.exp;document.getElementById('quiz-exp').classList.remove('hidden');
-  await sSet('proverb-'+todayKey(),{correct});
-  if(correct){
-    questData['proverb']=true;await sSet('quests-'+todayKey(),questData);renderQuests();
-    playSound('correct');
-    showQuizCelebration();
+  const answered=showAnswer||(_quizState.answers.length>idx);
+  const userAnswer=_quizState.answers.length>idx?_quizState._chosen?.[idx]:null;
+  p.opts.forEach((o,i)=>{
+    const btn=document.createElement('button');btn.className='qopt';btn.textContent=o;
+    if(answered){
+      btn.disabled=true;
+      if(i===p.a)btn.classList.add('correct');
+      else if(i===userAnswer&&userAnswer!==p.a)btn.classList.add('wrong');
+    } else {
+      btn.onclick=()=>answerQuiz(i===p.a,p,i,c,idx);
+    }
+    c.appendChild(btn);
+  });
+  // Explanation
+  const expEl=document.getElementById('quiz-exp');
+  if(answered&&p.exp){
+    expEl.textContent=p.exp;expEl.classList.remove('hidden');
   } else {
-    playSound('wrong');
+    expEl.classList.add('hidden');
   }
 }
+
+async function initProverbQuiz(){
+  const saved=await sGet('quiz3-'+todayKey());
+  if(saved&&saved.questions&&saved.questions.length===5){
+    _quizState=saved;
+    _renderQuizPips(_quizState.done?5:_quizState.idx,_quizState.answers);
+    if(_quizState.done){_showQuizAllDone();return;}
+    _renderQuizQuestion(_quizState.questions[_quizState.idx],_quizState.idx);
+    return;
+  }
+  // No saved — fetch
+  if(!getApiKey()){
+    const qs=_selectDailyQuizzesFallback();
+    _quizState={idx:0,questions:qs,answers:[],_chosen:[],done:false};
+    await sSet('quiz3-'+todayKey(),_quizState);
+    _renderQuizPips(0,[]);_renderQuizQuestion(qs[0],0);return;
+  }
+  document.getElementById('quiz-generating').classList.remove('hidden');
+  document.getElementById('quiz-main-area').style.display='none';
+  document.getElementById('quiz-all-done').classList.add('hidden');
+  try{
+    const reviewItems=await _getReviewItems();
+    const qs=await _fetchDailyQuestions(reviewItems);
+    if(!qs||qs.length<3)throw new Error('問題不足');
+    // Pad to 5 if needed
+    while(qs.length<5)qs.push(..._selectDailyQuizzesFallback().slice(0,5-qs.length));
+    _quizState={idx:0,questions:qs.slice(0,5),answers:[],_chosen:[],done:false};
+    await sSet('quiz3-'+todayKey(),_quizState);
+    _renderQuizPips(0,[]);_renderQuizQuestion(qs[0],0);
+  }catch(e){
+    const qs=_selectDailyQuizzesFallback();
+    _quizState={idx:0,questions:qs,answers:[],_chosen:[],done:false};
+    await sSet('quiz3-'+todayKey(),_quizState);
+    _renderQuizPips(0,[]);_renderQuizQuestion(qs[0],0);
+  }
+}
+
+function _selectDailyQuizzesFallback(){
+  const d=new Date();
+  const seed=d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();
+  const arr=[...EXAM_QUIZ.keys()];
+  let s=seed;
+  for(let i=arr.length-1;i>0;i--){s=(s*1664525+1013904223)&0xffffffff;const j=Math.abs(s)%(i+1);[arr[i],arr[j]]=[arr[j],arr[i]];}
+  return arr.slice(0,5).map(i=>EXAM_QUIZ[i]);
+}
+
+async function answerQuiz(correct,p,chosen,container,qIdx){
+  container.querySelectorAll('.qopt').forEach((b,i)=>{
+    b.disabled=true;
+    if(i===p.a)b.classList.add('correct');
+    else if(i===chosen&&!correct)b.classList.add('wrong');
+  });
+  const expEl=document.getElementById('quiz-exp');
+  expEl.textContent=p.exp;expEl.classList.remove('hidden');
+  if(!_quizState._chosen)_quizState._chosen=[];
+  _quizState._chosen[qIdx]=chosen;
+  _quizState.answers.push(correct);
+  // Spaced repetition: save wrong answers for review in 3 days
+  if(!correct){
+    await _saveWrongItem(p);
+  } else if(p.isReview){
+    // Correctly answered a review item - remove from bank
+    await _markReviewDone(p.q);
+  }
+  if(correct){playSound('correct');showQuizCelebration();}
+  else{playSound('wrong');}
+  await sSet('quiz3-'+todayKey(),_quizState);
+  _renderQuizPips(_quizState.idx,_quizState.answers);
+  if(_quizState.idx<4){
+    setTimeout(()=>{if(!_reviewMode)showNextQuiz();},2200);
+  } else {
+    _quizState.done=true;
+    await sSet('quiz3-'+todayKey(),_quizState);
+    const correctCount=_quizState.answers.filter(Boolean).length;
+    if(correctCount>=1){questData['proverb']=true;await sSet('quests-'+todayKey(),questData);renderQuests();}
+    setTimeout(()=>_showQuizAllDone(),2400);
+  }
+}
+
+function showNextQuiz(){
+  _reviewMode=false;
+  _quizState.idx++;
+  document.getElementById('quiz-exp').classList.add('hidden');
+  _renderQuizQuestion(_quizState.questions[_quizState.idx],_quizState.idx);
+  _renderQuizPips(_quizState.idx,_quizState.answers);
+}
+
+function reviewQuiz(idx){
+  // Only allow reviewing answered questions
+  if(idx>=_quizState.answers.length&&!_quizState.done)return;
+  if(!_quizState.questions||!_quizState.questions[idx])return;
+  _reviewMode=true;
+  document.getElementById('quiz-all-done').classList.add('hidden');
+  _renderQuizPips(idx,_quizState.answers);
+  _renderQuizQuestion(_quizState.questions[idx],idx,true);
+  // Show back button if all done
+  if(_quizState.done){
+    const exp=document.getElementById('quiz-exp');
+    const backBtn=document.getElementById('quiz-back-to-done');
+    if(!backBtn){
+      const b=document.createElement('button');
+      b.id='quiz-back-to-done';b.className='btn btn-outline btn-full';
+      b.style.marginTop='10px';b.textContent='← 結果に戻る';
+      b.onclick=()=>{_reviewMode=false;_showQuizAllDone();};
+      exp.after(b);
+    }
+  }
+}
+
+function _showQuizAllDone(){
+  _reviewMode=false;
+  document.getElementById('quiz-opts').innerHTML='';
+  document.getElementById('quiz-exp').classList.add('hidden');
+  document.getElementById('quiz-school-badge').innerHTML='';
+  document.getElementById('proverb-text').textContent='';
+  const backBtn=document.getElementById('quiz-back-to-done');if(backBtn)backBtn.remove();
+  const correctCount=_quizState.answers.filter(Boolean).length;
+  const el=document.getElementById('quiz-all-done');el.classList.remove('hidden');
+  const msgs=['まだまだこれから！見直ししよう！','少しずつ進んでる！','半分以上正解！いい感じ！','よくできた！あと1問！','全問正解！！完璧だ🏆'];
+  document.getElementById('quiz-score-display').textContent=correctCount+'/5問正解　'+msgs[Math.min(correctCount,4)];
+  _renderQuizPips(5,_quizState.answers);
+  if(correctCount===5)celebrate(3,'🎓','全問正解！！','今日のクイズ完璧！神じゃん！');
+  else if(correctCount>=4)celebrate(2,'🎓','4/5問正解！','あと一歩！');
+}
+
+
 function showQuizCelebration(){
   celebrate(2,'🎓','正解！','中学受験クイズ +5XP');
 }
@@ -1390,7 +1770,7 @@ function pinIn(n){if(pinBuf.length>=4)return;pinBuf+=n;for(let i=0;i<4;i++)docum
 function pinDel(){pinBuf=pinBuf.slice(0,-1);for(let i=0;i<4;i++)document.getElementById('pd'+i).classList.toggle('filled',i<pinBuf.length);}
 function pinClear(){pinBuf='';for(let i=0;i<4;i++)document.getElementById('pd'+i).classList.remove('filled');document.getElementById('pin-err').textContent='';}
 function checkPin(){
-  if(pinBuf==='0201'){pinUnlocked=true;document.getElementById('pin-wrap').classList.add('hidden');document.getElementById('hensachi-content').classList.remove('hidden');loadHensachi().then(()=>renderHChart());loadWeakData();}
+  if(pinBuf==='0819'){pinUnlocked=true;document.getElementById('pin-wrap').classList.add('hidden');document.getElementById('hensachi-content').classList.remove('hidden');loadHensachi().then(()=>renderHChart());loadWeakData();}
   else{document.getElementById('pin-err').textContent='PINが違います。もう一度どうぞ。';pinBuf='';for(let i=0;i<4;i++)document.getElementById('pd'+i).classList.remove('filled');}
 }
 function lockHS(){pinUnlocked=false;pinBuf='';document.getElementById('hensachi-content').classList.add('hidden');document.getElementById('pin-wrap').classList.remove('hidden');for(let i=0;i<4;i++)document.getElementById('pd'+i).classList.remove('filled');document.getElementById('pin-err').textContent='';}
@@ -2094,15 +2474,19 @@ function toggleSound(){
 
 function _updateSoundBtn(){
   const btn=document.getElementById('sound-toggle-btn');
-  const icon=document.getElementById('sound-icon');
-  const lbl=document.getElementById('sound-label');
   if(!btn)return;
-  if(_soundOn){
-    icon.textContent='🔊';lbl.textContent='サウンドON';
-    btn.style.borderColor='var(--teal)';btn.style.color='var(--teal)';
-  }else{
-    icon.textContent='🔇';lbl.textContent='サウンドOFF';
-    btn.style.borderColor='var(--border)';btn.style.color='var(--text3)';
+  btn.classList.toggle('on',_soundOn);
+  btn.title=_soundOn?'サウンドON（タップでOFF）':'サウンドOFF（タップでON）';
+  // Toggle wave lines in SVG
+  const svg=document.getElementById('sound-svg');
+  if(svg){
+    // Remove existing wave paths
+    svg.querySelectorAll('.sound-wave').forEach(e=>e.remove());
+    if(_soundOn){
+      const p1=document.createElementNS('http://www.w3.org/2000/svg','path');
+      p1.setAttribute('d','M15.54 8.46a5 5 0 0 1 0 7.07');p1.setAttribute('class','sound-wave');p1.setAttribute('stroke','currentColor');p1.setAttribute('stroke-width','2');p1.setAttribute('stroke-linecap','round');p1.setAttribute('fill','none');
+      svg.appendChild(p1);
+    }
   }
 }
 
@@ -2202,31 +2586,48 @@ function playSound(type){
 
 // ── WELCOME MESSAGE ───────────────────────────────────────────
 const WELCOME_MESSAGES=[
-  {emoji:'🌅',title:'おはよう、夏伎！',msg:'今日も一歩ずつ着実に。\n合格への道は毎日の積み重ねだよ！'},
-  {emoji:'🚀',title:'今日もはじめよう！',msg:'昨日の自分より少しだけ成長しよう。\nそれだけで十分。'},
-  {emoji:'📚',title:'よく来たね！',msg:'今日勉強したことは、\nぜったいに裏切らないよ。'},
-  {emoji:'⭐',title:'がんばれ、夏伎！',msg:'パパもママも応援してるよ。\n今日もクエストを達成しよう！'},
-  {emoji:'🎯',title:'集中タイム、スタート！',msg:'スマホを置いて、\n今日の最初の一問を解いてみよう。'},
-  {emoji:'🔥',title:'ストリーク継続中！',msg:'毎日続けることが\n一番の才能だよ。'},
-  {emoji:'💎',title:'今日も最高の一日にしよう！',msg:'受験生として輝ける時間は\n今だけ。全力で行こう！'},
+  {emoji:'( ´ ▽ ` )ﾉ',title:'おかえり、夏伎くん！',msg:'また来てくれたね～！\nうれしいよ。さあ、今日もいっしょにがんばろう♪'},
+  {emoji:'(๑•̀ㅂ•́)و✧',title:'よく来たね！えらい！',msg:'来ただけでもう100点満点！\nあとは少しだけ前に進もう。'},
+  {emoji:'(っ´▽`)っ',title:'おかえりなさい〜！',msg:'夏伎くんのことを、\nパパもママも毎日応援してるよ。\n一緒にがんばろうね (ﾉ´ω`)ﾉ'},
+  {emoji:'✧*。٩(ˊᗜˋ*)و✧',title:'お！来たね！',msg:'今日もここに来てくれた夏伎くんはもう\n合格に向かって歩いてるよ。すごい！'},
+  {emoji:'(〃ᵕ〃)',title:'おかえり〜♪',msg:'昨日より少しだけでいい。\n毎日の積み重ねが、\nいつか大きな力になるよ。'},
+  {emoji:'(*ﾟ▽ﾟ*)',title:'来てくれてありがとう！',msg:'今日勉強したことは、\nぜったいに自分を裏切らないよ。\nいっしょに進もう！'},
+  {emoji:'(⌒▽⌒)☆',title:'おかえり、夏伎くん！',msg:'ここに来るたびに、\n夏伎くんは少しずつ強くなってるよ。\nすごいな～！'},
 ];
+
+// Birthday config
+const BIRTHDAYS=[
+  {mo:8,day:19,name:'夏伎くん',emoji:'🎂',msg:'今日は夏伎くんの誕生日だね！\nおめでとう！٩(ˊᗜˋ*)و\n受験生として輝く特別な一年になりますように。\nパパもママも大好きだよ！'},
+  {mo:7,day:17,name:'桐吏くん',emoji:'🎉',msg:'今日は桐吏くんの誕生日だね！\nおめでとう！(∩´∀`)∩\n素晴らしい一年になりますように。'},
+  {mo:3,day:15,name:'パパ（Yasuhiro）',emoji:'🎁',msg:'今日はパパの誕生日だね！\nYasuhiro、おめでとう！\n家族みんなが感謝してるよ。(*´▽`*)'},
+  {mo:9,day:25,name:'ママ（Yuko）',emoji:'🌹',msg:'今日はママの誕生日だね！\nYuko、おめでとう！\n今日はゆっくり過ごしてね。(ˊωˋ*)'},
+];
+
 function showWelcomeMessage(){
   const today=todayKey();
   if(localStorage.getItem('nk_welcome')===today)return;
   localStorage.setItem('nk_welcome',today);
   const d=new Date();
-  const idx=(d.getFullYear()*366+d.getMonth()*31+d.getDate())%WELCOME_MESSAGES.length;
-  const w=WELCOME_MESSAGES[idx];
+  const mo=d.getMonth()+1,day=d.getDate();
+  // Check birthdays first
+  const bday=BIRTHDAYS.find(b=>b.mo===mo&&b.day===day);
+  let w;
+  if(bday){
+    w={emoji:bday.emoji,title:'🎂 '+bday.name+'の誕生日！',msg:bday.msg};
+  } else {
+    // Random from 7 patterns
+    const idx=Math.floor(Math.random()*WELCOME_MESSAGES.length);
+    w=WELCOME_MESSAGES[idx];
+  }
   document.getElementById('welcome-emoji').textContent=w.emoji;
   document.getElementById('welcome-title').textContent=w.title;
   document.getElementById('welcome-msg').textContent=w.msg;
   const ov=document.getElementById('welcome-overlay');
   ov.style.display='flex';
   ov.style.animation='bdFadeIn .4s ease';
-  // Close on tap
   ov.onclick=()=>closeWelcome();
-  // Auto close after 4s
-  setTimeout(()=>closeWelcome(),4000);
+  // Birthday stays longer
+  setTimeout(()=>closeWelcome(),bday?6000:4500);
 }
 function closeWelcome(){
   const ov=document.getElementById('welcome-overlay');
