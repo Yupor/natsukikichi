@@ -1336,7 +1336,8 @@ async function _markReviewDone(q){
 // ── RADIO CORNER ──────────────────────────────────────────────
 async function initRadioCorner(){
   const saved=await sGet('radio-'+todayKey());
-  if(saved){renderRadio(saved);return;}
+  // キャッシュにillust_typeがない古いデータは再生成する
+  if(saved&&saved.illust_type!==undefined){renderRadio(saved);return;}
   if(!getApiKey()){
     renderRadio({title:'APIキー未設定',topic:'歴史',icon:'⚙️',content:'ファミリータブ → 🔑AI機能の設定 でAPIキーを入れると、毎日新しいネタが届くよ！',highlights:[]});
     return;
@@ -1372,30 +1373,29 @@ async function initRadioCorner(){
 
     const jsonExample='{"title":"今日のテーマ（短く）","topic":"'+t.topic+'","icon":"'+t.icon+'","content":"本文","highlights":["重要語句1"],"illust_type":"timeline OR compare OR flow OR map OR none","illust_data":{"labels":["ラベル1","ラベル2"],"values":["値1","値2"],"note":"補足"}}';
     const promptLines2=[
-      'あなたは中学受験（早稲田・麻布・開成レベル）の歴史・地理の講師です。',
+      'あなたは中学受験の歴史・地理をめちゃくちゃわかりやすく教える先生です。',
       '「そーだったのかラジオ」という小学5年生向けの読み物を書いてください。',
       '',
       'テーマ：「'+t.name+'」',
       '',
-      '条件：',
-      '・難易度は難関中学受験レベル。基本的すぎる内容は省く',
-      '・受験生がつまずきやすいポイントを中心に',
-      '・必ず身近なもので例える（ゲーム・スポーツ・食べ物など）',
-      '・話し言葉でサクサク読める',
+      '【文章のルール】',
+      '・タメ口・話し言葉で書く（「〜だよ」「〜なんだよね」「〜って感じ」）',
+      '・必ず身近な例えを入れる（ゲーム・サッカー・コンビニ・YouTube・スマホ等）',
+      '・専門用語はすぐ「つまり〜」と言い換える',
+      '・受験で狙われる意外なポイントやひっかけに触れる',
       '・重要語句は★語句★で囲む',
-      '・受験ポイントは【ポイント】〜 で1個だけ',
-      '・難しい漢字にはふりがな',
-      '・200〜250文字',
+      '・受験ポイントは【ポイント】〜 で1個だけ（短く！）',
+      '・難しい漢字はふりがなをつける',
+      '・180〜220文字でコンパクトに',
       '',
-      '【イラスト指定】illust_typeを以下から1つ選ぶ：',
-      '- timeline: 年代の流れ（例：○年→△年→□年）',
-      '- compare: 2つの比較（例：AとBの違い）',
-      '- flow: 仕組みの流れ（例：A→B→C→D）',
-      '- map: 地域・場所の関係',
-      '- none: 図が不要な場合',
+      '【イラスト指定】絶対にnone以外を選ぶこと！',
+      '- timeline: 時代の流れ（labelsに出来事名、valuesに年代や短い説明）',
+      '- compare: 2つのものの違い（labelsに比較項目、valuesに対応する値）',
+      '- flow: 仕組みの流れA→B→C（labelsに各ステップ名）',
+      '- map: 中心と周辺の関係（labels[0]が中心、以降が周辺）',
       '',
-      'illust_dataにはイラスト描画に必要なラベル・値・補足を入れる。',
-      'labels/valuesは最大4つまで。日本語で短く。',
+      'labels・valuesは各5文字以内の短い言葉で。2〜4個。',
+      'noteには図全体の一言補足を入れる。',
       '',
       'JSONのみで返す：',
       jsonExample
@@ -1404,7 +1404,7 @@ async function initRadioCorner(){
     const res=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':getApiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:800,messages:[{role:'user',content:prompt}]})
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1200,messages:[{role:'user',content:prompt}]})
     });
     const data=await res.json();
     const raw=data.content?.[0]?.text||'{}';
