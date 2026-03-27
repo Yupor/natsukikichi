@@ -1587,7 +1587,7 @@ async function initRadioCorner(){
     ];
     const t=topics[seed%topics.length];
 
-    const jsonExample='{"title":"短いテーマ名","topic":"'+t.topic+'","icon":"'+t.icon+'","hook":"つかみ文（1〜2文・驚き・例え）","point":"ここが超重要！（1〜2文）","exam":"試験ではこう出る（問われ方を1問だけ具体的に）","illust_type":"timeline OR compare OR flow OR map","illust_data":{"labels":["A","B","C"],"values":["説明1","説明2","説明3"],"note":"図の補足"}}';
+    const jsonExample='{"title":"短いテーマ名","topic":"'+t.topic+'","icon":"'+t.icon+'","hook":"つかみ文（1〜2文・驚き・例え）","point":"ここが超重要！（1〜2文）","exam":"試験ではこう出る（問われ方を1問だけ具体的に）","illust_type":"timeline OR compare OR flow OR map","illust_data":{"labels":["左列タイトル","データ1","データ2"],"values":["右列タイトル","値1","値2"],"note":"図の補足"}}';
     const promptLines2=[
       'あなたは中学受験の歴史・地理の先生です。',
       'テーマ：「'+t.name+'」',
@@ -1615,7 +1615,8 @@ async function initRadioCorner(){
       '4. illust_type（図）',
       '・内容に合う図を必ず選ぶ（noneは禁止）',
       '・timeline=時代の流れ / compare=2つの違い / flow=仕組み / map=場所の関係',
-      '・labels・valuesは4文字以内・2〜4個',
+      '・labels・valuesは5文字以内・3〜4個',
+      '・compareの場合：labels[0]＝左列タイトル、values[0]＝右列タイトル、以降がデータ行',
       '',
       'JSONのみで返す：',
       jsonExample
@@ -1731,21 +1732,31 @@ function buildRadioIllust(type, d){
 
   if(type==='compare'&&labels.length>=2){
     // Two column compare
-    const H=labels.length<=2?110:130;
+    // labels = left column items, values = right column items
+    // First label/value pair = column headers
+    const colLeft=labels[0]||'A';
+    const colRight=values[0]||'B';
+    const dataLabels=labels.slice(1);
+    const dataValues=values.slice(1);
+    const n=Math.min(dataLabels.length,4);
+    const rowH=24;
+    const headerH=28;
+    const H=headerH+(n>0?n*rowH+8:0)+(note?20:12);
     const mid=W/2;
     let rows='';
-    const n=Math.min(labels.length,4);
     for(let i=0;i<n;i++){
-      const y=30+i*22;
-      rows+='<rect x="10" y="'+(y-14)+'" width="'+(mid-18)+'" height="18" rx="4" fill="rgba(90,171,255,.12)"/>'
-           +'<text x="'+( mid/2)+'" y="'+y+'" text-anchor="middle" font-size="11" fill="'+BLUE+'" font-weight="700">'+labels[i]+'</text>'
-           +'<rect x="'+(mid+8)+'" y="'+(y-14)+'" width="'+(mid-18)+'" height="18" rx="4" fill="rgba(255,154,80,.12)"/>'
-           +'<text x="'+(mid+mid/2)+'" y="'+y+'" text-anchor="middle" font-size="11" fill="'+ORANGE+'" font-weight="700">'+(values[i]||'')+'</text>';
+      const y=headerH+10+i*rowH;
+      rows+='<rect x="8" y="'+(y-15)+'" width="'+(mid-14)+'" height="20" rx="5" fill="rgba(90,171,255,.1)"/>'
+           +'<text x="'+(mid/2)+'" y="'+y+'" text-anchor="middle" font-size="12" fill="'+BLUE+'" font-weight="700">'+dataLabels[i]+'</text>'
+           +'<rect x="'+(mid+6)+'" y="'+(y-15)+'" width="'+(mid-14)+'" height="20" rx="5" fill="rgba(255,154,80,.1)"/>'
+           +'<text x="'+(mid+mid/2)+'" y="'+y+'" text-anchor="middle" font-size="12" fill="'+ORANGE+'" font-weight="700">'+(dataValues[i]||'')+'</text>';
     }
-    return '<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;border-radius:10px;background:rgba(255,255,255,.04);padding:6px 0;">'
-      +'<text x="'+(mid/2)+'" y="16" text-anchor="middle" font-size="10" fill="'+BLUE+'" font-weight="800">'+( labels[0]||'A')+'</text>'
-      +'<line x1="'+mid+'" y1="4" x2="'+mid+'" y2="'+(H-8)+'" stroke="#2a4470" stroke-width="1.5" stroke-dasharray="4,3"/>'
-      +'<text x="'+(mid+mid/2)+'" y="16" text-anchor="middle" font-size="10" fill="'+ORANGE+'" font-weight="800">'+( values[0]||'B')+'</text>'
+    return '<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;border-radius:10px;background:rgba(255,255,255,.04);">'
+      +'<rect x="8" y="4" width="'+(mid-14)+'" height="20" rx="6" fill="rgba(90,171,255,.2)"/>'
+      +'<text x="'+(mid/2)+'" y="18" text-anchor="middle" font-size="12" fill="'+BLUE+'" font-weight="800">'+colLeft+'</text>'
+      +'<rect x="'+(mid+6)+'" y="4" width="'+(mid-14)+'" height="20" rx="6" fill="rgba(255,154,80,.2)"/>'
+      +'<text x="'+(mid+mid/2)+'" y="18" text-anchor="middle" font-size="12" fill="'+ORANGE+'" font-weight="800">'+colRight+'</text>'
+      +'<line x1="'+mid+'" y1="2" x2="'+mid+'" y2="'+(H-10)+'" stroke="#2a4470" stroke-width="1.5" stroke-dasharray="4,3"/>'
       +rows
       +(note?'<text x="'+(W/2)+'" y="'+(H-4)+'" text-anchor="middle" font-size="9" fill="#5a7a9a">'+note+'</text>':'')
       +'</svg>';
