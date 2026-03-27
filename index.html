@@ -531,27 +531,190 @@ input:focus,textarea:focus,select:focus{border-color:var(--teal);box-shadow:0 0 
   </div>
 </div>
 
-<!-- ══ TAB: 偏差値 ══ -->
+<!-- ══ TAB: 分析 ══ -->
 <div id="tab-hensachi" class="content">
-  <div id="pin-wrap" class="pin-wrap">
-    <div style="font-size:11px;color:var(--text3);letter-spacing:3px;font-weight:700;">PAPA ONLY</div>
-    <div style="font-size:26px;font-weight:800;color:var(--gold);margin-top:10px;">🔐 PIN入力</div>
-    <div style="font-size:15px;color:var(--text2);margin-top:6px;">Yasuhiro専用エリアです</div>
-    <div class="pdots" id="pdots">
-      <div class="pdot" id="pd0"></div><div class="pdot" id="pd1"></div>
-      <div class="pdot" id="pd2"></div><div class="pdot" id="pd3"></div>
+  <div id="hensachi-content">
+
+    <!-- ステップ説明 -->
+    <div style="display:flex;gap:0;margin-bottom:16px;background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;">
+      <div style="flex:1;padding:10px 6px;text-align:center;border-right:1px solid var(--border);">
+        <div style="font-size:18px;margin-bottom:2px;">📝</div>
+        <div style="font-size:9px;font-weight:800;color:var(--teal);letter-spacing:.5px;">STEP 1</div>
+        <div style="font-size:10px;color:var(--text2);font-weight:700;margin-top:1px;">夏伎が登録</div>
+      </div>
+      <div style="flex:1;padding:10px 6px;text-align:center;border-right:1px solid var(--border);">
+        <div style="font-size:18px;margin-bottom:2px;">🔬</div>
+        <div style="font-size:9px;font-weight:800;color:var(--purple);letter-spacing:.5px;">STEP 2</div>
+        <div style="font-size:10px;color:var(--text2);font-weight:700;margin-top:1px;">弱点分析</div>
+      </div>
+      <div style="flex:1;padding:10px 6px;text-align:center;border-right:1px solid var(--border);">
+        <div style="font-size:18px;margin-bottom:2px;">📊</div>
+        <div style="font-size:9px;font-weight:800;color:var(--gold);letter-spacing:.5px;">STEP 3</div>
+        <div style="font-size:10px;color:var(--text2);font-weight:700;margin-top:1px;">パパが入力</div>
+      </div>
+      <div style="flex:1;padding:10px 6px;text-align:center;">
+        <div style="font-size:18px;margin-bottom:2px;">📈</div>
+        <div style="font-size:9px;font-weight:800;color:var(--blue);letter-spacing:.5px;">STEP 4</div>
+        <div style="font-size:10px;color:var(--text2);font-weight:700;margin-top:1px;">グラフ確認</div>
+      </div>
     </div>
-    <div id="pin-err" style="font-size:14px;color:var(--red);height:20px;text-align:center;margin-bottom:10px;font-weight:700;"></div>
-    <div class="pkpad">
-      <button class="pkey" onclick="pinIn('1')">1</button><button class="pkey" onclick="pinIn('2')">2</button><button class="pkey" onclick="pinIn('3')">3</button>
-      <button class="pkey" onclick="pinIn('4')">4</button><button class="pkey" onclick="pinIn('5')">5</button><button class="pkey" onclick="pinIn('6')">6</button>
-      <button class="pkey" onclick="pinIn('7')">7</button><button class="pkey" onclick="pinIn('8')">8</button><button class="pkey" onclick="pinIn('9')">9</button>
-      <button class="pkey pkey-sm" onclick="pinClear()">C</button><button class="pkey" onclick="pinIn('0')">0</button><button class="pkey pkey-sm" onclick="pinDel()">⌫</button>
+
+    <!-- ━━ STEP 1: 夏伎がテストを登録 ━━ -->
+    <div class="card" style="border-color:rgba(0,224,181,.35);border-width:1.5px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#040b18;flex-shrink:0;">1</div>
+        <div>
+          <div class="ctitle" style="margin-bottom:0;">テストを登録する</div>
+          <div style="font-size:11px;color:var(--teal);font-weight:700;">🧒 夏伎が受けたらすぐ登録しよう！</div>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="showAddTestType()" style="margin-left:auto;font-size:11px;padding:5px 10px;">＋ 種別</button>
+      </div>
+      <span class="lbl">テストの種類</span>
+      <div id="test-type-tabs" style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px;"></div>
+      <span class="lbl">回</span>
+      <div id="test-round-tabs" style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px;"></div>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
+        <select id="new-round-num" style="flex:1;font-size:15px;">
+          <option value="">回数を選ぶ</option>
+          <option>第1回</option><option>第2回</option><option>第3回</option>
+          <option>第4回</option><option>第5回</option><option>第6回</option>
+          <option>第7回</option><option>第8回</option><option>第9回</option>
+          <option>第10回</option><option>第11回</option><option>第12回</option>
+        </select>
+        <button class="btn btn-outline btn-sm" onclick="addTestRound()" style="white-space:nowrap;">＋ 追加</button>
+      </div>
+      <div style="margin-bottom:12px;">
+        <span class="lbl">実施日</span>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <select id="h-month" style="font-size:15px;">
+            <option value="">月</option>
+            <option>1月</option><option>2月</option><option>3月</option><option>4月</option>
+            <option>5月</option><option>6月</option><option>7月</option><option>8月</option>
+            <option>9月</option><option>10月</option><option>11月</option><option>12月</option>
+          </select>
+          <select id="h-day" style="font-size:15px;">
+            <option value="">日</option>
+            <option>1日</option><option>2日</option><option>3日</option><option>4日</option><option>5日</option>
+            <option>6日</option><option>7日</option><option>8日</option><option>9日</option><option>10日</option>
+            <option>11日</option><option>12日</option><option>13日</option><option>14日</option><option>15日</option>
+            <option>16日</option><option>17日</option><option>18日</option><option>19日</option><option>20日</option>
+            <option>21日</option><option>22日</option><option>23日</option><option>24日</option><option>25日</option>
+            <option>26日</option><option>27日</option><option>28日</option><option>29日</option><option>30日</option><option>31日</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-teal btn-full" onclick="registerTest()">📝 テストを登録する</button>
+      <div style="font-size:12px;color:var(--text3);margin-top:8px;">偏差値はあとでパパが入力するよ。まず登録だけでOK！</div>
     </div>
-  </div>
-  <div id="hensachi-content" class="hidden">
+
+    <!-- 矢印 -->
+    <div style="text-align:center;font-size:22px;color:var(--border2);margin:-4px 0;">↓</div>
+
+    <!-- ━━ STEP 2: 強み・弱点分析 ━━ -->
+    <div class="card" style="border-color:rgba(179,148,255,.35);border-width:1.5px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#040b18;flex-shrink:0;">2</div>
+        <div>
+          <div class="ctitle" style="margin-bottom:0;">強み・弱点を分析する</div>
+          <div style="font-size:11px;color:var(--purple);font-weight:700;">🧒 問題用紙と回答用紙を読み込もう！</div>
+        </div>
+        <span style="margin-left:auto;font-size:10px;background:rgba(179,148,255,.15);color:var(--purple);border:1px solid rgba(179,148,255,.4);border-radius:4px;padding:2px 7px;font-weight:800;">AI</span>
+      </div>
+      <div style="background:rgba(179,148,255,.07);border-radius:10px;padding:10px 12px;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+        <span style="font-size:16px;">💡</span>
+        <div style="font-size:13px;color:var(--text2);">1教科分析するごとに <strong style="color:var(--purple);">+3XP</strong> もらえるよ！</div>
+      </div>
+      <span class="lbl">📋 どのテストを分析する？</span>
+      <div id="analysis-test-select" style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px;"></div>
+      <div id="analysis-no-test" style="font-size:13px;color:var(--text3);background:rgba(255,255,255,.03);border-radius:8px;padding:8px 12px;margin-bottom:10px;">↑ STEP 1でテストを登録すると選べるよ</div>
+      <div id="analysis-selected-test" class="hidden" style="background:rgba(179,148,255,.1);border:1.5px solid rgba(179,148,255,.3);border-radius:10px;padding:10px 14px;margin-bottom:12px;">
+        <div style="font-size:11px;color:var(--purple);font-weight:800;margin-bottom:2px;">分析するテスト</div>
+        <div id="analysis-selected-test-label" style="font-size:15px;font-weight:700;color:var(--text);"></div>
+      </div>
+      <div class="itabs" id="analysis-tabs" style="margin-bottom:12px;">
+        <button class="itab active" onclick="selAnalysisTab('国語',this)">📖 国語</button>
+        <button class="itab" onclick="selAnalysisTab('算数',this)">🔢 算数</button>
+        <button class="itab" onclick="selAnalysisTab('理科',this)">🔬 理科</button>
+        <button class="itab" onclick="selAnalysisTab('社会',this)">🌏 社会</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+        <div>
+          <span class="lbl">問題用紙</span>
+          <div class="upload-area" style="padding:14px;" onclick="document.getElementById('weak-q-upload').click()">
+            <div style="font-size:28px;">📄</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:4px;" id="weak-q-label">タップして選択</div>
+          </div>
+          <input type="file" id="weak-q-upload" accept="image/*" style="display:none;" onchange="handleWeakUpload(event,'q')">
+        </div>
+        <div>
+          <span class="lbl">回答用紙</span>
+          <div class="upload-area" style="padding:14px;" onclick="document.getElementById('weak-a-upload').click()">
+            <div style="font-size:28px;">✏️</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:4px;" id="weak-a-label">タップして選択</div>
+          </div>
+          <input type="file" id="weak-a-upload" accept="image/*" style="display:none;" onchange="handleWeakUpload(event,'a')">
+        </div>
+      </div>
+      <button class="btn btn-full" id="weak-analyze-btn" onclick="analyzeWeakness()" style="background:var(--purple);color:#040b18;font-size:15px;font-weight:800;" disabled>
+        🔬 分析スタート！
+      </button>
+      <div id="weak-result-panel" style="margin-top:16px;">
+        <div id="weak-empty-state" style="text-align:center;padding:16px 0;color:var(--text3);font-size:14px;">
+          <div style="font-size:28px;margin-bottom:6px;">📋</div>
+          テストを選んでアップロードしてね
+        </div>
+        <div id="weak-data-panel" class="hidden">
+          <div id="strength-weakness-visual" style="margin-bottom:16px;"></div>
+          <div id="weak-advice-card" class="hidden" style="background:rgba(179,148,255,.07);border:1px solid rgba(179,148,255,.2);border-radius:10px;padding:14px;margin-bottom:12px;">
+            <div style="font-size:11px;color:var(--purple);font-weight:800;letter-spacing:1.5px;margin-bottom:8px;">💡 夏伎への復習アドバイス</div>
+            <div id="weak-advice-text" style="font-size:14px;color:var(--text);line-height:1.8;"></div>
+          </div>
+          <div id="chatgpt-link-area" class="hidden" style="margin-bottom:12px;">
+            <button class="btn btn-outline btn-full" onclick="copyGPTPrompt()" style="font-size:13px;">
+              🤖 ChatGPTで詳しく解説してもらう
+            </button>
+            <div style="font-size:11px;color:var(--text3);margin-top:6px;line-height:1.6;">プロンプトがコピーされます。ChatGPTに貼り付けてね！</div>
+          </div>
+          <div id="weak-practice-section" class="hidden">
+            <div style="font-size:12px;color:var(--text3);font-weight:700;letter-spacing:1px;margin-bottom:8px;">⚔️ 弱点克服 練習問題</div>
+            <div id="weak-practice-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 矢印 -->
+    <div style="text-align:center;font-size:22px;color:var(--border2);margin:-4px 0;">↓</div>
+
+    <!-- ━━ STEP 3: Yasuhiroが偏差値を入力 ━━ -->
+    <div class="card" style="border-color:rgba(255,210,63,.3);border-width:1.5px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#040b18;flex-shrink:0;">3</div>
+        <div>
+          <div class="ctitle" style="margin-bottom:0;">偏差値を入力する</div>
+          <div style="font-size:11px;color:var(--gold);font-weight:700;">👨 Yasuhiroが結果届いたら入力してね！</div>
+        </div>
+      </div>
+      <span class="lbl">どのテストの結果？</span>
+      <div id="score-test-select" style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px;">
+        <div style="font-size:13px;color:var(--text3);">↑ STEP 1でテストを登録すると選べるよ</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+        <div><span class="lbl">偏差値</span><input type="number" id="h-score" placeholder="55" min="20" max="80"/></div>
+        <div><span class="lbl">教科</span><select id="h-subj"><option>総合</option><option>国語</option><option>算数</option><option>理科</option><option>社会</option></select></div>
+      </div>
+      <button class="btn btn-full" onclick="addHS()" style="background:var(--gold);color:#040b18;font-weight:800;">追加する</button>
+    </div>
+
+    <!-- 矢印 -->
+    <div style="text-align:center;font-size:22px;color:var(--border2);margin:-4px 0;">↓</div>
+
+    <!-- ━━ STEP 4: 偏差値グラフ ━━ -->
     <div class="card">
-      <div class="ctitle">📈 偏差値グラフ</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#040b18;flex-shrink:0;">4</div>
+        <div class="ctitle" style="margin-bottom:0;">📈 偏差値グラフ</div>
+      </div>
       <div class="itabs" id="htabs">
         <button class="itab active" onclick="selHS('総合',this)">総合</button>
         <button class="itab" onclick="selHS('国語',this)">国語</button>
@@ -561,88 +724,26 @@ input:focus,textarea:focus,select:focus{border-color:var(--teal);box-shadow:0 0 
       </div>
       <canvas id="hchart" height="220"></canvas>
     </div>
-    <div class="card">
-      <div class="ctitle">➕ 成績を追加</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
-        <div><span class="lbl">日付</span><input type="text" id="h-date" placeholder="例: 3/25"/></div>
-        <div><span class="lbl">偏差値</span><input type="number" id="h-score" placeholder="55" min="20" max="80"/></div>
-      </div>
-      <div style="margin-bottom:10px;"><span class="lbl">教科</span><select id="h-subj"><option>総合</option><option>国語</option><option>算数</option><option>理科</option><option>社会</option></select></div>
-      <div style="margin-bottom:12px;"><span class="lbl">テスト名</span><input type="text" id="h-name" placeholder="例: マンスリーテスト 3月"/></div>
-      <button class="btn btn-teal btn-full" onclick="addHS()">追加する</button>
-    </div>
+
     <div class="card">
       <div class="ctitle">📋 成績履歴</div>
       <div id="score-hist"></div>
     </div>
 
-    <!-- ━━ 弱点分析 ━━ -->
-    <div class="card" style="border-color:rgba(179,148,255,.35);border-width:1.5px;">
-      <div class="ctitle">🔬 テスト弱点分析 <span style="font-size:10px;background:rgba(179,148,255,.15);color:var(--purple);border:1px solid var(--purple)44;border-radius:4px;padding:2px 7px;margin-left:4px;">AI</span></div>
-
-      <!-- 教科タブ（分析結果表示用） -->
-      <div class="itabs" id="weak-tabs" style="margin-bottom:0;">
-        <button class="itab active" onclick="selWeakTab('国語',this)">📖 国語</button>
-        <button class="itab" onclick="selWeakTab('算数',this)">🔢 算数</button>
-        <button class="itab" onclick="selWeakTab('理科',this)">🔬 理科</button>
-        <button class="itab" onclick="selWeakTab('社会',this)">🌏 社会</button>
-      </div>
-
-      <!-- 分析結果パネル -->
-      <div id="weak-result-panel" style="margin-top:14px;">
-        <div id="weak-empty-state" style="text-align:center;padding:20px 0;color:var(--text3);font-size:14px;">
-          <div style="font-size:32px;margin-bottom:8px;">📋</div>
-          まだ分析データがありません<br>下からテストをアップロードしてください
-        </div>
-        <div id="weak-data-panel" class="hidden">
-          <div style="margin-bottom:12px;">
-            <div style="font-size:12px;color:var(--text3);font-weight:700;letter-spacing:1px;margin-bottom:8px;">📊 分野別 強み・弱点</div>
-            <div id="weak-bars-chart"></div>
-          </div>
-          <div id="weak-advice-card" class="hidden" style="background:rgba(179,148,255,.07);border:1px solid rgba(179,148,255,.2);border-radius:10px;padding:14px;margin-bottom:12px;">
-            <div style="font-size:11px;color:var(--purple);font-weight:800;letter-spacing:1.5px;margin-bottom:8px;">💡 復習アドバイス</div>
-            <div id="weak-advice-text" style="font-size:14px;color:var(--text);line-height:1.8;"></div>
-          </div>
-          <div id="weak-practice-section" class="hidden">
-            <div style="font-size:12px;color:var(--text3);font-weight:700;letter-spacing:1px;margin-bottom:8px;">⚔️ 弱点克服 練習問題</div>
-            <div id="weak-practice-list"></div>
-          </div>
+    <!-- テスト種別追加モーダル -->
+    <div id="add-test-type-modal" class="hidden" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(4,11,24,.88);z-index:8000;display:flex;align-items:center;justify-content:center;padding:24px;">
+      <div style="background:var(--card);border:1.5px solid var(--border);border-radius:18px;padding:24px;width:100%;max-width:320px;">
+        <div style="font-size:17px;font-weight:800;margin-bottom:14px;">＋ テスト種別を追加</div>
+        <input type="text" id="new-test-type-inp" placeholder="例: 実力テスト" style="margin-bottom:12px;"/>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-teal" style="flex:1;" onclick="saveNewTestType()">追加する</button>
+          <button class="btn btn-outline" onclick="document.getElementById('add-test-type-modal').classList.add('hidden')">キャンセル</button>
         </div>
       </div>
-
-      <hr class="divider">
-
-      <!-- アップロードセクション -->
-      <div style="font-size:12px;color:var(--text3);font-weight:700;letter-spacing:1px;margin-bottom:10px;">📷 テストを読み込む</div>
-      <div style="margin-bottom:10px;">
-        <span class="lbl">教科</span>
-        <select id="weak-subj"><option>国語</option><option>算数</option><option>理科</option><option>社会</option></select>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
-        <div>
-          <span class="lbl">問題用紙</span>
-          <div class="upload-area" style="padding:16px;" onclick="document.getElementById('weak-q-upload').click()">
-            <div style="font-size:26px;">📄</div>
-            <div style="font-size:12px;color:var(--text2);margin-top:4px;" id="weak-q-label">タップして選択</div>
-          </div>
-          <input type="file" id="weak-q-upload" accept="image/*" style="display:none;" onchange="handleWeakUpload(event,'q')">
-        </div>
-        <div>
-          <span class="lbl">回答用紙</span>
-          <div class="upload-area" style="padding:16px;" onclick="document.getElementById('weak-a-upload').click()">
-            <div style="font-size:26px;">✏️</div>
-            <div style="font-size:12px;color:var(--text2);margin-top:4px;" id="weak-a-label">タップして選択</div>
-          </div>
-          <input type="file" id="weak-a-upload" accept="image/*" style="display:none;" onchange="handleWeakUpload(event,'a')">
-        </div>
-      </div>
-      <button class="btn btn-full" id="weak-analyze-btn" onclick="analyzeWeakness()" style="background:var(--purple);color:#040b18;font-size:15px;font-weight:800;" disabled>
-        🔬 弱点を分析する
-      </button>
     </div>
 
     <div style="text-align:right;margin-bottom:14px;">
-      <button class="btn btn-outline btn-sm" onclick="lockHS()">🔒 ロックする</button>
+      <button class="btn btn-outline btn-sm" onclick="lockHS()">🔒 成績をロックする</button>
     </div>
   </div>
 </div>
@@ -709,27 +810,41 @@ input:focus,textarea:focus,select:focus{border-color:var(--teal);box-shadow:0 0 
 
 <!-- ══ TAB: 攻略の道 ══ -->
 <div id="tab-kouryaku" class="content">
-  <div class="card" style="text-align:center;padding:22px 18px 18px;">
-    <div style="font-size:40px;margin-bottom:8px;">⚔️</div>
-    <div style="font-size:22px;font-weight:800;color:var(--gold);">攻略の道</div>
-    <div style="font-size:14px;color:var(--text2);margin-top:6px;line-height:1.7;">問題写真を撮影 → AI類似問題を生成<br>正解するとメダルが獲得できる！</div>
+
+  <!-- セクション切り替え -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px;">
+    <button class="btn" id="kouryaku-tab-jibun" onclick="switchKouryakuTab('jibun')" style="background:rgba(255,210,63,.15);color:var(--gold);border:1.5px solid rgba(255,210,63,.3);font-size:13px;padding:12px;">
+      📷 自分でアップロード
+    </button>
+    <button class="btn" id="kouryaku-tab-strategy" onclick="switchKouryakuTab('strategy')" style="background:var(--surface);color:var(--text3);border:1.5px solid var(--border);font-size:13px;padding:12px;">
+      🎯 テスト対策問題
+      <span id="strategy-count-badge" style="display:none;background:var(--red);color:white;border-radius:10px;padding:1px 7px;font-size:10px;margin-left:4px;"></span>
+    </button>
   </div>
-  <div class="card">
-    <div class="ctitle">🏅 獲得メダル</div>
-    <div class="mgrid" id="mgrid"></div>
-    <div id="medal-count" style="font-size:14px;color:var(--text3);margin-top:12px;text-align:center;"></div>
-    <hr class="divider">
-    <div style="font-size:12px;color:var(--text3);font-weight:700;letter-spacing:1px;margin-bottom:10px;">獲得条件一覧</div>
-    <div class="mdetail" id="medal-detail-list"></div>
-  </div>
-  <div class="card" id="step-upload">
-    <div class="ctitle">📷 ステップ1：問題を撮影・アップロード</div>
-    <div class="upload-area" onclick="document.getElementById('fupload').click()">
-      <div style="font-size:42px;margin-bottom:10px;">📸</div>
-      <div style="font-size:16px;color:var(--text2);font-weight:700;">タップして写真を選択</div>
-      <div style="font-size:13px;color:var(--text3);margin-top:5px;">JPG / PNG 対応</div>
+
+  <!-- ① 自分でアップロード -->
+  <div id="kouryaku-jibun">
+    <div class="card" style="text-align:center;padding:18px 18px 14px;">
+      <div style="font-size:36px;margin-bottom:6px;">📷</div>
+      <div style="font-size:19px;font-weight:800;color:var(--gold);">問題をアップして解こう！</div>
+      <div style="font-size:13px;color:var(--text2);margin-top:5px;line-height:1.7;">写真を撮影 → AI類似問題を生成<br>正解するとXP＆メダルが獲得できる！</div>
     </div>
-    <input type="file" id="fupload" accept="image/*" style="display:none;" onchange="handleUpload(event)">
+    <div class="card">
+      <div class="ctitle">🏅 獲得メダル</div>
+      <div class="mgrid" id="mgrid"></div>
+      <div id="medal-count" style="font-size:14px;color:var(--text3);margin-top:12px;text-align:center;"></div>
+      <hr class="divider">
+      <div style="font-size:12px;color:var(--text3);font-weight:700;letter-spacing:1px;margin-bottom:10px;">獲得条件一覧</div>
+      <div class="mdetail" id="medal-detail-list"></div>
+    </div>
+    <div class="card" id="step-upload">
+      <div class="ctitle">📷 ステップ1：問題を撮影・アップロード</div>
+      <div class="upload-area" onclick="document.getElementById('fupload').click()">
+        <div style="font-size:42px;margin-bottom:10px;">📸</div>
+        <div style="font-size:16px;color:var(--text2);font-weight:700;">タップして写真を選択</div>
+        <div style="font-size:13px;color:var(--text3);margin-top:5px;">JPG / PNG 対応</div>
+      </div>
+      <input type="file" id="fupload" accept="image/*" style="display:none;" onchange="handleUpload(event)">
     <div id="upload-preview" class="hidden" style="margin-top:12px;">
       <img id="prev-img" style="width:100%;border-radius:10px;max-height:220px;object-fit:contain;border:1px solid var(--border);"/>
       <div style="margin-top:12px;"><span class="lbl">教科を選択</span><select id="k-subj"><option>算数</option><option>国語</option><option>理科</option><option>社会</option></select></div>
@@ -745,6 +860,30 @@ input:focus,textarea:focus,select:focus{border-color:var(--teal);box-shadow:0 0 
     <div id="grade-result"></div>
     <button class="btn btn-outline btn-full" style="margin-top:14px;" onclick="resetQuest()">🔄 別の問題に挑戦する</button>
   </div>
+  </div><!-- /kouryaku-jibun -->
+
+  <!-- ② テスト対策問題 -->
+  <div id="kouryaku-strategy" style="display:none;">
+    <div style="padding:8px 0 12px;">
+      <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:4px;">🎯 テスト対策問題</div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.6;">テスト分析で見つかった弱点の<br>克服問題が自動で届くよ！</div>
+    </div>
+    <!-- 教科フィルター -->
+    <div class="itabs" id="strategy-tabs" style="margin-bottom:12px;">
+      <button class="itab active" onclick="selStrategyTab('全て',this)">全て</button>
+      <button class="itab" onclick="selStrategyTab('国語',this)">📖 国語</button>
+      <button class="itab" onclick="selStrategyTab('算数',this)">🔢 算数</button>
+      <button class="itab" onclick="selStrategyTab('理科',this)">🔬 理科</button>
+      <button class="itab" onclick="selStrategyTab('社会',this)">🌏 社会</button>
+    </div>
+    <div id="strategy-problems-list"></div>
+    <div id="strategy-empty" style="text-align:center;padding:40px 0;color:var(--text3);">
+      <div style="font-size:40px;margin-bottom:12px;">🎯</div>
+      <div style="font-size:15px;font-weight:700;margin-bottom:6px;">まだ対策問題がないよ</div>
+      <div style="font-size:13px;line-height:1.7;">📊 分析タブ → テスト分析 で<br>テストを読み込むと自動で届くよ！</div>
+    </div>
+  </div>
+
 </div>
 
 <!-- ══ TAB: ファミリー ══ -->
@@ -1042,7 +1181,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--teal);box-shadow:0 0 
 <!-- BOTTOM NAV -->
 <div class="bnav">
   <button class="ni active" id="nb-home" onclick="showTab('home')"><span class="ico">🏠</span>ホーム</button>
-  <button class="ni" id="nb-hensachi" onclick="showTab('hensachi')"><span class="ico">📈</span>偏差値</button>
+  <button class="ni" id="nb-hensachi" onclick="showTab('hensachi')"><span class="ico">📊</span>分析</button>
   <button class="ni" id="nb-calendar" onclick="showTab('calendar')"><span class="ico">📅</span>塾カレ</button>
   <button class="ni" id="nb-kouryaku" onclick="showTab('kouryaku')"><span class="ico">⚔️</span>攻略</button>
   <button class="ni" id="nb-family" onclick="showTab('family')"><span class="ico">👨‍👩‍👦</span>家族</button>
@@ -1142,7 +1281,7 @@ const MEDAL_DEFS=[
 ];
 
 // STATE
-let pinBuf='',pinUnlocked=false;
+let pinBuf='',pinUnlocked=true;
 let timerOn=false,timerIv=null,timerSec=0,activeSubj=null,activeMode='予習';
 let calDate=new Date(),selCalDate=null;
 let hensachiData={},studyData={},studyDetail={},questData={};
@@ -1224,6 +1363,7 @@ async function init(){
   renderApiKeyStatus();
   renderEmailStatus();
   initSound();
+  loadTestRegistry();
   setTimeout(showWelcomeMessage,600);
   // Check scheduled emails (daily summary, weekly report)
   setTimeout(checkAndSendScheduledEmails, 3000);
@@ -1290,9 +1430,8 @@ function showTab(id){
   document.querySelectorAll('.ni').forEach(e=>e.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active');
   document.getElementById('nb-'+id).classList.add('active');
-  // Scroll to top smoothly
   window.scrollTo({top:0,behavior:'smooth'});
-  if(id==='hensachi'&&pinUnlocked){renderHChart();loadWeakData();}
+  if(id==='hensachi'){renderHChart();loadWeakData();renderScoreTestSelect();}
   if(id==='calendar'){renderCalendar();loadGCalSetup();}
   if(id==='family'){renderFamilySummary();renderMessages();}
 }
@@ -2935,8 +3074,523 @@ function initSound(){
 // Patch earnMedal to add sound
 const _origEarnMedal=earnMedal;// will be set below after function def
 
-// Patch celebrate to add sound
-const _origCelebrate=celebrate;
+// ── テスト台帳 ─────────────────────────────────────────────
+const DEFAULT_TEST_TYPES=['カリキュラムテスト','組み分けテスト','マンスリーテスト','公開模試（SO）'];
+let _testTypes=[];
+let _testRounds=[];   // 選択中の種別に対応する回リスト
+let _selectedTestType='';
+let _selectedTestRound='';
+let _selectedAnalysisTest=''; // 分析で選んだテスト名
+
+async function loadTestRegistry(){
+  const types=await sGet('test-types');
+  _testTypes=types||(DEFAULT_TEST_TYPES.slice());
+  const rounds=await sGet('test-rounds')||{};
+  renderTestTypeTabs();
+  // Auto-select first type
+  if(_testTypes.length>0)selectTestType(_testTypes[0]);
+  renderScoreTestSelect();
+}
+
+function renderTestTypeTabs(){
+  const el=document.getElementById('test-type-tabs');
+  if(!el)return;
+  el.innerHTML=_testTypes.map(t=>{
+    const active=t===_selectedTestType;
+    return '<button onclick="selectTestType(\''+t.replace(/'/g,'\\\'')+'\')" style="padding:6px 12px;border-radius:8px;border:1.5px solid '+(active?'var(--teal)':'var(--border)')+';background:'+(active?'rgba(0,224,181,.1)':'var(--surface)')+';color:'+(active?'var(--teal)':'var(--text2)')+';font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">'+t+'</button>';
+  }).join('');
+}
+
+async function selectTestType(type){
+  _selectedTestType=type;
+  renderTestTypeTabs();
+  // Load rounds for this type
+  const rounds=await sGet('test-rounds')||{};
+  _testRounds=rounds[type]||[];
+  renderTestRoundTabs();
+  // Also update analysis test selector
+  renderAnalysisTestSelector();
+}
+
+function renderTestRoundTabs(){
+  const el=document.getElementById('test-round-tabs');
+  if(!el)return;
+  el.innerHTML=_testRounds.map(r=>{
+    const active=r===_selectedTestRound;
+    return '<button onclick="selectTestRound(\''+r.replace(/'/g,'\\\'')+'\')" style="padding:5px 10px;border-radius:7px;border:1.5px solid '+(active?'var(--gold)':'var(--border)')+';background:'+(active?'rgba(255,210,63,.1)':'var(--surface)')+';color:'+(active?'var(--gold)':'var(--text2)')+';font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">'+r+'</button>';
+  }).join('');
+  if(_testRounds.length===0){
+    el.innerHTML='<span style="font-size:12px;color:var(--text3);">まだ回がありません。下に入力して追加してね。</span>';
+  }
+}
+
+function selectTestRound(round){
+  _selectedTestRound=round;
+  renderTestRoundTabs();
+}
+
+async function addTestRound(){
+  const sel=document.getElementById('new-round-num');
+  const val=sel?sel.value.trim():'';
+  if(!val||!_selectedTestType){showToast('テストの種類と回を選んでね');return;}
+  const rounds=await sGet('test-rounds')||{};
+  if(!rounds[_selectedTestType])rounds[_selectedTestType]=[];
+  if(!rounds[_selectedTestType].includes(val)){
+    rounds[_selectedTestType].push(val);
+    await sSet('test-rounds',rounds);
+    _testRounds=rounds[_selectedTestType];
+    renderTestRoundTabs();
+    renderAnalysisTestSelector();
+  }
+  if(sel)sel.value='';
+  selectTestRound(val);
+}
+
+function showAddTestType(){
+  document.getElementById('add-test-type-modal').classList.remove('hidden');
+  document.getElementById('new-test-type-inp').focus();
+}
+
+async function saveNewTestType(){
+  const inp=document.getElementById('new-test-type-inp');
+  const val=inp.value.trim();
+  if(!val)return;
+  if(!_testTypes.includes(val)){
+    _testTypes.push(val);
+    await sSet('test-types',_testTypes);
+    renderTestTypeTabs();
+  }
+  inp.value='';
+  document.getElementById('add-test-type-modal').classList.add('hidden');
+  selectTestType(val);
+}
+
+// 分析セクション用テスト選択
+function renderAnalysisTestSelector(){
+  const el=document.getElementById('analysis-test-select');
+  const noTestEl=document.getElementById('analysis-no-test');
+  if(!el)return;
+  // Build list of all registered tests (type + round)
+  const allTests=[];
+  // Include current type's rounds
+  if(_selectedTestType&&_testRounds.length>0){
+    _testRounds.forEach(r=>allTests.push(_selectedTestType+' '+r));
+  }
+  if(allTests.length===0){
+    el.innerHTML='';
+    if(noTestEl)noTestEl.style.display='';
+    return;
+  }
+  if(noTestEl)noTestEl.style.display='none';
+  el.innerHTML=allTests.map(t=>{
+    const active=t===_selectedAnalysisTest;
+    return '<button onclick="selectAnalysisTest(\''+t.replace(/'/g,'\\\'')+'\')" style="padding:6px 12px;border-radius:8px;border:1.5px solid '+(active?'var(--purple)':'var(--border)')+';background:'+(active?'rgba(179,148,255,.12)':'var(--surface)')+';color:'+(active?'var(--purple)':'var(--text2)')+';font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">'+t+'</button>';
+  }).join('');
+}
+
+function selectAnalysisTest(testName){
+  _selectedAnalysisTest=testName;
+  renderAnalysisTestSelector();
+  const label=document.getElementById('analysis-selected-test-label');
+  const box=document.getElementById('analysis-selected-test');
+  if(label)label.textContent=testName;
+  if(box)box.classList.remove('hidden');
+}
+
+// テスト登録（夏伎用）
+async function registerTest(){
+  const type=_selectedTestType;
+  const round=_selectedTestRound;
+  const month=document.getElementById('h-month')?.value||'';
+  const day=document.getElementById('h-day')?.value||'';
+  const date=month&&day?month+day:month||'';
+  if(!type){showToast('テストの種類を選んでね');return;}
+  if(!round){showToast('回を選んで「＋ 追加」してね');return;}
+  const testName=type+' '+round;
+  const registry=await sGet('test-registry')||[];
+  if(!registry.find(t=>t.name===testName)){
+    registry.push({name:testName,type,round,date,registered:todayKey()});
+    await sSet('test-registry',registry);
+  }
+  const rounds=await sGet('test-rounds')||{};
+  if(!rounds[type])rounds[type]=[];
+  if(!rounds[type].includes(round)){
+    rounds[type].push(round);
+    await sSet('test-rounds',rounds);
+  }
+  if(document.getElementById('h-month'))document.getElementById('h-month').value='';
+  if(document.getElementById('h-day'))document.getElementById('h-day').value='';
+  renderAnalysisTestSelector();
+  renderScoreTestSelect();
+  showToast('✅ '+testName+(date?' ('+date+')':'')+' を登録したよ！');
+  celebrate(1,'📝','テスト登録完了！','パパが偏差値を入力してくれるよ');
+}
+
+// Yasuhiro用: 登録済みテストから選んで偏差値を入力
+let _selectedScoreTest='';
+async function renderScoreTestSelect(){
+  const el=document.getElementById('score-test-select');
+  if(!el)return;
+  const registry=await sGet('test-registry')||[];
+  if(registry.length===0){
+    el.innerHTML='<div style="font-size:13px;color:var(--text3);">↑ 夏伎がテストを登録すると選べるよ</div>';
+    return;
+  }
+  el.innerHTML=registry.map(t=>{
+    const active=t.name===_selectedScoreTest;
+    return '<button onclick="selectScoreTest(\''+t.name.replace(/'/g,'\\\'')+'\')" style="padding:6px 12px;border-radius:8px;border:1.5px solid '+(active?'var(--gold)':'var(--border)')+';background:'+(active?'rgba(255,210,63,.1)':'var(--surface)')+';color:'+(active?'var(--gold)':'var(--text2)')+';font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">'
+      +t.name+(t.date?' ('+t.date+')':'')+'</button>';
+  }).join('');
+}
+
+function selectScoreTest(name){
+  _selectedScoreTest=name;
+  renderScoreTestSelect();
+  // Also update analysis selector
+  selectAnalysisTest(name);
+}
+
+// Override addHS to use selected score test
+const _origAddHS=typeof addHS==='function'?addHS:null;
+async function addHS(){
+  const score=parseInt(document.getElementById('h-score').value);
+  const subj=document.getElementById('h-subj').value;
+  if(isNaN(score)){showToast('偏差値を入力してください');return;}
+  if(!_selectedScoreTest){showToast('どのテストか選んでね');return;}
+  // Get date from registry
+  const registry=await sGet('test-registry')||[];
+  const t=registry.find(r=>r.name===_selectedScoreTest);
+  const date=t?.date||todayKey();
+  if(!hensachiData[subj])hensachiData[subj]=[];
+  hensachiData[subj].push({date,score,name:_selectedScoreTest});
+  await sSet('hensachi',hensachiData);
+  renderHChart();renderScoreHist();
+  document.getElementById('h-score').value='';
+  showToast('✅ '+_selectedScoreTest+' '+subj+' 偏差値'+score+' を追加しました！');
+}
+const MECE_DOMAINS={
+  国語:[
+    {domain:'漢字・語句',category:'知識'},
+    {domain:'文法・文の構成',category:'知識'},
+    {domain:'読解（物語文）',category:'読解'},
+    {domain:'読解（説明文・論説文）',category:'読解'},
+    {domain:'詩・短歌・俳句',category:'読解'},
+    {domain:'記述・作文',category:'表現'},
+  ],
+  算数:[
+    {domain:'四則計算・小数・分数',category:'計算'},
+    {domain:'割合・比',category:'計算'},
+    {domain:'速さ・時間・距離',category:'文章題'},
+    {domain:'特殊算（鶴亀・旅人・仕事・植木など）',category:'文章題'},
+    {domain:'平面図形（面積・角度）',category:'図形'},
+    {domain:'立体図形（体積・表面積）',category:'図形'},
+    {domain:'数列・規則性・場合の数',category:'規則性'},
+  ],
+  理科:[
+    {domain:'植物のつくりと働き',category:'知識'},
+    {domain:'動物・人体',category:'知識'},
+    {domain:'てこ・滑車・輪軸',category:'計算・実験'},
+    {domain:'電気・回路',category:'計算・実験'},
+    {domain:'光・音・熱',category:'計算・実験'},
+    {domain:'水溶液・中和・燃焼',category:'計算・実験'},
+    {domain:'天体（太陽・月・星）',category:'知識'},
+    {domain:'気象・地層・岩石',category:'知識'},
+  ],
+  社会:[
+    {domain:'縄文・弥生・古墳時代',category:'歴史'},
+    {domain:'飛鳥・奈良時代',category:'歴史'},
+    {domain:'平安時代',category:'歴史'},
+    {domain:'鎌倉時代',category:'歴史'},
+    {domain:'室町・戦国時代',category:'歴史'},
+    {domain:'安土桃山時代',category:'歴史'},
+    {domain:'江戸時代',category:'歴史'},
+    {domain:'明治時代',category:'歴史'},
+    {domain:'大正・昭和戦前',category:'歴史'},
+    {domain:'昭和戦後・現代',category:'歴史'},
+    {domain:'国土・地形・気候',category:'地理'},
+    {domain:'農業・林業・漁業',category:'地理'},
+    {domain:'工業・エネルギー',category:'地理'},
+    {domain:'交通・貿易・人口',category:'地理'},
+    {domain:'地方別地理',category:'地理'},
+    {domain:'憲法・三権分立',category:'公民'},
+    {domain:'地方自治・選挙',category:'公民'},
+    {domain:'国際社会・環境',category:'公民'},
+  ]
+};
+
+// 強み・弱点の判定基準
+function getStrengthLevel(rate){
+  if(rate>=80)return{label:'💪 得意',color:'var(--green)',bg:'rgba(68,217,142,.1)',border:'rgba(68,217,142,.3)'};
+  if(rate>=60)return{label:'📚 標準',color:'var(--blue)',bg:'rgba(90,171,255,.1)',border:'rgba(90,171,255,.25)'};
+  if(rate>=40)return{label:'🎯 要強化',color:'var(--orange)',bg:'rgba(255,154,80,.1)',border:'rgba(255,154,80,.3)'};
+  return{label:'🔥 最優先',color:'var(--red)',bg:'rgba(255,96,96,.1)',border:'rgba(255,96,96,.3)'};
+}
+
+// ── 攻略タブ切り替え ─────────────────────────────────────────
+function switchKouryakuTab(tab){
+  const isJibun=tab==='jibun';
+  document.getElementById('kouryaku-jibun').style.display=isJibun?'':'none';
+  document.getElementById('kouryaku-strategy').style.display=isJibun?'none':'';
+  const btnJ=document.getElementById('kouryaku-tab-jibun');
+  const btnS=document.getElementById('kouryaku-tab-strategy');
+  btnJ.style.background=isJibun?'rgba(255,210,63,.15)':'var(--surface)';
+  btnJ.style.color=isJibun?'var(--gold)':'var(--text3)';
+  btnJ.style.borderColor=isJibun?'rgba(255,210,63,.3)':'var(--border)';
+  btnS.style.background=!isJibun?'rgba(255,154,80,.15)':'var(--surface)';
+  btnS.style.color=!isJibun?'var(--orange)':'var(--text3)';
+  btnS.style.borderColor=!isJibun?'rgba(255,154,80,.3)':'var(--border)';
+  if(!isJibun)renderStrategyProblems('全て');
+}
+
+let _strategySubjFilter='全て';
+function selStrategyTab(subj,btn){
+  _strategySubjFilter=subj;
+  document.querySelectorAll('#strategy-tabs .itab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderStrategyProblems(subj);
+}
+
+async function renderStrategyProblems(subj){
+  const all=await sGet('strategy-problems')||[];
+  const filtered=subj==='全て'?all:all.filter(p=>p.subj===subj);
+  const list=document.getElementById('strategy-problems-list');
+  const empty=document.getElementById('strategy-empty');
+  // Update badge
+  const badge=document.getElementById('strategy-count-badge');
+  if(all.length>0){badge.textContent=all.length+'問';badge.style.display='';}
+  else{badge.style.display='none';}
+  if(filtered.length===0){list.innerHTML='';empty.style.display='';return;}
+  empty.style.display='none';
+  list.innerHTML=filtered.map((p,i)=>{
+    const sw=getStrengthLevel(0);// 未解答
+    return '<div class="card" style="border-color:'+sw.border+';margin-bottom:10px;" id="sp-card-'+i+'">'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
+      +'<span style="background:'+sw.bg+';color:'+sw.color+';border:1px solid '+sw.border+';border-radius:6px;padding:2px 8px;font-size:11px;font-weight:800;">'+p.subj+'</span>'
+      +'<span style="font-size:11px;color:var(--text3);">'+p.domain+'</span>'
+      +(p.source?'<span style="font-size:10px;color:var(--purple);margin-left:auto;background:rgba(179,148,255,.1);padding:2px 7px;border-radius:5px;">'+p.source+'</span>':'')
+      +'</div>'
+      +'<div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:10px;line-height:1.7;">'+p.question+'</div>'
+      +'<div class="qopts" id="sp-opts-'+i+'"></div>'
+      +'<div id="sp-exp-'+i+'" class="hidden" style="margin-top:10px;padding:12px;background:rgba(0,224,181,.06);border-radius:8px;font-size:13px;color:var(--text2);line-height:1.8;border-left:3px solid var(--teal);"></div>'
+      +'<div id="sp-gpt-'+i+'" class="hidden" style="margin-top:8px;">'
+      +'<button class="btn btn-outline btn-sm" onclick="copyGPTPromptForProblem('+i+')" style="font-size:12px;width:100%;">🤖 ChatGPTで詳しく解説</button>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+  // Render options
+  filtered.forEach((p,i)=>{
+    const opts=document.getElementById('sp-opts-'+i);if(!opts)return;
+    (p.options||[]).forEach((o,oi)=>{
+      const btn=document.createElement('button');btn.className='qopt';btn.textContent=o;
+      btn.onclick=()=>answerStrategyProblem(i,oi,p);
+      opts.appendChild(btn);
+    });
+  });
+  // Store filtered for ChatGPT access
+  window._currentStrategyProblems=filtered;
+}
+
+async function answerStrategyProblem(idx,chosen,p){
+  const opts=document.querySelectorAll('#sp-opts-'+idx+' .qopt');
+  opts.forEach((b,i)=>{b.disabled=true;if(i===p.answer)b.classList.add('correct');else if(i===chosen&&chosen!==p.answer)b.classList.add('wrong');});
+  const expEl=document.getElementById('sp-exp-'+idx);
+  if(expEl&&p.explanation){expEl.textContent=p.explanation;expEl.classList.remove('hidden');}
+  const gptEl=document.getElementById('sp-gpt-'+idx);
+  if(gptEl)gptEl.classList.remove('hidden');
+  if(chosen===p.answer){playSound('correct');showQuizCelebration();}
+  else{playSound('wrong');}
+}
+
+function copyGPTPromptForProblem(idx){
+  const p=(window._currentStrategyProblems||[])[idx];
+  if(!p)return;
+  const prompt='あなたはヒカキンみたいに話が面白い先生です。\n小学5年生の男の子（早稲田アカデミー生）に以下の中学受験問題をわかりやすく解説してください。\n\n【問題】\n'+p.question+'\n\n【正解】\n'+(p.options?p.options[p.answer]:'')+(p.explanation?'\n\n【解説】\n'+p.explanation:'')+'\n\nルール：\n・難しい言葉は使わない\n・身近な例えを必ず使う（サッカー・ゲーム・コンビニ等）\n・「え、そういうことか！」と思わせる説明\n・最後に「試験ではこう答えよう！」と一言でまとめる\n・タメ口でOK';
+  navigator.clipboard.writeText(prompt).then(()=>{
+    showToast('📋 コピーしました！ChatGPTに貼り付けてね');
+    setTimeout(()=>{window.open('https://chatgpt.com/','_blank');},800);
+  });
+}
+
+// ── 分析タブ切り替え ─────────────────────────────────────────
+let _curAnalysisTab='国語';
+function selAnalysisTab(subj,btn){
+  _curAnalysisTab=subj;
+  document.querySelectorAll('#analysis-tabs .itab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderWeakPanel(subj);
+}
+
+// ── ChatGPT連携 ───────────────────────────────────────────────
+let _lastAnalysisData=null;
+function copyGPTPrompt(){
+  if(!_lastAnalysisData)return;
+  const d=_lastAnalysisData;
+  const weakDomains=(d.categories||[]).filter(c=>c.score<60).map(c=>c.name).join('、');
+  const prompt='あなたはヒカキンみたいに話が面白い先生です。\n小学5年生の男の子（早稲田アカデミー生）の'+d.subject+'の弱点を楽しく解説してください。\n\n【弱いジャンル】\n'+weakDomains+'\n\nルール：\n・難しい言葉は使わない\n・「例えばサッカーで言うと〜」みたいに身近な例えを必ず使う\n・「え、そういうことか！」と思わせる説明\n・最後に「試験ではこう答えよう！」と一言まとめ\n・タメ口でOK';
+  navigator.clipboard.writeText(prompt).then(()=>{
+    showToast('📋 コピーしました！ChatGPTを開いて貼り付けてね');
+    setTimeout(()=>{window.open('https://chatgpt.com/','_blank');},800);
+  });
+}
+
+// ── 強み・弱点 可視化レンダリング ────────────────────────────
+function renderStrengthWeaknessVisual(data){
+  const el=document.getElementById('strength-weakness-visual');
+  if(!el||!data.categories)return;
+  const cats=data.categories;
+  // Group by category
+  const byCategory={};
+  cats.forEach(c=>{
+    const key=c.category||'その他';
+    if(!byCategory[key])byCategory[key]=[];
+    byCategory[key].push(c);
+  });
+  let html='';
+  Object.entries(byCategory).forEach(([cat,items])=>{
+    html+='<div style="margin-bottom:14px;">'
+      +'<div style="font-size:10px;font-weight:800;color:var(--text3);letter-spacing:1.5px;margin-bottom:6px;">'+cat.toUpperCase()+'</div>';
+    items.forEach(item=>{
+      const rate=item.score||0;
+      const sw=getStrengthLevel(rate);
+      html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'
+        +'<div style="font-size:12px;color:var(--text2);width:140px;flex-shrink:0;line-height:1.4;">'+item.name+'</div>'
+        +'<div style="flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden;">'
+        +'<div style="height:100%;width:'+rate+'%;background:'+sw.color+';border-radius:4px;transition:width .6s ease;"></div>'
+        +'</div>'
+        +'<span style="font-size:10px;font-weight:800;color:'+sw.color+';background:'+sw.bg+';border:1px solid '+sw.border+';border-radius:5px;padding:2px 6px;white-space:nowrap;">'+sw.label+'</span>'
+        +'</div>';
+    });
+    html+='</div>';
+  });
+  el.innerHTML=html;
+}
+
+// ── 分析結果処理（既存を拡張） ────────────────────────────────
+const _origRenderWeakPanel=typeof renderWeakPanel==='function'?renderWeakPanel:null;
+
+// Override renderWeakPanel to use new visual
+async function renderWeakPanel(subj){
+  const d=_weakData[subj];
+  const resultPanel=document.getElementById('weak-result-panel');
+  const emptyState=document.getElementById('weak-empty-state');
+  const dataPanel=document.getElementById('weak-data-panel');
+  if(!d){
+    if(emptyState)emptyState.style.display='';
+    if(dataPanel)dataPanel.classList.add('hidden');
+    return;
+  }
+  if(emptyState)emptyState.style.display='none';
+  if(dataPanel)dataPanel.classList.remove('hidden');
+  // 強み・弱点可視化
+  renderStrengthWeaknessVisual(d);
+  // アドバイス
+  const advCard=document.getElementById('weak-advice-card');
+  const advText=document.getElementById('weak-advice-text');
+  if(d.advice&&advText){advText.textContent=d.advice;if(advCard)advCard.classList.remove('hidden');}
+  // ChatGPT連携
+  _lastAnalysisData={...d,subject:subj};
+  const gptArea=document.getElementById('chatgpt-link-area');
+  if(gptArea)gptArea.classList.remove('hidden');
+  // 対策問題
+  const practiceEl=document.getElementById('weak-practice-section');
+  const practiceList=document.getElementById('weak-practice-list');
+  if(d.practice_problems&&d.practice_problems.length>0&&practiceList){
+    if(practiceEl)practiceEl.classList.remove('hidden');
+    const labels=['①','②','③','④'];
+    practiceList.innerHTML='';
+    d.practice_problems.forEach(function(p,pi){
+      const div=document.createElement('div');div.className='wproblem';
+      const expSafe=(p.explanation||'').replace(/'/g,'&#39;');
+      const optsHtml=(p.options||[]).map(function(o,i){
+        return '<button class="wproblem-opt" onclick="answerWeakProblem('+pi+','+i+','+p.answer+',\''+expSafe+'\')">'+labels[i]+' '+o+'</button>';
+      }).join('');
+      div.innerHTML='<div style="font-size:10px;color:var(--purple);font-weight:800;letter-spacing:1px;margin-bottom:6px;">⚔️ 弱点克服 '+(pi+1)+'問目 — '+p.topic+'</div>'
+        +'<div class="wproblem-q">'+p.question+'</div>'
+        +'<div class="wproblem-opts" id="wopts-'+pi+'">'+optsHtml+'</div>'
+        +'<div class="wproblem-exp" id="wexp-'+pi+'">'+(p.explanation||'')+'</div>';
+      practiceList.appendChild(div);
+    });
+  }
+}
+
+// ── analyzeWeakness（既存を拡張：XP付与＋対策問題追加） ───────
+const _origAnalyzeWeakness=typeof analyzeWeakness==='function'?analyzeWeakness:null;
+
+async function analyzeWeakness(){
+  if(!getApiKey()){showToast('APIキーを設定してください');return;}
+  const qFile=document.getElementById('weak-q-upload').files[0];
+  const aFile=document.getElementById('weak-a-upload').files[0];
+  if(!qFile||!aFile){showToast('問題用紙と回答用紙を両方選んでね');return;}
+  const subj=_curAnalysisTab;
+  const testName=_selectedAnalysisTest||(_selectedTestType&&_selectedTestRound?_selectedTestType+' '+_selectedTestRound:'不明');
+  const domains=MECE_DOMAINS[subj]||[];
+  document.getElementById('weak-analyze-btn').disabled=true;
+  document.getElementById('weak-analyze-btn').textContent='🔬 分析中…';
+  try{
+    // Convert images to base64
+    const toB64=(file)=>new Promise((res,rej)=>{
+      const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);
+    });
+    const [qB64,aB64]=await Promise.all([toB64(qFile),toB64(aFile)]);
+    const domainList=domains.map(d=>'・'+d.domain+'（'+d.category+'）').join('\n');
+    const prompt='あなたは中学受験（早稲田アカデミー）の'+subj+'の採点・分析の専門家です。\n'
+      +'テスト種別：'+testName+'\n\n'
+      +'問題用紙と回答用紙の画像を見て、以下を分析してください。\n\n'
+      +'【分析対象の分野（MECE）】\n'+domainList+'\n\n'
+      +'【判定基準】\n正答率80%以上→得意 / 60-79%→標準 / 40-59%→要強化 / 40%未満→最優先\n\n'
+      +'【出力形式】JSONのみで返す：\n'
+      +'{"subject":"'+subj+'","test_type":"'+testType+'","test_round":"'+testRound+'",'
+      +'"categories":[{"name":"分野名","category":"カテゴリ","score":正答率0-100,"correct":正解数,"total":問題数}],'
+      +'"advice":"夏伎くん（小5）への復習アドバイス（100文字・話し言葉で）",'
+      +'"practice_problems":[{"topic":"分野名","question":"問題文","options":["A","B","C","D"],"answer":正解インデックス,"explanation":"解説","source":"出題例校名"}]}';
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':getApiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-6',
+        max_tokens:2000,
+        messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:qFile.type||'image/jpeg',data:qB64}},
+          {type:'image',source:{type:'base64',media_type:aFile.type||'image/jpeg',data:aB64}},
+          {type:'text',text:prompt}
+        ]}]
+      })
+    });
+    const data=await res.json();
+    const raw=data.content?.[0]?.text||'{}';
+    const parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    _weakData[subj]=parsed;
+    await sSet('weak-data',_weakData);
+    // 対策問題を攻略タブに追加
+    if(parsed.practice_problems&&parsed.practice_problems.length>0){
+      const existing=await sGet('strategy-problems')||[];
+      const newProblems=parsed.practice_problems.map(p=>({
+        ...p, subj:subj, domain:p.topic,
+        source:p.source||testName,
+        addedDate:todayKey()
+      }));
+      const merged=[...existing,...newProblems].slice(-50);
+      await sSet('strategy-problems',merged);
+      // Update badge
+      const badge=document.getElementById('strategy-count-badge');
+      if(badge){badge.textContent=merged.length+'問';badge.style.display='';}
+    }
+    // XP付与（1教科 +3XP）
+    const xpKey='analysis-xp-'+todayKey();
+    const xpDone=await sGet(xpKey)||[];
+    if(!xpDone.includes(subj)){
+      xpDone.push(subj);
+      await sSet(xpKey,xpDone);
+      celebrate(1,'🔬',subj+'を分析した！','+3XP ゲット！');
+    }
+    renderWeakPanel(subj);
+    showToast('✅ 分析完了！対策問題も攻略タブに追加したよ');
+  }catch(e){
+    console.error(e);showToast('分析に失敗しました。もう一度試してね');
+  }
+  document.getElementById('weak-analyze-btn').disabled=false;
+  document.getElementById('weak-analyze-btn').textContent='🔬 分析スタート！';
+}
 celebrate=(tier,icon,title,subtitle)=>{
   _origCelebrate(tier,icon,title,subtitle);
   const sounds=['','checkin','medal','fanfare','epic'];
