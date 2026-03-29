@@ -1844,29 +1844,32 @@ function _renderQuizQuestion(p,idx,showAnswer=false){
     const typeColor=p.type==='四字熟語'?'var(--purple)':p.type==='故事成語'?'var(--orange)':p.type==='慣用句'?'#ff7eb3':p.type==='漢字'?'var(--blue)':'var(--teal)';
     const lvLabel=p.lv>=3?'🔥難問':p.lv===2?'⚡標準':'🌱基本';
     const lvColor=p.lv>=3?'var(--red)':p.lv===2?'var(--orange)':'var(--teal)';
-    badge.innerHTML=`<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-      <span style="background:${typeColor}22;color:${typeColor};border:1px solid ${typeColor}44;border-radius:6px;padding:3px 9px;font-size:12px;font-weight:800;">${p.type}</span>
-      <span style="background:rgba(255,210,63,.1);color:var(--gold);border:1px solid rgba(255,210,63,.25);border-radius:6px;padding:3px 9px;font-size:11px;font-weight:700;">📚 ${p.school||'中学受験頻出'}</span>
-      <span style="background:${lvColor}22;color:${lvColor};border:1px solid ${lvColor}44;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:800;">${lvLabel}</span>
-      ${p.isReview?'<span style="background:rgba(255,154,80,.15);color:var(--orange);border:1px solid rgba(255,154,80,.3);border-radius:6px;padding:3px 8px;font-size:11px;font-weight:800;">🔁 復習問題</span>':''}
-      ${_reviewMode?'<span style="background:rgba(179,148,255,.15);color:var(--purple);border:1px solid rgba(179,148,255,.3);border-radius:6px;padding:3px 8px;font-size:11px;font-weight:800;">📖 見直し</span>':''}
-    </div>`;
+    const reviewBadge=p.isReview?'<span style="background:rgba(255,154,80,.15);color:var(--orange);border:1px solid rgba(255,154,80,.3);border-radius:6px;padding:3px 8px;font-size:11px;font-weight:800;">🔁 復習問題</span>':'';
+    const modeBadge=_reviewMode?'<span style="background:rgba(179,148,255,.15);color:var(--purple);border:1px solid rgba(179,148,255,.3);border-radius:6px;padding:3px 8px;font-size:11px;font-weight:800;">📖 見直し</span>':'';
+    badge.innerHTML='<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">'
+      +'<span style="background:'+typeColor+'22;color:'+typeColor+';border:1px solid '+typeColor+'44;border-radius:6px;padding:3px 9px;font-size:12px;font-weight:800;">'+p.type+'</span>'
+      +'<span style="background:rgba(255,210,63,.1);color:var(--gold);border:1px solid rgba(255,210,63,.25);border-radius:6px;padding:3px 9px;font-size:11px;font-weight:700;">📚 '+(p.school||'中学受験頻出')+'</span>'
+      +'<span style="background:'+lvColor+'22;color:'+lvColor+';border:1px solid '+lvColor+'44;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:800;">'+lvLabel+'</span>'
+      +reviewBadge+modeBadge
+      +'</div>';
   }
   document.getElementById('proverb-text').textContent=p.q;
   document.getElementById('quiz-done-msg').classList.add('hidden');
   document.getElementById('quiz-all-done').classList.add('hidden');
-  // Options
+  // Options（opts または options どちらにも対応）
+  const opts=p.opts||p.options||[];
+  const correctIdx=p.a!==undefined?p.a:p.answer;
   const c=document.getElementById('quiz-opts');c.innerHTML='';
   const answered=showAnswer||(_quizState.answers.length>idx);
   const userAnswer=_quizState.answers.length>idx?_quizState._chosen?.[idx]:null;
-  p.opts.forEach((o,i)=>{
+  opts.forEach((o,i)=>{
     const btn=document.createElement('button');btn.className='qopt';btn.textContent=o;
     if(answered){
       btn.disabled=true;
-      if(i===p.a)btn.classList.add('correct');
-      else if(i===userAnswer&&userAnswer!==p.a)btn.classList.add('wrong');
+      if(i===correctIdx)btn.classList.add('correct');
+      else if(i===userAnswer&&userAnswer!==correctIdx)btn.classList.add('wrong');
     } else {
-      btn.onclick=()=>answerQuiz(i===p.a,p,i,c,idx);
+      btn.onclick=()=>answerQuiz(i===correctIdx,p,i,c,idx);
     }
     c.appendChild(btn);
   });
@@ -1932,7 +1935,8 @@ function _selectDailyQuizzesFallback(){
 async function answerQuiz(correct,p,chosen,container,qIdx){
   container.querySelectorAll('.qopt').forEach((b,i)=>{
     b.disabled=true;
-    if(i===p.a)b.classList.add('correct');
+    const ci=p.a!==undefined?p.a:p.answer;
+    if(i===ci)b.classList.add('correct');
     else if(i===chosen&&!correct)b.classList.add('wrong');
   });
   const expEl=document.getElementById('quiz-exp');
@@ -2468,144 +2472,6 @@ function handleWeakUpload(e,type){
   reader.readAsDataURL(file);
 }
 
-async function analyzeWeakness(){
-  if(!checkApiKeyForKouryaku())return;
-  const subj=document.getElementById('weak-subj').value;
-  const btn=document.getElementById('weak-analyze-btn');
-  btn.disabled=true;btn.innerHTML='<span class="ldots"><span></span><span></span><span></span></span> AI分析中...（少々お待ちください）';
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'x-api-key':getApiKey(),
-        'anthropic-version':'2023-06-01',
-        'anthropic-dangerous-direct-browser-access':'true'
-      },
-      body:JSON.stringify({
-        model:'claude-sonnet-4-6',
-        max_tokens:2000,
-        messages:[{role:'user',content:[
-          {type:'image',source:{type:'base64',media_type:_weakImgs.qMime,data:_weakImgs.q}},
-          {type:'image',source:{type:'base64',media_type:_weakImgs.aMime,data:_weakImgs.a}},
-          {type:'text',text:`あなたは優秀な中学受験の${subj}専門の家庭教師です。
-1枚目の画像はテストの問題用紙、2枚目は生徒（小学5年生）の回答用紙です。
-
-以下のJSON形式のみで返してください（他の文章は不要）：
-{
-  "subject": "${subj}",
-  "wrong_count": 間違えた問題の数（数値）,
-  "categories": [
-    {"name": "分野名", "score": 0〜100の理解度, "status": "strong"または"weak"または"mid", "comment": "一言コメント"}
-  ],
-  "strengths": ["得意な分野1", "得意な分野2"],
-  "weaknesses": ["苦手な分野1", "苦手な分野2"],
-  "advice": "復習のアドバイスを3〜4文で具体的に。何をどう復習すべきか。",
-  "practice_problems": [
-    {
-      "topic": "この問題が対応する苦手分野",
-      "question": "類似練習問題の問題文",
-      "options": ["選択肢A", "選択肢B", "選択肢C", "選択肢D"],
-      "answer": 正解のインデックス（0〜3）,
-      "answer_text": "正解の値",
-      "explanation": "解説（2〜3文）"
-    }
-  ]
-}
-
-practice_problemsは間違えた問題数と同じ数（最大6問）作成してください。
-categoriesは${subj}の主要分野を5〜7個カバーしてください。
-必ずJSON形式のみで返してください。`}
-        ]}]
-      })
-    });
-    const data=await res.json();
-    if(!res.ok){alert('API エラー：'+(data?.error?.message||'不明'));btn.disabled=false;btn.innerHTML='🔬 弱点を分析する';return;}
-    const raw=data.content?.[0]?.text||'{}';
-    let parsed;
-    try{parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());}
-    catch{alert('分析結果の解析に失敗しました。もう一度試してください。');btn.disabled=false;btn.innerHTML='🔬 弱点を分析する';return;}
-    _weakData[subj]=parsed;
-    await sSet('weak-data',_weakData);
-    // Switch to the analyzed subject tab
-    const tabBtns=document.querySelectorAll('#weak-tabs .itab');
-    const subjMap={国語:0,算数:1,理科:2,社会:3};
-    tabBtns.forEach(b=>b.classList.remove('active'));
-    tabBtns[subjMap[subj]]?.classList.add('active');
-    _curWeakTab=subj;
-    renderWeakPanel(subj);
-    showToast('✅ '+subj+'の弱点分析が完了しました！');
-    playSound('fanfare');
-  }catch(err){alert('通信エラー：'+err.message);}
-  btn.disabled=false;btn.innerHTML='🔬 弱点を分析する';
-}
-
-function selWeakTab(subj,btn){
-  _curWeakTab=subj;
-  document.querySelectorAll('#weak-tabs .itab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  renderWeakPanel(subj);
-}
-
-function renderWeakPanel(subj){
-  const d=_weakData[subj];
-  const emptyEl=document.getElementById('weak-empty-state');
-  const dataEl=document.getElementById('weak-data-panel');
-  if(!d){
-    emptyEl.classList.remove('hidden');dataEl.classList.add('hidden');return;
-  }
-  emptyEl.classList.add('hidden');dataEl.classList.remove('hidden');
-  // Category bars
-  const barsEl=document.getElementById('weak-bars-chart');
-  barsEl.innerHTML='';
-  // Tags
-  let tagsHtml='<div style="margin-bottom:10px;flex-wrap:wrap;display:flex;gap:4px;">';
-  (d.strengths||[]).forEach(s=>tagsHtml+=`<span class="weak-tag weak-tag-strong">💪 ${s}</span>`);
-  (d.weaknesses||[]).forEach(s=>tagsHtml+=`<span class="weak-tag weak-tag-weak">⚠️ ${s}</span>`);
-  tagsHtml+='</div>';
-  barsEl.innerHTML=tagsHtml;
-  // Bars
-  (d.categories||[]).forEach(cat=>{
-    const col=cat.status==='strong'?'var(--green)':cat.status==='weak'?'var(--red)':'var(--gold)';
-    const row=document.createElement('div');row.className='weak-bar-row';
-    row.innerHTML=`
-      <div class="weak-bar-label" title="${cat.name}">${cat.name}</div>
-      <div class="weak-bar-wrap">
-        <div class="weak-bar-fill" style="width:0%;background:${col};" data-pct="${cat.score}"></div>
-      </div>
-      <div class="weak-bar-pct" style="color:${col};">${cat.score}%</div>`;
-    barsEl.appendChild(row);
-    // Animate bars
-    setTimeout(()=>{row.querySelector('.weak-bar-fill').style.width=cat.score+'%';},50);
-  });
-  // Advice
-  const advEl=document.getElementById('weak-advice-card');
-  const advTxt=document.getElementById('weak-advice-text');
-  if(d.advice){
-    advEl.classList.remove('hidden');
-    advTxt.textContent=d.advice;
-  }
-  // Practice problems
-  const practiceEl=document.getElementById('weak-practice-section');
-  const practiceList=document.getElementById('weak-practice-list');
-  if(d.practice_problems&&d.practice_problems.length){
-    practiceEl.classList.remove('hidden');
-    practiceList.innerHTML='';
-    d.practice_problems.forEach(function(p,pi){
-      const labels=['①','②','③','④'];
-      const div=document.createElement('div');div.className='wproblem';
-      const expSafe=(p.explanation||'').replace(/'/g,'&#39;');
-      const optsHtml=(p.options||[]).map(function(o,i){
-        return '<button class="wproblem-opt" onclick="answerWeakProblem('+pi+','+i+','+p.answer+',\''+expSafe+'\')">'+labels[i]+' '+o+'</button>';
-      }).join('');
-      div.innerHTML='<div style="font-size:10px;color:var(--purple);font-weight:800;letter-spacing:1px;margin-bottom:6px;">⚔️ 弱点克服 '+(pi+1)+'問目 — '+p.topic+'</div>'
-        +'<div class="wproblem-q">'+p.question+'</div>'
-        +'<div class="wproblem-opts" id="wopts-'+pi+'">'+optsHtml+'</div>'
-        +'<div class="wproblem-exp" id="wexp-'+pi+'">'+(p.explanation||'')+'</div>';
-      practiceList.appendChild(div);
-    });
-  }
-}
 
 function answerWeakProblem(pi,chosen,correct,explanation){
   const opts=document.querySelectorAll(`#wopts-${pi} .wproblem-opt`);
