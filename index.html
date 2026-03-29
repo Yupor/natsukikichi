@@ -2038,14 +2038,38 @@ async function doCheckin(){
   const prev=await sGet('streak');let nc=1;if(prev&&prev.lastKey===yk)nc=prev.count+1;
   streakDays=nc;await sSet('streak',{count:nc,lastKey:todayKey()});renderStreakBadge();
   questData['checkin']=true;await sSet('quests-'+todayKey(),questData);renderQuests();
-  // Checkin celebration
-  if(nc>=7)celebrate(3,'🔥',nc+'日連続！','ストリーク継続中！すごい！');
-  else if(nc>=3)celebrate(2,'🔥',nc+'日連続チェックイン！','この調子で続けよう！');
-  else celebrate(1,'📍','チェックイン！','今日もがんばろう！');
+
+  // ランダム励ましメッセージ
+  const msgs=[
+    ['よっしゃ！今日もスタート！','夏伎ならきっとできる💪'],
+    ['チェックイン完了！','今日の自分、昨日より強くなれ🔥'],
+    ['さあ行こう！','開成・早稲田は毎日の積み重ねで決まる⚡'],
+    ['今日もここにいるね！','コツコツが最強の武器だよ✨'],
+    ['ナイスチェックイン！','この一歩が合格への道になる🚀'],
+    ['来たね！','今日やった分だけ、未来の夏伎が楽になるよ📚'],
+    ['よく来た！','受験は気合いと根性、でも夏伎には才能もある😎'],
+    ['ファイト！','どんな問題も、慌てずに一個ずつ解けば怖くない🎯'],
+  ];
+  const seed=new Date().getDate();
+  const [msg, sub]=msgs[seed%msgs.length];
+
+  if(nc>=7)celebrate(3,'🔥',nc+'日連続！！','ストリーク継続中！マジすごい🏆');
+  else if(nc>=3)celebrate(2,'🔥',nc+'日連続チェックイン！',sub);
+  else celebrate(1,'📍',msg,sub);
+
+  // チェックイン後に励ましをカードにも表示
+  const chktime=document.getElementById('chktime');
+  if(chktime){
+    chktime.innerHTML='<div style="text-align:center;margin-top:10px;padding:10px 14px;background:rgba(0,224,181,.07);border-radius:10px;border:1px solid rgba(0,224,181,.2);">'
+      +'<div style="font-size:15px;font-weight:800;color:var(--teal);margin-bottom:3px;">'+msg+'</div>'
+      +'<div style="font-size:13px;color:var(--text2);">'+sub+'</div>'
+      +'<div style="font-size:11px;color:var(--text3);margin-top:6px;">'+t+' チェックイン ✅</div>'
+      +'</div>';
+  }
+
   if(!medals.find(m=>m.id==='first'))await earnMedal('first');
   if(nc>=3&&!medals.find(m=>m.id==='streak3'))await earnMedal('streak3');
   if(nc>=7&&!medals.find(m=>m.id==='streak7'))await earnMedal('streak7');
-  // メール通知
   sendCheckinEmail();
 }
 async function loadStudyData(){
