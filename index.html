@@ -2180,13 +2180,13 @@ async function renderWeeklyStats(){
     const pctRest=Math.max(0,Math.round((r.tot/barMax)*100)-pctY-pctF);
     const div=document.createElement('div');div.className='wkrow';
     const isToday=r.isToday;
-    div.innerHTML=`
-      <div class="wkday" style="${isToday?'color:var(--teal);':''}">${r.label}${isToday?'<span style="font-size:8px;display:block;color:var(--teal)">今</span>':''}</div>
-      <div class="wkbar-wrap">
-        <div class="wkbar-y" style="width:${pctY}%"></div>
-        <div class="wkbar-f" style="width:${pctF+pctRest}%"></div>
-      </div>
-      <div class="wkmins">${r.tot>0?r.tot:''}</div>`;
+    div.innerHTML='<div class="wkday" style="'+(isToday?'color:var(--teal);':'')+'">'
+      +r.label+(isToday?'<span style="font-size:8px;display:block;color:var(--teal)">今</span>':'')+'</div>'
+      +'<div class="wkbar-wrap">'
+      +'<div class="wkbar-y" style="width:'+pctY+'%"></div>'
+      +'<div class="wkbar-f" style="width:'+(pctF+pctRest)+'%"></div>'
+      +'</div>'
+      +'<div class="wkmins">'+(r.tot>0?r.tot:'')+'</div>';
     barsEl.appendChild(div);
   });
   // Milestones
@@ -2196,13 +2196,12 @@ async function renderWeeklyStats(){
     const hit=grandTotal>=ms.mins;
     if(hit&&!medals.find(m=>m.id===ms.id)){await earnMedal(ms.id);}
     const div=document.createElement('div');div.className='wkmile'+(hit?' hit':'');
-    div.innerHTML=`
-      <div class="wmico">${ms.icon}</div>
-      <div class="wminfo">
-        <div class="wmtit">${ms.label} <span style="font-size:11px;color:var(--text3);">${grandTotal}/${ms.mins}分</span></div>
-        <div class="wmbar"><div class="wmfill" style="width:${pct}%;background:${hit?ms.col:'var(--border2)'}"></div></div>
-      </div>
-      <div class="wmxp" style="color:${hit?ms.col:'var(--text3)'}">${hit?'✓':'+'}<br>${ms.xp}XP</div>`;
+    div.innerHTML='<div class="wmico">'+ms.icon+'</div>'
+      +'<div class="wminfo">'
+      +'<div class="wmtit">'+ms.label+' <span style="font-size:11px;color:var(--text3);">'+grandTotal+'/'+ms.mins+'分</span></div>'
+      +'<div class="wmbar"><div class="wmfill" style="width:'+pct+'%;background:'+(hit?ms.col:'var(--border2)')+'"></div></div>'
+      +'</div>'
+      +'<div class="wmxp" style="color:'+(hit?ms.col:'var(--text3)')+'">'+(hit?'✓':'+')+' <br>'+ms.xp+'XP</div>';
     mEl.appendChild(div);
   }
 }
@@ -2213,10 +2212,9 @@ function renderQuests(){
   QUEST_DEFS.forEach(q=>{
     const done=!!questData[q.id];if(done)xp+=q.xp;
     const div=document.createElement('div');div.className='qitem';
-    div.innerHTML=`
-      <div class="qchk${done?' done':''}" style="cursor:default;">${done?'✓':''}</div>
-      <div class="qtxt${done?' done':''}">${q.icon} ${q.txt}</div>
-      <div class="qxp">${done?'<span style="color:var(--green)">✓</span> ':'+'}${q.xp}XP</div>`;
+    div.innerHTML='<div class="qchk'+(done?' done':'')+'" style="cursor:default;">'+(done?'✓':'')+'</div>'
+      +'<div class="qtxt'+(done?' done':'')+'">'+q.icon+' '+q.txt+'</div>'
+      +'<div class="qxp">'+(done?'<span style="color:var(--green)">✓</span> ':'+')+q.xp+'XP</div>';
     list.appendChild(div);
   });
   document.getElementById('xpval').textContent=xp+' / '+tot+' XP';
