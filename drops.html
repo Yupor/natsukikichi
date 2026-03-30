@@ -2,23 +2,19 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>DROPS</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://w.soundcloud.com/player/api.js"></script>
 <style>
-:root{
-  --bg:#070b12;--s1:#0e1420;--s2:#141c2e;
-  --bdr:rgba(255,255,255,0.07);--bdr2:rgba(255,255,255,0.14);
-  --txt:#f0ede6;--mut:rgba(240,237,230,0.42);--fnt:rgba(240,237,230,0.18);
-  --acc:#00f0be;
-  --rule:#00f0be;--lyrics:#f060c0;--drill:#f0b030;--msg:#3090f0;
-}
+:root{--bg:#070b12;--s1:#0e1420;--s2:#141c2e;--bdr:rgba(255,255,255,0.07);--bdr2:rgba(255,255,255,0.14);--txt:#f0ede6;--mut:rgba(240,237,230,0.42);--fnt:rgba(240,237,230,0.18);--acc:#00f0be;--rule:#00f0be;--lyrics:#f060c0;--drill:#f0b030;--msg:#3090f0;}
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{min-height:100%;background:var(--bg);}
 #app{background:var(--bg);min-height:100vh;max-width:480px;margin:0 auto;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:var(--txt);position:relative;}
 #app::before{content:'';position:fixed;inset:0;max-width:480px;margin:0 auto;background-image:linear-gradient(rgba(255,255,255,0.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.022) 1px,transparent 1px);background-size:28px 28px;pointer-events:none;z-index:0;}
 .v{position:relative;z-index:1;animation:fi .18s ease;}
 @keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-
 .home{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem;gap:2rem;}
 .logo-word{font-family:'Courier New',monospace;font-size:56px;font-weight:700;letter-spacing:0.18em;color:var(--txt);display:block;line-height:1;}
 .logo-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--acc);margin-left:2px;vertical-align:super;}
@@ -31,13 +27,11 @@ html,body{min-height:100%;background:var(--bg);}
 .ico-y{background:rgba(240,96,192,0.1);color:var(--lyrics);border:1px solid rgba(240,96,192,0.25);}
 .mname{font-size:15px;font-weight:600;color:var(--txt);margin-bottom:2px;}
 .mdesc{font-size:12px;color:var(--mut);}
-
 .nav{display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--bdr);position:sticky;top:0;z-index:10;background:rgba(7,11,18,0.92);backdrop-filter:blur(8px);}
 .nbk{background:none;border:none;cursor:pointer;color:var(--mut);font-size:12px;font-family:'Courier New',monospace;padding:4px 0;transition:color .12s;letter-spacing:0.05em;}
 .nbk:hover{color:var(--txt);}
 .ntit{flex:1;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--mut);font-family:'Courier New',monospace;}
 .ncnt{font-size:10px;padding:3px 9px;border-radius:20px;background:var(--s1);border:1px solid var(--bdr2);color:var(--mut);font-family:'Courier New',monospace;}
-
 .feed{padding:12px 14px;display:flex;flex-direction:column;gap:8px;}
 .card{background:var(--s1);border:1px solid var(--bdr);border-radius:10px;padding:11px 14px 11px 0;cursor:pointer;display:flex;align-items:stretch;transition:border-color .12s,background .12s;overflow:hidden;}
 .card:hover{background:var(--s2);border-color:var(--bdr2);}
@@ -50,15 +44,13 @@ html,body{min-height:100%;background:var(--bg);}
 .cfoot{display:flex;align-items:center;justify-content:space-between;margin-top:7px;}
 .cdate{font-size:10px;color:var(--fnt);font-family:'Courier New',monospace;}
 .tags{display:flex;gap:4px;flex-wrap:wrap;}
-.tag{font-size:10px;padding:2px 8px;border-radius:20px;border:1px solid var(--bdr2);color:var(--mut);font-family:'Courier New',monospace;}
+.stag{font-size:10px;padding:2px 8px;border-radius:20px;border:1px solid var(--bdr2);color:var(--mut);font-family:'Courier New',monospace;}
 .sc-badge{font-size:9px;padding:2px 7px;border-radius:4px;background:rgba(240,96,192,0.1);color:var(--lyrics);font-family:'Courier New',monospace;border:1px solid rgba(240,96,192,0.2);}
 .file-badge{font-size:9px;padding:2px 7px;border-radius:4px;background:rgba(255,255,255,0.06);color:var(--mut);font-family:'Courier New',monospace;border:1px solid var(--bdr);}
-
 .c-rule{color:var(--rule);}.bg-rule{background:rgba(0,240,190,0.1);}
 .c-lyrics{color:var(--lyrics);}.bg-lyrics{background:rgba(240,96,192,0.1);}
 .c-drill{color:var(--drill);}.bg-drill{background:rgba(240,176,48,0.1);}
 .c-msg{color:var(--msg);}.bg-msg{background:rgba(48,144,240,0.1);}
-
 .det{padding:1.5rem 16px 3rem;}
 .det-type{font-size:9px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;font-family:'Courier New',monospace;margin-bottom:8px;display:block;}
 .det-tit{font-size:22px;font-weight:700;color:var(--txt);margin-bottom:14px;line-height:1.25;}
@@ -67,24 +59,13 @@ html,body{min-height:100%;background:var(--bg);}
 .sc-player-lbl{font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--lyrics);font-family:'Courier New',monospace;padding:8px 12px 6px;background:rgba(240,96,192,0.06);display:flex;align-items:center;gap:6px;}
 .sc-player-lbl::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--lyrics);}
 .sc-player iframe{display:block;width:100%;border:none;}
-.lyrics-lbl{font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--mut);font-family:'Courier New',monospace;margin-bottom:10px;}
 .track-title-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(240,96,192,0.06);border-radius:8px;border:1px solid rgba(240,96,192,0.15);margin-bottom:10px;}
 .track-title-dot{width:6px;height:6px;border-radius:50%;background:var(--lyrics);flex-shrink:0;animation:pulse 1.5s infinite;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
 .track-title-text{font-size:12px;font-weight:500;color:var(--lyrics);flex:1;}
-.track-row{background:var(--s1);border:1px solid var(--bdr);border-radius:8px;padding:10px 12px;margin-bottom:8px;}
-.track-row-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
-.track-num{font-size:9px;font-family:'Courier New',monospace;color:var(--mut);flex-shrink:0;white-space:nowrap;}
-.track-name{font-size:12px;font-weight:500;color:var(--lyrics);flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
-.sc-fetch-btn{padding:8px 14px;border:1px solid rgba(240,96,192,0.4);border-radius:8px;background:rgba(240,96,192,0.07);color:var(--lyrics);font-size:11px;font-family:'Courier New',monospace;cursor:pointer;transition:all .1s;width:100%;}
-.sc-fetch-btn:hover{background:rgba(240,96,192,0.15);}
-.sc-fetch-loading{font-size:11px;color:var(--mut);font-family:'Courier New',monospace;padding:8px 0;text-align:center;}
-.sc-hidden-player{position:absolute;opacity:0;pointer-events:none;height:1px;overflow:hidden;}
 .det-body{font-size:14px;color:rgba(240,237,230,0.82);line-height:2;margin-bottom:1.2rem;}
 .det-body div,.det-body p{min-height:1em;}
 .det-body b,.det-body strong{font-weight:700;color:var(--txt);}
-.det-link{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--s1);border-radius:8px;border:1px solid var(--bdr2);font-size:11px;color:var(--acc);margin-bottom:1rem;font-family:'Courier New',monospace;word-break:break-all;text-decoration:none;transition:border-color .12s;}
-.det-link:hover{border-color:var(--acc);}
 .att-img{width:100%;border-radius:8px;border:1px solid var(--bdr);margin-bottom:1rem;display:block;}
 .att-pdf{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--s1);border-radius:8px;border:1px solid var(--bdr2);margin-bottom:1rem;cursor:pointer;}
 .att-pdf-icon{font-size:22px;flex-shrink:0;}
@@ -92,95 +73,82 @@ html,body{min-height:100%;background:var(--bg);}
 .att-pdf-name{font-size:12px;color:var(--txt);font-family:'Courier New',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .att-pdf-sub{font-size:10px;color:var(--mut);}
 .att-pdf-dl{font-size:10px;color:var(--acc);font-family:'Courier New',monospace;flex-shrink:0;}
+.reactions{margin-bottom:1.2rem;}
+.react-lbl{font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--mut);font-family:'Courier New',monospace;margin-bottom:8px;}
+.react-row{display:flex;gap:6px;flex-wrap:wrap;}
+.react-btn{background:var(--s1);border:1px solid var(--bdr2);border-radius:20px;padding:5px 12px;cursor:pointer;font-size:15px;display:flex;align-items:center;gap:5px;}
+.react-count{font-size:11px;font-family:'Courier New',monospace;color:var(--mut);}
+.react-add{background:none;border:1px dashed var(--bdr2);border-radius:20px;padding:5px 12px;cursor:pointer;font-size:12px;color:var(--mut);font-family:'Courier New',monospace;}
+.react-picker{background:var(--s2);border:1px solid var(--bdr2);border-radius:10px;padding:8px;margin-top:6px;display:none;}
+.react-picker.on{display:block;}
+.react-picker-grid{display:flex;flex-wrap:wrap;gap:4px;}
+.react-pick-btn{background:none;border:none;cursor:pointer;font-size:20px;padding:4px;border-radius:6px;}
 .tagsec{border-top:1px solid var(--bdr);padding-top:1rem;margin-top:0.5rem;}
 .taglbl{font-size:9px;color:var(--fnt);letter-spacing:0.18em;text-transform:uppercase;font-family:'Courier New',monospace;margin-bottom:10px;}
 .tagopts{display:flex;gap:6px;flex-wrap:wrap;}
-.tbtn{font-size:11px;padding:6px 14px;border-radius:20px;border:1px solid var(--bdr2);color:var(--mut);background:none;cursor:pointer;font-family:'Courier New',monospace;transition:all .1s;}
-.tbtn:hover{background:var(--s1);color:var(--txt);}
+.tbtn{font-size:11px;padding:6px 14px;border-radius:20px;border:1px solid var(--bdr2);color:var(--mut);background:none;cursor:pointer;font-family:'Courier New',monospace;}
 .tbtn.on{border-color:var(--acc);color:var(--acc);background:rgba(0,240,190,0.07);}
-
 .pin{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 50px);padding:2rem;gap:14px;}
 .pin-lg{font-family:'Courier New',monospace;font-size:26px;font-weight:700;letter-spacing:0.18em;color:var(--lyrics);margin-bottom:4px;}
 .pin-lbl{font-size:10px;color:var(--mut);letter-spacing:0.15em;text-transform:uppercase;font-family:'Courier New',monospace;}
 .pin-dots{display:flex;gap:10px;margin:4px 0;}
-.pdot{width:12px;height:12px;border-radius:50%;border:1px solid var(--bdr2);transition:all .1s;}
+.pdot{width:12px;height:12px;border-radius:50%;border:1px solid var(--bdr2);}
 .pdot.on{background:var(--lyrics);border-color:var(--lyrics);}
 .pin-err{font-size:11px;color:#f07070;font-family:'Courier New',monospace;}
 .npad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:192px;}
-.nbt{background:var(--s1);border:1px solid var(--bdr2);border-radius:10px;padding:13px;cursor:pointer;font-size:17px;font-weight:600;color:var(--txt);transition:background .1s;font-family:'Courier New',monospace;text-align:center;}
-.nbt:hover{background:var(--s2);}
+.nbt{background:var(--s1);border:1px solid var(--bdr2);border-radius:10px;padding:13px;cursor:pointer;font-size:17px;font-weight:600;color:var(--txt);font-family:'Courier New',monospace;text-align:center;}
 .nbt:active{transform:scale(0.94);}
-
 .tabs{display:flex;border-bottom:1px solid var(--bdr);}
-.tab{flex:1;padding:11px 8px;text-align:center;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--mut);cursor:pointer;font-family:'Courier New',monospace;border-bottom:2px solid transparent;transition:color .12s;}
+.tab{flex:1;padding:11px 8px;text-align:center;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--mut);cursor:pointer;font-family:'Courier New',monospace;border-bottom:2px solid transparent;}
 .tab.on{color:var(--txt);border-bottom-color:var(--acc);}
-
 .form{padding:16px;display:flex;flex-direction:column;gap:14px;padding-bottom:3rem;}
 .fl{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--mut);margin-bottom:5px;display:block;font-family:'Courier New',monospace;}
-.fi,.fs{width:100%;padding:10px 12px;background:var(--s1);border:1px solid var(--bdr2);border-radius:8px;color:var(--txt);font-size:13px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;outline:none;transition:border-color .12s;}
-.fi:focus,.fs:focus{border-color:rgba(255,255,255,0.32);}
-
-/* ── Rich text editor ── */
+.fi,.fs{width:100%;padding:10px 12px;background:var(--s1);border:1px solid var(--bdr2);border-radius:8px;color:var(--txt);font-size:13px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;outline:none;}
 .rte-wrap{border:1px solid var(--bdr2);border-radius:8px;overflow:hidden;}
 .rte-toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--s2);border-bottom:1px solid var(--bdr);flex-wrap:wrap;align-items:center;}
-.rtb{background:none;border:1px solid transparent;border-radius:5px;cursor:pointer;padding:4px 8px;font-size:12px;color:var(--mut);transition:all .1s;font-family:'Courier New',monospace;line-height:1;}
+.rtb{background:none;border:1px solid transparent;border-radius:5px;cursor:pointer;padding:4px 8px;font-size:12px;color:var(--mut);font-family:'Courier New',monospace;line-height:1;}
 .rtb:hover{background:var(--s1);color:var(--txt);border-color:var(--bdr2);}
 .rtb.on{background:rgba(0,240,190,0.1);color:var(--acc);border-color:rgba(0,240,190,0.3);}
 .rtb-sep{width:1px;height:16px;background:var(--bdr2);margin:0 2px;flex-shrink:0;}
-.rtb-color{width:18px;height:18px;border-radius:50%;border:2px solid transparent;cursor:pointer;flex-shrink:0;transition:border-color .1s;}
+.rtb-color{width:18px;height:18px;border-radius:50%;border:2px solid transparent;cursor:pointer;flex-shrink:0;}
 .rtb-color:hover,.rtb-color.on{border-color:rgba(255,255,255,0.6);}
-.emoji-panel{background:var(--s2);border-bottom:1px solid var(--bdr);padding:8px;}
+.emoji-panel{background:var(--s2);border-bottom:1px solid var(--bdr);padding:8px;display:none;}
+.emoji-panel.on{display:block;}
 .emoji-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;}
-.emoji-btn{background:none;border:none;cursor:pointer;font-size:18px;padding:4px;border-radius:6px;transition:background .1s;text-align:center;}
-.emoji-btn:hover{background:var(--s1);}
-.rte-body div,.rte-body p{min-height:1em;}
+.emoji-btn{background:none;border:none;cursor:pointer;font-size:18px;padding:4px;border-radius:6px;}
 .rte-body{min-height:100px;padding:10px 12px;background:var(--s1);color:rgba(240,237,230,0.82);font-size:13px;line-height:1.85;outline:none;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;}
-.rte-body b,.rte-body strong{color:var(--txt);}
-.rte-body:empty::before{content:attr(data-placeholder);color:var(--fnt);pointer-events:none;}
-
-.file-drop{border:1px dashed var(--bdr2);border-radius:8px;padding:14px;text-align:center;cursor:pointer;transition:border-color .12s;}
-.file-drop:hover{border-color:rgba(255,255,255,0.3);}
+.rte-body div,.rte-body p{min-height:1em;}
+.rte-body:empty::before{content:attr(data-placeholder);color:var(--fnt);}
+.track-row{background:var(--s1);border:1px solid var(--bdr);border-radius:8px;padding:10px 12px;margin-bottom:8px;}
+.track-row-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.track-num{font-size:9px;font-family:'Courier New',monospace;color:var(--mut);flex-shrink:0;white-space:nowrap;}
+.track-name{font-size:12px;font-weight:500;color:var(--lyrics);flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.sc-fetch-btn{padding:8px 14px;border:1px solid rgba(240,96,192,0.4);border-radius:8px;background:rgba(240,96,192,0.07);color:var(--lyrics);font-size:11px;font-family:'Courier New',monospace;cursor:pointer;width:100%;margin-top:6px;}
+.sc-fetch-loading{font-size:11px;color:var(--mut);font-family:'Courier New',monospace;padding:8px 0;text-align:center;}
+.file-drop{border:1px dashed var(--bdr2);border-radius:8px;padding:14px;text-align:center;cursor:pointer;}
 .file-drop input{display:none;}
 .file-drop-lbl{font-size:11px;color:var(--mut);font-family:'Courier New',monospace;display:block;margin-bottom:3px;}
 .file-drop-sub{font-size:10px;color:var(--fnt);}
 .file-preview{display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(0,240,190,0.05);border:1px solid rgba(0,240,190,0.2);border-radius:8px;}
 .file-preview-name{font-size:11px;color:var(--acc);font-family:'Courier New',monospace;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
-.file-preview-rm{background:none;border:none;color:var(--mut);cursor:pointer;font-size:13px;padding:2px;}
-.bsend{padding:13px;border-radius:10px;background:var(--acc);border:none;color:#060a10;font-size:13px;font-weight:700;cursor:pointer;width:100%;letter-spacing:0.1em;text-transform:uppercase;font-family:'Courier New',monospace;transition:opacity .12s;}
-.bsend:hover{opacity:0.86;}
+.file-preview-rm{background:none;border:none;color:var(--mut);cursor:pointer;font-size:13px;}
+.bsend{padding:13px;border-radius:10px;background:var(--acc);border:none;color:#060a10;font-size:13px;font-weight:700;cursor:pointer;width:100%;letter-spacing:0.1em;text-transform:uppercase;font-family:'Courier New',monospace;}
 .mcard{background:var(--s1);border:1px solid var(--bdr);border-radius:10px;padding:11px 13px;display:flex;gap:10px;align-items:flex-start;margin-bottom:8px;}
 .mcb{flex:1;min-width:0;}
-.bedit{background:none;border:1px solid var(--bdr2);color:var(--mut);border-radius:6px;font-size:10px;padding:4px 10px;cursor:pointer;font-family:'Courier New',monospace;flex-shrink:0;transition:all .1s;}
-.bedit:hover{background:var(--s2);color:var(--txt);}
-.bdel{background:none;border:1px solid rgba(240,80,80,0.25);color:rgba(240,80,80,0.6);border-radius:6px;font-size:10px;padding:4px 10px;cursor:pointer;font-family:'Courier New',monospace;flex-shrink:0;transition:all .1s;}
-.bdel:hover{background:rgba(240,80,80,0.08);border-color:rgba(240,80,80,0.55);color:#f05050;}
-.empty{text-align:center;padding:3rem 1rem;color:var(--fnt);font-size:12px;font-family:'Courier New',monospace;letter-spacing:0.06em;}
-.toast{background:var(--acc);color:#060a10;text-align:center;padding:10px;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;font-family:'Courier New',monospace;position:sticky;top:0;z-index:20;}
-.preview-wrap{padding:1rem 16px 3rem;border-top:1px solid var(--bdr);}
+.bedit{background:none;border:1px solid var(--bdr2);color:var(--mut);border-radius:6px;font-size:10px;padding:4px 10px;cursor:pointer;font-family:'Courier New',monospace;flex-shrink:0;}
+.bdel{background:none;border:1px solid rgba(240,80,80,0.25);color:rgba(240,80,80,0.6);border-radius:6px;font-size:10px;padding:4px 10px;cursor:pointer;font-family:'Courier New',monospace;flex-shrink:0;}
+.preview-wrap{padding:1rem 16px 3rem;}
 .preview-card{background:var(--s1);border:1px solid var(--bdr2);border-radius:12px;padding:1rem 14px;}
-
-.reactions{margin-bottom:1.2rem;}
-.react-lbl{font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--mut);font-family:'Courier New',monospace;margin-bottom:8px;}
-.react-row{display:flex;gap:6px;flex-wrap:wrap;}
-.react-btn{background:var(--s1);border:1px solid var(--bdr2);border-radius:20px;padding:5px 12px;cursor:pointer;font-size:15px;transition:all .1s;display:flex;align-items:center;gap:5px;}
-.react-btn:hover{background:var(--s2);border-color:var(--bdr2);}
-.react-count{font-size:11px;font-family:'Courier New',monospace;color:var(--mut);}
-.react-add{background:none;border:1px dashed var(--bdr2);border-radius:20px;padding:5px 12px;cursor:pointer;font-size:12px;color:var(--mut);font-family:'Courier New',monospace;transition:all .1s;}
-.react-add:hover{background:var(--s1);color:var(--txt);}
-.react-picker{background:var(--s2);border:1px solid var(--bdr2);border-radius:10px;padding:8px;margin-top:6px;display:none;}
-.react-picker.on{display:block;}
-.react-picker-grid{display:flex;flex-wrap:wrap;gap:4px;}
-.react-pick-btn{background:none;border:none;cursor:pointer;font-size:20px;padding:4px;border-radius:6px;transition:background .1s;}
-.react-pick-btn:hover{background:var(--s1);}
+.empty{text-align:center;padding:3rem 1rem;color:var(--fnt);font-size:12px;font-family:'Courier New',monospace;}
+.toast{background:var(--acc);color:#060a10;text-align:center;padding:10px;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;font-family:'Courier New',monospace;position:sticky;top:0;z-index:20;}
+.sc-hidden{position:absolute;opacity:0;pointer-events:none;height:1px;overflow:hidden;}
 </style>
 </head>
 <body>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script src="https://w.soundcloud.com/player/api.js"></script>
 <div id="app"></div>
 <script>
-const firebaseConfig={
+// ── Firebase ──────────────────────────────────────────────────────────
+firebase.initializeApp({
   apiKey:"AIzaSyAWKQMRQREp765mBbjHHvntnkPF-PV3MMs",
   authDomain:"natsukikich.firebaseapp.com",
   databaseURL:"https://natsukikich-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -188,106 +156,92 @@ const firebaseConfig={
   storageBucket:"natsukikich.firebasestorage.app",
   messagingSenderId:"897484879290",
   appId:"1:897484879290:web:dd104398870f0209801983"
-};
-firebase.initializeApp(firebaseConfig);
+});
 const db=firebase.database();
+
+// ── Constants ─────────────────────────────────────────────────────────
 const PIN='0925';
 const TYPES={rule:'ルール',lyrics:'歌詞',drill:'ドリル',msg:'メッセージ'};
 const TATAGS=['重要','お気に入り','復習','できた!'];
 const REACT_EMOJIS=['👍','❤️','🔥','😊','🎵','✨','💪','🤩','😂','🥺','👏','🌟'];
-const RICH_TYPES=['rule','lyrics','drill','msg'];
-const COLORS=[
-  {v:'#f060c0',label:'ピンク'},
-  {v:'#00f0be',label:'グリーン'},
-  {v:'#f0b030',label:'イエロー'},
-  {v:'#3090f0',label:'ブルー'},
-  {v:'#f07070',label:'レッド'},
-  {v:'#c0a0ff',label:'パープル'},
-];
-
+const COLORS=[{v:'#f060c0',l:'ピンク'},{v:'#00f0be',l:'グリーン'},{v:'#f0b030',l:'イエロー'},{v:'#3090f0',l:'ブルー'},{v:'#f07070',l:'レッド'},{v:'#c0a0ff',l:'パープル'}];
+const EMOJIS=['😊','😄','😂','🥺','😎','🤔','😴','🥳','😤','🔥','⭐','✨','💡','📖','✏️','🎵','🎶','🎤','🎸','🎹','👍','👏','💪','🙌','👀','🤞','✌️','🫶','🤩','💯','🌸','🌟','🌈','🍀','🐯','🐱','🐶','🦁','🐧','🦋','📝','📚','🗒️','📌','🔖','💬','📣','🎯','🏆','🎁'];
 const SEED=[
-  {id:'seed-rule-001',type:'rule',title:'タブレットの使用ルール',
-   content:'使っていいとき\n・勉強・調べもの（ChatGPT、学習アプリ、辞書）はOK\n・宿題が終わったあと\n\n時間のルール\n・平日は1日1時間まで（21時以降は使わない）\n・休日は2時間まで（外出・運動のあとに使う）\n\nやっていいこと・だめなこと\n・アプリの追加はお母さんに相談\n・ゲーム・SNS・YouTube（勉強以外）はなし\n・個人情報（名前・学校・住所）は入力しない\n\n大切にすること\n・食事中・お風呂では使わない\n・充電スポットはリビング\n・使い終わったら元の場所に戻す',
-   rich:false,url:null,file:null,createdAt:Date.now()-86400000*3},
-  {id:'seed-lyrics-001',type:'lyrics',title:'日本史の歌',
-   content:'曲を聴きながら<b style="color:#f060c0">歌詞</b>を覚えよう！',
-   rich:true,url:'https://soundcloud.com/yupor/sets/noiand3f840r',file:null,createdAt:Date.now()-86400000*2},
-  {id:'seed-lyrics-002',type:'lyrics',title:'理科の歌',
-   content:'曲を聴きながら<b style="color:#00f0be">覚えよう！</b>',
-   rich:true,url:'https://soundcloud.com/yupor/sets/akinqrleepmg',file:null,createdAt:Date.now()-86400000*1}
+  {id:'seed-rule-001',type:'rule',title:'タブレットの使用ルール',content:'使っていいとき\n・勉強・調べもの（ChatGPT、学習アプリ、辞書）はOK\n・宿題が終わったあと\n\n時間のルール\n・平日は1日1時間まで（21時以降は使わない）\n・休日は2時間まで（外出・運動のあとに使う）\n\nやっていいこと・だめなこと\n・アプリの追加はお母さんに相談\n・ゲーム・SNS・YouTube（勉強以外）はなし\n・個人情報（名前・学校・住所）は入力しない\n\n大切にすること\n・食事中・お風呂では使わない\n・充電スポットはリビング\n・使い終わったら元の場所に戻す',rich:false,url:null,file:null,tracks:null,createdAt:Date.now()-86400000*3},
+  {id:'seed-lyrics-001',type:'lyrics',title:'日本史の歌',content:'',rich:false,url:'https://soundcloud.com/yupor/sets/noiand3f840r',file:null,tracks:null,createdAt:Date.now()-86400000*2},
+  {id:'seed-lyrics-002',type:'lyrics',title:'理科の歌',content:'',rich:false,url:'https://soundcloud.com/yupor/sets/akinqrleepmg',file:null,tracks:null,createdAt:Date.now()-86400000*1}
 ];
 
-let S={view:'home',cards:[],tags:{},sel:null,ptab:'create',etab:'edit',pin:'',perr:false,toast:null,pendingFile:null};
+// ── State ─────────────────────────────────────────────────────────────
+var S={
+  view:'home',cards:null,tags:{},reactions:{},
+  sel:null,ptab:'create',etab:'edit',
+  pin:'',perr:false,toast:null,
+  pendingFile:null,
+  _formType:'rule',_formTracks:null,_fetchStatus:null,
+  _editId:null,_editType:null,_editTracks:null,_editFetchStatus:null,
+  _draft:null,_savedTit:'',_savedUrl:''
+};
 
-function scEmbedUrl(url){
-  return'https://w.soundcloud.com/player/?url='+encodeURIComponent(url)+'&color=%23f060c0&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=true';
-}
-function load(){
-  S.cards=null;
+// ── Firebase I/O ──────────────────────────────────────────────────────
+function fbLoad(){
   db.ref('drops/cards').on('value',function(snap){
     var val=snap.val();
-    if(val){
-      S.cards=Object.values(val).sort(function(a,b){return a.createdAt-b.createdAt;});
-    } else {
-      S.cards=JSON.parse(JSON.stringify(SEED));
-      SEED.forEach(function(c){db.ref('drops/cards/'+c.id).set(c);});
-    }
+    if(val){S.cards=Object.values(val).sort(function(a,b){return a.createdAt-b.createdAt;});}
+    else{S.cards=JSON.parse(JSON.stringify(SEED));SEED.forEach(function(c){db.ref('drops/cards/'+c.id).set(c);});}
     render();
-  },function(err){
-    console.error('Firebase error:',err);
-    if(!S.cards){S.cards=JSON.parse(JSON.stringify(SEED));}
-    render();
-  });
-  db.ref('drops/tags').on('value',function(snap){
-    S.tags=snap.val()||{};
-    render();
-  });
-  db.ref('drops/reactions').on('value',function(snap){
-    S.reactions=snap.val()||{};
-    render();
-  });
+  },function(){S.cards=JSON.parse(JSON.stringify(SEED));render();});
+  db.ref('drops/tags').on('value',function(snap){S.tags=snap.val()||{};render();});
+  db.ref('drops/reactions').on('value',function(snap){S.reactions=snap.val()||{};render();});
 }
-function save(card){
-  db.ref('drops/cards/'+card.id).set(card);
-}
-function saveT(cid){
-  db.ref('drops/tags/'+cid).set(S.tags[cid]||null);
-}
-function saveReaction(cid,emoji){
-  var ref=db.ref('drops/reactions/'+cid+'/'+encodeEmoji(emoji));
-  ref.transaction(function(cur){return(cur||0)+1;});
-}
-function encodeEmoji(e){return e.codePointAt(0).toString(16);}
+function fbSave(card){db.ref('drops/cards/'+card.id).set(card);}
+function fbDel(id){db.ref('drops/cards/'+id).remove();db.ref('drops/tags/'+id).remove();db.ref('drops/reactions/'+id).remove();}
+function fbTag(cid){db.ref('drops/tags/'+cid).set(S.tags[cid]||null);}
+function fbReact(cid,emoji){db.ref('drops/reactions/'+cid+'/'+emoji.codePointAt(0).toString(16)).transaction(function(n){return(n||0)+1;});}
 
+// ── Helpers ───────────────────────────────────────────────────────────
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function fd(ts){const d=new Date(ts);return(d.getMonth()+1)+'/'+d.getDate();}
+function fd(ts){var d=new Date(ts);return(d.getMonth()+1)+'/'+(d.getDate());}
 function tc(t){return{rule:'c-rule bg-rule',lyrics:'c-lyrics bg-lyrics',drill:'c-drill bg-drill',msg:'c-msg bg-msg'}[t]||'';}
 function ac(t){return{rule:'var(--rule)',lyrics:'var(--lyrics)',drill:'var(--drill)',msg:'var(--msg)'}[t]||'var(--acc)';}
-function isSC(url){return url&&url.includes('soundcloud.com');}
-function isRich(t){return RICH_TYPES.includes(t);}
+function isSC(u){return u&&u.includes('soundcloud.com');}
+function scEmbed(u){return'https://w.soundcloud.com/player/?url='+encodeURIComponent(u)+'&color=%23f060c0&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=true';}
+function badges(c){var b='';if(c.type==='lyrics'&&isSC(c.url))b+='<span class="sc-badge">&#9834; SC</span>';if(c.file)b+='<span class="file-badge">'+(c.file.type==='image'?'IMG':'PDF')+'</span>';return b;}
+function strip(h){return(h||'').replace(/<[^>]*>/g,'').replace(/&nbsp;/g,' ').trim();}
 
-function cardBadges(c){
-  let b='';
-  if(c.type==='lyrics'&&isSC(c.url))b+='<span class="sc-badge">&#9834; SC</span>';
-  if(c.file)b+='<span class="file-badge">'+(c.file.type==='image'?'IMG':'PDF')+'</span>';
-  return b;
+// ── Toolbar ───────────────────────────────────────────────────────────
+function toolbar(){
+  var cb=COLORS.map(function(c){return'<button class="rtb-color" style="background:'+c.v+'" title="'+c.l+'" onclick="fmtColor(\''+c.v+'\')" ></button>';}).join('');
+  var eg=EMOJIS.map(function(e){return'<button class="emoji-btn" onclick="insEmoji(\''+e+'\')">'+e+'</button>';}).join('');
+  return'<div class="rte-toolbar"><button class="rtb" id="rtb-bold" onclick="fmt(\'bold\')"><b>B</b></button><button class="rtb" id="rtb-italic" onclick="fmt(\'italic\')"><i>I</i></button><button class="rtb" id="rtb-underline" onclick="fmt(\'underline\')"><u>U</u></button><div class="rtb-sep"></div><span style="font-size:10px;color:var(--fnt);font-family:Courier New,monospace;margin-right:4px">色</span>'+cb+'<div class="rtb-sep"></div><button class="rtb" id="rtb-emoji" onclick="toggleEmoji(event)" style="font-size:14px">&#128512;</button><div class="rtb-sep"></div><button class="rtb" onclick="fmt(\'removeFormat\')" style="font-size:10px">消す</button></div><div class="emoji-panel" id="emoji-panel"><div class="emoji-grid">'+eg+'</div></div>';
+}
+function fmt(cmd){var r=document.getElementById('rte');if(r)r.focus();document.execCommand(cmd,false,null);syncToolbar();}
+function fmtColor(v){var r=document.getElementById('rte');if(!r)return;r.focus();document.execCommand('styleWithCSS',false,true);document.execCommand('foreColor',false,v);syncToolbar();}
+function syncToolbar(){['bold','italic','underline'].forEach(function(c){var b=document.getElementById('rtb-'+c);if(b)b.classList.toggle('on',document.queryCommandState(c));});}
+function toggleEmoji(e){e.stopPropagation();var p=document.getElementById('emoji-panel');if(p){var on=p.classList.toggle('on');document.getElementById('rtb-emoji').classList.toggle('on',on);}}
+function insEmoji(e){var r=document.getElementById('rte');if(r){r.focus();document.execCommand('insertText',false,e);}var p=document.getElementById('emoji-panel');if(p){p.classList.remove('on');document.getElementById('rtb-emoji').classList.remove('on');}}
+
+// ── File area helper ──────────────────────────────────────────────────
+function fileArea(fp,existingFile,clearFn){
+  if(fp)return'<div class="file-preview"><span style="font-size:18px">'+(fp.type==='image'?'&#128444;':'&#128196;')+'</span><span class="file-preview-name">'+esc(fp.name)+'</span><button class="file-preview-rm" onclick="'+clearFn+'()">&#10005;</button></div>';
+  if(existingFile)return'<div class="file-preview"><span style="font-size:18px">'+(existingFile.type==='image'?'&#128444;':'&#128196;')+'</span><span class="file-preview-name">'+esc(existingFile.name)+'</span><button class="file-preview-rm" onclick="'+clearFn+'()">&#10005;</button></div>';
+  return'<label class="file-drop"><input type="file" accept="image/*,.pdf" onchange="handleFile(event)"/><span class="file-drop-lbl">&#128206; ファイルを添付する</span><span class="file-drop-sub">画像 または PDF（5MB以内）</span></label>';
 }
 
-function stripTags(html){return(html||'').replace(/<[^>]*>/g,'').replace(/&nbsp;/g,' ').trim();}
-
+// ── Views ─────────────────────────────────────────────────────────────
 function rHome(){
   return'<div class="home v"><div style="text-align:center"><span class="logo-word">DROPS<span class="logo-dot"></span></span><p class="logo-sub">ゆうこ から 夏伎 へ</p></div><div class="hbtns"><button class="mbtn" onclick="go(\'nf\')"><div class="mico ico-n">夏伎</div><div><div class="mname">夏伎</div><div class="mdesc">カードを受け取る</div></div></button><button class="mbtn" onclick="go(\'pp\')"><div class="mico ico-y">Y</div><div><div class="mname">ゆうこ</div><div class="mdesc">カードを作って送る</div></div></button></div></div>';
 }
 
 function rNF(){
-  if(!S.cards){return'<div class="v"><div class="nav"><button class="nbk" onclick="go(\'home\')">&#8592; back</button><span class="ntit">夏伎の drops</span></div><div class="empty">— 読み込み中 —</div></div>';}
-  const cs=[...S.cards].reverse();
-  const list=cs.length?cs.map(function(c){
-    const tg=S.tags[c.id]||[];
-    const prev=c.rich?stripTags(c.content):c.content;
-    return'<div class="card" onclick="openCard(\''+c.id+'\')"><div class="cacc" style="background:'+ac(c.type)+'"></div><div class="cbody"><div class="chead"><span class="ttag '+tc(c.type)+'">'+TYPES[c.type]+'</span><span class="ctit">'+esc(c.title)+'</span>'+cardBadges(c)+'</div><div class="cprev">'+esc(prev)+'</div><div class="cfoot"><span class="cdate">'+fd(c.createdAt)+'</span><div class="tags">'+tg.map(function(t){return'<span class="tag">'+t+'</span>';}).join('')+'</div></div></div></div>';
+  if(!S.cards)return'<div class="v"><div class="nav"><button class="nbk" onclick="go(\'home\')">&#8592; back</button><span class="ntit">夏伎の drops</span></div><div class="empty">— 読み込み中 —</div></div>';
+  var cs=[...S.cards].reverse();
+  var list=cs.length?cs.map(function(c){
+    var tg=S.tags[c.id]||[];
+    var prev=c.rich?strip(c.content):c.content||'';
+    return'<div class="card" onclick="openCard(\''+c.id+'\')"><div class="cacc" style="background:'+ac(c.type)+'"></div><div class="cbody"><div class="chead"><span class="ttag '+tc(c.type)+'">'+TYPES[c.type]+'</span><span class="ctit">'+esc(c.title)+'</span>'+badges(c)+'</div><div class="cprev">'+esc(prev)+'</div><div class="cfoot"><span class="cdate">'+fd(c.createdAt)+'</span><div class="tags">'+tg.map(function(t){return'<span class="stag">'+t+'</span>';}).join('')+'</div></div></div></div>';
   }).join(''):'<div class="empty">— まだ drops はありません —</div>';
-  return'<div class="v"><div class="nav"><button class="nbk" onclick="go(\'home\')">&#8592; back</button><span class="ntit">夏伎の drops</span><span class="ncnt">'+S.cards.length+'</span></div><div class="feed">'+list+'</div></div>';
+  return'<div class="v"><div class="nav"><button class="nbk" onclick="go(\'home\')">&#8592; back</button><span class="ntit">夏伎の drops</span><span class="ncnt">'+(S.cards.length)+'</span></div><div class="feed">'+list+'</div></div>';
 }
 
 function rND(){
@@ -295,23 +249,24 @@ function rND(){
   var c=S.cards.find(function(x){return x.id===S.sel;});
   if(!c)return rNF();
   var tg=S.tags[c.id]||[];
+  var rxs=S.reactions[c.id]||{};
   var showSC=c.type==='lyrics'&&isSC(c.url);
-  var playerHtml=showSC?'<div class="sc-player"><div class="sc-player-lbl">SoundCloud</div><iframe id="sc-iframe" src="'+scEmbedUrl(c.url)+'" height="166" scrolling="no" allow="autoplay"></iframe></div>':'';
-  var attHtml='';
-  if(c.file){
-    if(c.file.type==='image')attHtml='<img class="att-img" src="'+c.file.data+'" alt="'+esc(c.file.name)+'"/>';
-    else attHtml='<div class="att-pdf" onclick="dlFile(\''+c.id+'\')"><span class="att-pdf-icon">&#128196;</span><div class="att-pdf-meta"><div class="att-pdf-name">'+esc(c.file.name)+'</div><div class="att-pdf-sub">PDF ファイル</div></div><span class="att-pdf-dl">開く &#8594;</span></div>';
+  var hasTracks=c.tracks&&c.tracks.length>0;
+  var playerHtml=showSC?'<div class="sc-player"><div class="sc-player-lbl">SoundCloud</div><iframe id="sc-iframe" src="'+scEmbed(c.url)+'" height="166" scrolling="no" allow="autoplay"></iframe></div>':'';
+  var lyricsHtml='';
+  if(showSC&&hasTracks){
+    lyricsHtml='<div id="sc-lyrics-section"><div class="track-title-bar" id="sc-track-bar" style="display:none"><div class="track-title-dot"></div><span class="track-title-text" id="sc-track-title">—</span></div><div id="sc-lyrics-body" class="det-body"></div></div>';
+  }else if(c.content){
+    lyricsHtml=c.rich?'<div class="det-body">'+c.content+'</div>':'<div class="det-body" style="white-space:pre-wrap">'+esc(c.content)+'</div>';
   }
-  var bodyHtml=c.content?(c.rich?'<div class="det-body">'+c.content+'</div>':'<div class="det-body" style="white-space:pre-wrap">'+esc(c.content)+'</div>'):'';
-  var lyricsLbl=showSC&&c.content?'<p class="lyrics-lbl">歌詞 / メモ</p>':'';
-  var linkHtml=(!showSC&&c.url)?'<a class="det-link" href="'+c.url+'" target="_blank">&#9654; リンクを開く</a>':'';
-  return'<div class="v"><div class="nav"><button class="nbk" onclick="go(\'nf\')">&#8592; もどる</button><span class="ntit"></span></div><div class="det"><span class="det-type '+tc(c.type)+'">'+TYPES[c.type]+'</span><h1 class="det-tit">'+esc(c.title)+'</h1><hr class="det-div"/>'+playerHtml+lyricsLbl+bodyHtml+attHtml+linkHtml+'<div class="tagsec"><p class="taglbl">タグをつける</p><div class="tagopts">'+TATAGS.map(function(t){return'<button class="tbtn'+(tg.includes(t)?' on':'')+'" onclick="toggleTag(\''+c.id+'\',\''+t+'\')">'+t+'</button>';}).join('')+'</div></div></div></div>';
-}
-
-function dlFile(id){
-  var c=S.cards.find(function(x){return x.id===id;});
-  if(!c||!c.file)return;
-  var a=document.createElement('a');a.href=c.file.data;a.download=c.file.name;a.click();
+  var attHtml='';
+  if(c.file){if(c.file.type==='image')attHtml='<img class="att-img" src="'+c.file.data+'"/>';else attHtml='<div class="att-pdf" onclick="dlFile(\''+c.id+'\')"><span class="att-pdf-icon">&#128196;</span><div class="att-pdf-meta"><div class="att-pdf-name">'+esc(c.file.name)+'</div><div class="att-pdf-sub">PDF</div></div><span class="att-pdf-dl">開く &#8594;</span></div>';}
+  var linkHtml=(!showSC&&c.url)?'<a style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--s1);border-radius:8px;border:1px solid var(--bdr2);font-size:11px;color:var(--acc);margin-bottom:1rem;font-family:Courier New,monospace;text-decoration:none" href="'+esc(c.url)+'" target="_blank">&#9654; リンクを開く</a>':'';
+  var rxBtns=REACT_EMOJIS.map(function(e){var cnt=rxs[e.codePointAt(0).toString(16)]||0;return cnt?'<button class="react-btn" onclick="fbReact(\''+c.id+'\',\''+e+'\')">'+e+'<span class="react-count">'+cnt+'</span></button>':'';}).join('');
+  var pickerHtml='<div class="react-picker" id="rpicker"><div class="react-picker-grid">'+REACT_EMOJIS.map(function(e){return'<button class="react-pick-btn" onclick="doReact(\''+c.id+'\',\''+e+'\')">'+e+'</button>';}).join('')+'</div></div>';
+  var reactHtml='<div class="reactions"><p class="react-lbl">リアクション</p><div class="react-row">'+rxBtns+'<button class="react-add" onclick="togglePicker()">＋ 反応する</button></div>'+pickerHtml+'</div>';
+  var tagsHtml='<div class="tagsec"><p class="taglbl">タグをつける</p><div class="tagopts">'+TATAGS.map(function(t){return'<button class="tbtn'+(tg.includes(t)?' on':'')+'" onclick="toggleTag(\''+c.id+'\',\''+t+'\')">'+t+'</button>';}).join('')+'</div></div>';
+  return'<div class="v"><div class="nav"><button class="nbk" onclick="go(\'nf\')">&#8592; もどる</button></div><div class="det"><span class="det-type '+tc(c.type)+'">'+TYPES[c.type]+'</span><h1 class="det-tit">'+esc(c.title)+'</h1><hr class="det-div"/>'+playerHtml+lyricsHtml+attHtml+linkHtml+reactHtml+tagsHtml+'</div></div>';
 }
 
 function rPP(){
@@ -319,316 +274,53 @@ function rPP(){
   return'<div class="v"><div class="nav"><button class="nbk" onclick="go(\'home\')">&#8592; back</button><span class="ntit">ゆうこモード</span></div><div class="pin"><div class="pin-lg">DROPS</div><p class="pin-lbl">PIN を入力</p><div class="pin-dots">'+dots+'</div>'+(S.perr?'<p class="pin-err">PIN が違います</p>':'')+'<div class="npad">'+[1,2,3,4,5,6,7,8,9].map(function(n){return'<button class="nbt" onclick="addPin(\''+n+'\')">'+n+'</button>';}).join('')+'<button class="nbt" onclick="addPin(\'0\')" style="grid-column:2">0</button><button class="nbt" style="font-size:13px;color:var(--mut)" onclick="delPin()">&#9003;</button></div></div></div>';
 }
 
-var EMOJIS=[
-  '😊','😄','😂','🥺','😎','🤔','😴','🥳','😤','🔥',
-  '⭐','✨','💡','📖','✏️','🎵','🎶','🎤','🎸','🎹',
-  '👍','👏','💪','🙌','👀','🤞','✌️','🫶','🤩','💯',
-  '🌸','🌟','🌈','🍀','🐯','🐱','🐶','🦁','🐧','🦋',
-  '📝','📚','🗒️','📌','🔖','💬','📣','🎯','🏆','🎁',
-];
-
-function richToolbar(){
-  var colorBtns=COLORS.map(function(c){
-    return'<button class="rtb-color" style="background:'+c.v+'" title="'+c.label+'" onclick="fmtColor(\''+c.v+'\')" data-color="'+c.v+'"></button>';
-  }).join('');
-  var emojiGrid=EMOJIS.map(function(e){
-    return'<button class="emoji-btn" onclick="insertEmoji(\''+e+'\')">'+e+'</button>';
-  }).join('');
-  return'<div class="rte-toolbar">'+
-    '<button class="rtb" id="rtb-bold" onclick="fmt(\'bold\')" title="太字"><b>B</b></button>'+
-    '<button class="rtb" id="rtb-italic" onclick="fmt(\'italic\')" title="イタリック"><i>I</i></button>'+
-    '<button class="rtb" id="rtb-underline" onclick="fmt(\'underline\')" title="下線"><u>U</u></button>'+
-    '<div class="rtb-sep"></div>'+
-    '<span style="font-size:10px;color:var(--fnt);font-family:\'Courier New\',monospace;margin-right:4px">色</span>'+
-    colorBtns+
-    '<div class="rtb-sep"></div>'+
-    '<button class="rtb" onclick="toggleEmoji(event)" title="顔文字" id="rtb-emoji" style="font-size:14px">&#128512;</button>'+
-    '<div class="rtb-sep"></div>'+
-    '<button class="rtb" onclick="fmt(\'removeFormat\')" title="書式を消す" style="font-size:10px">消す</button>'+
-  '</div>'+
-  '<div class="emoji-panel" id="emoji-panel" style="display:none">'+
-    '<div class="emoji-grid">'+emojiGrid+'</div>'+
-  '</div>';
-}
-
-function toggleEmoji(e){
-  e.stopPropagation();
-  var panel=document.getElementById('emoji-panel');
-  if(!panel)return;
-  var shown=panel.style.display==='block';
-  panel.style.display=shown?'none':'block';
-  document.getElementById('rtb-emoji').classList.toggle('on',!shown);
-}
-function insertEmoji(emoji){
-  var rte=document.getElementById('rte');
-  if(!rte)return;
-  rte.focus();
-  document.execCommand('insertText',false,emoji);
-  var panel=document.getElementById('emoji-panel');
-  if(panel)panel.style.display='none';
-  document.getElementById('rtb-emoji').classList.remove('on');
-}
-
-function populateEditFields(){
-  var c=S.cards&&S.cards.find(function(x){return x.id===S._editId;});
-  if(!c)return;
-  var rte=document.getElementById('rte');
-  if(rte)rte.innerHTML=c.rich?c.content||'':c.content||'';
-}
-
-function getEditDraft(){
-  // read current form values into a draft object
-  if(!S.cards)return null;
-  var c=S.cards.find(function(x){return x.id===S._editId;});
-  if(!c)return null;
-  var type=(document.getElementById('ct')||{}).value||S._editType||c.type;
-  var title=((document.getElementById('ctit')||{}).value||'').trim()||c.title;
-  var url=((document.getElementById('curl')||{}).value||'').trim()||c.url||'';
-  var rich=isRich(type);
-  var content='';
-  if(rich){var rte=document.getElementById('rte');content=rte?rte.innerHTML:c.content||'';}
-  else{var ta=document.getElementById('ccont');content=ta?ta.value:c.content||'';}
-  return{id:c.id,type:type,title:title,content:content,rich:rich,url:url||null,file:S.pendingFile||c.file||null,createdAt:c.createdAt,reactions:c.reactions||null};
-}
-
-function switchEtab(tab){
-  if(tab==='preview'){
-    // snapshot current values before switching
-    S._draft=getEditDraft();
-  }
-  S.etab=tab;render();
-  if(tab==='edit'){
-    // restore form values
-    setTimeout(function(){
-      var d=S._draft||S.cards&&S.cards.find(function(x){return x.id===S._editId;});
-      if(!d)return;
-      var t=document.getElementById('ctit');if(t)t.value=d.title||'';
-      var u=document.getElementById('curl');if(u)u.value=d.url||'';
-      var rte=document.getElementById('rte');if(rte)rte.innerHTML=d.content||'';
-      var ta=document.getElementById('ccont');if(ta)ta.value=d.content||'';
-    },30);
-  }
-}
-
-function rPreview(){
-  var d=S._draft;
-  if(!d)return'<div class="empty">— プレビューなし —</div>';
-  var showSC=d.type==='lyrics'&&isSC(d.url);
-  var playerHtml=showSC?'<div class="sc-player"><div class="sc-player-lbl">SoundCloud</div><iframe src="'+scEmbedUrl(d.url)+'" height="166" scrolling="no" allow="autoplay"></iframe></div>':'';
-  var attHtml='';
-  if(d.file){
-    if(d.file.type==='image')attHtml='<img class="att-img" src="'+d.file.data+'" alt="'+esc(d.file.name)+'"/>';
-    else attHtml='<div class="att-pdf"><span class="att-pdf-icon">&#128196;</span><div class="att-pdf-meta"><div class="att-pdf-name">'+esc(d.file.name)+'</div><div class="att-pdf-sub">PDF ファイル</div></div></div>';
-  }
-  var bodyHtml=d.content?(d.rich?'<div class="det-body">'+d.content+'</div>':'<div class="det-body" style="white-space:pre-wrap">'+esc(d.content)+'</div>'):'';
-  var lyricsLbl=showSC&&d.content?'<p class="lyrics-lbl">歌詞 / メモ</p>':'';
-  var linkHtml=(!showSC&&d.url)?'<a class="det-link" href="'+esc(d.url)+'" target="_blank">&#9654; リンクを開く</a>':'';
-  return'<div class="preview-wrap"><button class="bsend" style="margin-bottom:1rem" onclick="updateCard()">このまま保存する &#10003;</button><div class="preview-card"><span class="det-type '+tc(d.type)+'" style="font-size:9px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;font-family:Courier New,monospace;margin-bottom:8px;display:block;">'+TYPES[d.type]+'</span><h1 class="det-tit">'+esc(d.title)+'</h1><hr class="det-div"/>'+playerHtml+lyricsLbl+bodyHtml+attHtml+linkHtml+'</div></div>';
+function rPM(){
+  var t=S.ptab;
+  var sel=S._formType||'rule';
+  var isLyrics=sel==='lyrics';
+  var fp=S.pendingFile;
+  var fa=fileArea(fp,null,'clearFile');
+  var tracks=S._formTracks||[];
+  var trackRows=tracks.length&&tracks[0].title?tracks.map(function(tr,i){return'<div class="track-row"><div class="track-row-head"><span class="track-num">'+(i+1)+'.</span><span class="track-name">'+esc(tr.title)+'</span></div><textarea class="fi" style="resize:vertical;min-height:60px;line-height:1.65;width:100%;margin-top:0" placeholder="歌詞を入力..." oninput="S._formTracks['+i+'].lyrics=this.value">'+esc(tr.lyrics||'')+'</textarea></div>';}).join(''):'';
+  var cf=isLyrics
+    ?'<div id="tracks-wrap">'+trackRows+'</div>'+(S._fetchStatus?'<div class="sc-fetch-loading">'+esc(S._fetchStatus)+'</div>':'')
+    :'<div class="rte-wrap">'+toolbar()+'<div class="rte-body" id="rte" contenteditable="true" data-placeholder="内容..."></div></div>';
+  var form='<div class="form"><div><label class="fl">種類</label><select class="fs" id="ct" onchange="onTypeChange(this.value)">'+Object.keys(TYPES).map(function(k){return'<option value="'+k+'"'+(k===sel?' selected':'')+'>'+TYPES[k]+'</option>';}).join('')+'</select></div><div><label class="fl">タイトル</label><input class="fi" type="text" id="ctit" placeholder="タイトル"/></div><div><label class="fl">SoundCloud URL'+(isLyrics?' <span style="font-size:9px;color:var(--mut)">URLを貼って読み込みボタンを押してください</span>':'')+'</label><input class="fi" type="url" id="curl" placeholder="https://soundcloud.com/...">'+(isLyrics?'<button class="sc-fetch-btn" onclick="fetchTracks()">&#9834; SoundCloudから曲リストを読み込む</button>':'')+'</div><div><label class="fl">'+(isLyrics?'曲ごとの歌詞':'内容')+'</label>'+cf+'</div><div><label class="fl">ファイル添付（任意）</label>'+fa+'</div><button class="bsend" onclick="createCard()">drop する &#8595;</button></div><div class="sc-hidden" id="sc-hidden-wrap"><iframe id="sc-hidden-iframe" src="" width="100" height="20" scrolling="no" allow="autoplay"></iframe></div>';
+  var cs=S.cards?[...S.cards].reverse():[];
+  var manage=cs.length?'<div style="padding:12px 14px">'+cs.map(function(c){return'<div class="mcard"><div class="cacc" style="background:'+ac(c.type)+';width:3px;flex-shrink:0;margin-right:10px;border-radius:2px;align-self:stretch;"></div><div class="mcb"><div class="chead"><span class="ttag '+tc(c.type)+'">'+TYPES[c.type]+'</span><span class="ctit">'+esc(c.title)+'</span>'+badges(c)+'</div><div style="font-size:10px;color:var(--fnt);font-family:Courier New,monospace;margin-top:4px">'+fd(c.createdAt)+'</div></div><div style="display:flex;gap:5px;flex-shrink:0"><button class="bedit" onclick="openEdit(\''+c.id+'\')">編集</button><button class="bdel" onclick="delCard(\''+c.id+'\')">削除</button></div></div>';}).join('')+'</div>':'<div class="empty">— まだ drops はありません —</div>';
+  return'<div class="v"><div class="nav"><button class="nbk" onclick="go(\'home\')">&#8592; back</button><span class="ntit">ゆうこモード</span></div><div class="tabs"><div class="tab'+(t==='create'?' on':'')+'" onclick="ptab(\'create\')">作る</div><div class="tab'+(t==='manage'?' on':'')+'" onclick="ptab(\'manage\')">送った drops ('+(S.cards?S.cards.length:0)+')</div></div>'+(t==='create'?form:manage)+'</div>';
 }
 
 function rED(){
   var c=S.cards&&S.cards.find(function(x){return x.id===S._editId;});
   if(!c)return rPM();
-  var selType=S._editType||c.type;
-  var showRich=isRich(selType);
+  var sel=S._editType||c.type;
+  var isLyrics=sel==='lyrics';
+  var showRich=!isLyrics;
   var fp=S.pendingFile;
-  var fileArea=fp
-    ?'<div class="file-preview"><span style="font-size:18px">'+(fp.type==='image'?'&#128444;':'&#128196;')+'</span><span class="file-preview-name">'+esc(fp.name)+'</span><button class="file-preview-rm" onclick="clearFile()">&#10005;</button></div>'
-    :(c.file?'<div class="file-preview"><span style="font-size:18px">'+(c.file.type==='image'?'&#128444;':'&#128196;')+'</span><span class="file-preview-name">'+esc(c.file.name)+'</span><button class="file-preview-rm" onclick="clearEditFile()">&#10005;</button></div>'
-    :'<label class="file-drop"><input type="file" accept="image/*,.pdf" onchange="handleFile(event)"/><span class="file-drop-lbl">&#128206; ファイルを添付する</span><span class="file-drop-sub">画像 または PDF（5MB以内）</span></label>');
-  // For rich content: inject directly via escaped HTML in a hidden field, then move to rte on mount
-  var safeContent=c.content||'';
-  var contentField=showRich
-    ?'<div class="rte-wrap">'+richToolbar()+'<div class="rte-body" id="rte" contenteditable="true" data-placeholder="内容...">'+safeContent+'</div></div>'
-    :'<textarea class="fi" id="ccont" style="resize:vertical;min-height:90px;line-height:1.65" placeholder="内容を書いてください...">'+esc(c.content||'')+'</textarea>';
-  var form='<div class="form">'+
-    '<div><label class="fl">種類</label><select class="fs" id="ct" onchange="onEditTypeChange(this.value)">'+
-      Object.keys(TYPES).map(function(k){return'<option value="'+k+'"'+(k===selType?' selected':'')+'>'+TYPES[k]+'</option>';}).join('')+
-    '</select></div>'+
-    '<div><label class="fl">タイトル</label><input class="fi" type="text" id="ctit" value="'+esc(c.title)+'"/></div>'+
-    '<div><label class="fl">内容'+(showRich?' <span style="font-size:9px;color:var(--acc);font-family:\'Courier New\',monospace">— 太字・色編集対応</span>':'')+'</label>'+contentField+'</div>'+
-    '<div><label class="fl">SoundCloud URL</label><input class="fi" type="url" id="curl" value="'+(c.url?esc(c.url):'')+'"/></div>'+
-    '<div><label class="fl">ファイル添付</label>'+fileArea+'</div>'+
-    '<button class="bsend" onclick="updateCard()">保存する &#10003;</button>'+
-  '</div>';
+  var fa=fileArea(fp,c.file,'clearEditFile');
+  var tracks=S._editTracks||(c.tracks&&c.tracks.length?JSON.parse(JSON.stringify(c.tracks)):[]);
+  var trackRows=tracks.length&&tracks[0].title?tracks.map(function(tr,i){return'<div class="track-row"><div class="track-row-head"><span class="track-num">'+(i+1)+'.</span><span class="track-name">'+esc(tr.title)+'</span></div><textarea class="fi" style="resize:vertical;min-height:60px;line-height:1.65;width:100%;margin-top:0" placeholder="歌詞を入力..." oninput="updEditLyrics('+i+',this.value)">'+esc(tr.lyrics||'')+'</textarea></div>';}).join(''):'';
+  var cf=isLyrics
+    ?'<div id="tracks-wrap">'+trackRows+'</div>'+(S._editFetchStatus?'<div class="sc-fetch-loading">'+esc(S._editFetchStatus)+'</div>':'')
+    :'<div class="rte-wrap">'+toolbar()+'<div class="rte-body" id="rte" contenteditable="true" data-placeholder="内容...">'+( c.content||'')+'</div></div>';
   var etab=S.etab||'edit';
-  var tabHtml='<div class="tabs"><div class="tab'+(etab==='edit'?' on':'')+'" onclick="switchEtab(\'edit\')">編集</div><div class="tab'+(etab==='preview'?' on':'')+'" onclick="switchEtab(\'preview\')">プレビュー</div></div>';
-  var body=etab==='edit'?form:rPreview();
-  return'<div class="v"><div class="nav"><button class="nbk" onclick="go(\'pm\')">&#8592; もどる</button><span class="ntit" style="color:var(--acc)">編集モード</span></div>'+tabHtml+body+'</div>';
+  var form='<div class="form"><div><label class="fl">種類</label><select class="fs" id="ct" onchange="onEditTypeChange(this.value)">'+Object.keys(TYPES).map(function(k){return'<option value="'+k+'"'+(k===sel?' selected':'')+'>'+TYPES[k]+'</option>';}).join('')+'</select></div><div><label class="fl">タイトル</label><input class="fi" type="text" id="ctit" value="'+esc(c.title)+'"/></div><div><label class="fl">SoundCloud URL</label><input class="fi" type="url" id="curl" value="'+(c.url||'')+'"/>'+(isLyrics?'<button class="sc-fetch-btn" onclick="fetchTracksEdit()">&#9834; SoundCloudから曲リストを読み込む</button>':'')+'</div><div><label class="fl">'+(isLyrics?'曲ごとの歌詞':'内容')+'</label>'+cf+'</div><div><label class="fl">ファイル添付</label>'+fa+'</div><button class="bsend" onclick="updateCard()">保存する &#10003;</button></div><div class="sc-hidden" id="sc-hidden-wrap-edit"><iframe id="sc-hidden-iframe-edit" src="" width="100" height="20" scrolling="no" allow="autoplay"></iframe></div>';
+  var preview=rPreview(c);
+  return'<div class="v"><div class="nav"><button class="nbk" onclick="go(\'pm\')">&#8592; もどる</button><span class="ntit" style="color:var(--acc)">編集モード</span></div><div class="tabs"><div class="tab'+(etab==='edit'?' on':'')+'" onclick="switchEtab(\'edit\')">編集</div><div class="tab'+(etab==='preview'?' on':'')+'" onclick="switchEtab(\'preview\')">プレビュー</div></div>'+(etab==='edit'?form:preview)+'</div>';
 }
 
-function openEdit(id){
-  S._editId=id;
-  S._editType=null;
-  S._draft=null;
-  S.etab='edit';
-  S.pendingFile=null;
-  S._editTracks=null;
-  S._editFetchStatus=null;
-  // pre-load existing tracks from card
-  var c=S.cards&&S.cards.find(function(x){return x.id===id;});
-  if(c&&c.tracks&&c.tracks.length)S._editTracks=JSON.parse(JSON.stringify(c.tracks));
-  S.view='ed';
-  render();
-}
-function onEditTypeChange(val){
-  // save current values before re-render
-  var tit=document.getElementById('ctit');
-  var url=document.getElementById('curl');
-  var rte=document.getElementById('rte');
-  var ta=document.getElementById('ccont');
-  S._savedTit=tit?tit.value:'';
-  S._savedUrl=url?url.value:'';
-  S._savedContent=rte?rte.innerHTML:(ta?ta.value:'');
-  S._editType=val;
-  // update card content temporarily so rED shows saved content
-  var c=S.cards&&S.cards.find(function(x){return x.id===S._editId;});
-  if(c){c.content=S._savedContent;}
-  render();
-  // restore title/url
-  var t2=document.getElementById('ctit');
-  var u2=document.getElementById('curl');
-  if(t2)t2.value=S._savedTit||'';
-  if(u2)u2.value=S._savedUrl||'';
-}
-function clearEditFile(){
-  var c=S.cards&&S.cards.find(function(x){return x.id===S._editId;});
-  if(c)c.file=null;
-  S.pendingFile=null;
-  render();
-}
-function updateEditTrackLyrics(i,v){
-  if(!S._editTracks)return;
-  S._editTracks[i].lyrics=v;
+function rPreview(card){
+  var c=card||S._draft;
+  if(!c)return'<div class="empty">— プレビューなし —</div>';
+  var showSC=c.type==='lyrics'&&isSC(c.url);
+  var player=showSC?'<div class="sc-player"><div class="sc-player-lbl">SoundCloud</div><iframe src="'+scEmbed(c.url)+'" height="130" scrolling="no" allow="autoplay" style="width:100%;border:none;display:block;"></iframe></div>':'';
+  var body=c.content?(c.rich?'<div class="det-body">'+c.content+'</div>':'<div class="det-body" style="white-space:pre-wrap">'+esc(c.content)+'</div>'):'';
+  var att='';if(c.file&&c.file.type==='image')att='<img class="att-img" src="'+c.file.data+'"/>';
+  return'<div class="preview-wrap"><button class="bsend" style="margin-bottom:1rem" onclick="updateCard()">このまま保存する &#10003;</button><div class="preview-card"><span class="det-type '+tc(c.type)+'" style="font-size:9px;letter-spacing:0.16em;text-transform:uppercase;font-family:Courier New,monospace;margin-bottom:8px;display:block;">'+TYPES[c.type]+'</span><h1 class="det-tit">'+esc(c.title)+'</h1><hr class="det-div"/>'+player+body+att+'</div></div>';
 }
 
-function fetchSCTracksEdit(){
-  if(!window.SC)return;
-  var urlEl=document.getElementById('curl');
-  var url=urlEl?urlEl.value.trim():'';
-  var titEl=document.getElementById('ctit');
-  var savedTit=titEl?titEl.value:'';
-  if(!url){alert('SoundCloudのURLを入力してください');return;}
-  S._editFetchStatus='読み込み中...';render();
-  setTimeout(function(){
-    var el=document.getElementById('curl');if(el)el.value=url;
-    var t=document.getElementById('ctit');if(t)t.value=savedTit;
-    var iframe=document.getElementById('sc-hidden-iframe-edit');
-    if(!iframe)return;
-    iframe.src='https://w.soundcloud.com/player/?url='+encodeURIComponent(url)+'&auto_play=false';
-    var widget=SC.Widget(iframe);
-    widget.bind(SC.Widget.Events.READY,function(){
-      widget.getSounds(function(sounds){
-        if(!sounds||!sounds.length){S._editFetchStatus='曲が見つかりませんでした';render();return;}
-        // preserve existing lyrics by matching titles
-        var oldTracks=S._editTracks||[];
-        S._editTracks=sounds.map(function(s,i){
-          var existing=oldTracks.find(function(t){return t.title===s.title;});
-          return{title:s.title||('Track '+(i+1)),lyrics:existing?existing.lyrics:'',index:i};
-        });
-        S._editFetchStatus=null;
-        render();
-        setTimeout(function(){
-          var el=document.getElementById('curl');if(el)el.value=url;
-          var t=document.getElementById('ctit');if(t)t.value=savedTit;
-        },30);
-      });
-    });
-  },80);
-}
-
-function updateCard(){
-  var c=S.cards&&S.cards.find(function(x){return x.id===S._editId;});
-  if(!c)return;
-  // use draft if we're in preview tab, otherwise read from form
-  var d=S._draft||getEditDraft();
-  if(!d||!d.title){alert('タイトルを入力してください');return;}
-  // save lyrics from DOM before reading
-  if(c.type==='lyrics'||d.type==='lyrics'){
-    var rows=document.querySelectorAll('.track-row');
-    rows.forEach(function(row,i){
-      var ta=row.querySelector('textarea');
-      if(S._editTracks&&S._editTracks[i]&&ta)S._editTracks[i].lyrics=ta.value;
-    });
-    if(S._editTracks&&S._editTracks.length)c.tracks=S._editTracks;
-  }
-  c.type=d.type;c.title=d.title;c.content=d.content;c.rich=d.rich;
-  c.url=d.url||null;
-  if(d.file)c.file=d.file;
-  S.pendingFile=null;S._draft=null;S._editTracks=null;S._editFetchStatus=null;
-  save(c);
-  S.toast='保存しました！';S.view='pm';S.ptab='manage';S.etab='edit';render();
-  setTimeout(function(){S.toast=null;render();},1800);
-}
-
-function rPM(){
-  var t=S.ptab;
-  var fp=S.pendingFile;
-  var selType=S._formType||'rule';
-  var showRich=isRich(selType);
-  var fileArea=fp
-    ?'<div class="file-preview"><span style="font-size:18px">'+(fp.type==='image'?'&#128444;':'&#128196;')+'</span><span class="file-preview-name">'+esc(fp.name)+'</span><button class="file-preview-rm" onclick="clearFile()">&#10005;</button></div>'
-    :'<label class="file-drop"><input type="file" accept="image/*,.pdf" onchange="handleFile(event)"/><span class="file-drop-lbl">&#128206; ファイルを添付する</span><span class="file-drop-sub">画像 または PDF（5MB以内）</span></label>';
-
-  var contentField=showRich
-    ?'<div class="rte-wrap">'+richToolbar()+'<div class="rte-body" id="rte" contenteditable="true" data-placeholder="歌詞や覚え方メモ（太字・色を使えます）..."></div></div>'
-    :'<textarea class="fi" id="ccont" style="resize:vertical;min-height:90px;line-height:1.65" placeholder="内容を書いてください..."></textarea>';
-
-  var form='<div class="form">'+
-    '<div><label class="fl">種類</label><select class="fs" id="ct" onchange="onTypeChange(this.value)">'+
-      Object.keys(TYPES).map(function(k){return'<option value="'+k+'"'+(k===selType?' selected':'')+'>'+TYPES[k]+'</option>';}).join('')+
-    '</select></div>'+
-    '<div><label class="fl">タイトル</label><input class="fi" type="text" id="ctit" placeholder="例：日本史の歌"/></div>'+
-    '<div><label class="fl">内容'+(showRich?' <span style="font-size:9px;color:var(--acc);font-family:\'Courier New\',monospace">— 太字・色編集対応</span>':'')+'</label>'+contentField+'</div>'+
-    '<div><label class="fl">SoundCloud URL（歌詞カードに貼るとプレイヤーが表示されます）</label><input class="fi" type="url" id="curl" placeholder="https://on.soundcloud.com/..."/></div>'+
-    '<div><label class="fl">ファイル添付（任意）</label>'+fileArea+'</div>'+
-    '<button class="bsend" onclick="createCard()">drop する &#8595;</button>'+
-  '</div>';
-
-  var cs=S.cards?[...S.cards].reverse():[];
-  var manage=cs.length
-    ?'<div style="padding:12px 14px">'+cs.map(function(c){
-        return'<div class="mcard"><div class="cacc" style="background:'+ac(c.type)+';width:3px;flex-shrink:0;margin-right:10px;border-radius:2px;align-self:stretch;"></div><div class="mcb"><div class="chead"><span class="ttag '+tc(c.type)+'">'+TYPES[c.type]+'</span><span class="ctit">'+esc(c.title)+'</span>'+cardBadges(c)+'</div><div style="font-family:\'Courier New\',monospace;font-size:10px;color:var(--fnt);margin-top:4px">'+fd(c.createdAt)+'</div></div><div style="display:flex;gap:5px;flex-shrink:0"><button class="bedit" onclick="openEdit(\''+c.id+'\')">編集</button><button class="bdel" onclick="delCard(\''+c.id+'\')">削除</button></div></div>';
-      }).join('')+'</div>'
-    :'<div class="empty">— まだ drops はありません —</div>';
-
-  return'<div class="v"><div class="nav"><button class="nbk" onclick="go(\'home\')">&#8592; back</button><span class="ntit">ゆうこモード</span></div><div class="tabs"><div class="tab'+(t==='create'?' on':'')+'" onclick="ptab(\'create\')">作る</div><div class="tab'+(t==='manage'?' on':'')+'" onclick="ptab(\'manage\')">送った drops ('+(S.cards?S.cards.length:0)+')</div></div>'+(t==='create'?form:manage)+'</div>';
-}
-
-function onTypeChange(val){
-  S._formTracks=val==='lyrics'?[]:null;
-  S._fetchStatus=null;
-  S._formType=val;
-  // preserve title/url if already typed
-  var tit=document.getElementById('ctit');
-  var url=document.getElementById('curl');
-  S._savedTit=tit?tit.value:'';
-  S._savedUrl=url?url.value:'';
-  render();
-  if(tit=document.getElementById('ctit'))tit.value=S._savedTit||'';
-  if(url=document.getElementById('curl'))url.value=S._savedUrl||'';
-}
-
-function fmt(cmd){
-  document.getElementById('rte')&&document.getElementById('rte').focus();
-  document.execCommand(cmd,false,null);
-  updateToolbar();
-}
-function fmtColor(color){
-  var rte=document.getElementById('rte');
-  if(!rte)return;
-  rte.focus();
-  document.execCommand('styleWithCSS',false,true);
-  document.execCommand('foreColor',false,color);
-  updateToolbar();
-}
-function updateToolbar(){
-  ['bold','italic','underline'].forEach(function(cmd){
-    var btn=document.getElementById('rtb-'+cmd);
-    if(btn)btn.classList.toggle('on',document.queryCommandState(cmd));
-  });
-}
-
+// ── Render ────────────────────────────────────────────────────────────
 function render(){
   var h='';
   if(S.view==='home')h=rHome();
@@ -638,136 +330,49 @@ function render(){
   else if(S.view==='pm')h=rPM();
   else if(S.view==='ed')h=rED();
   document.getElementById('app').innerHTML=(S.toast?'<div class="toast">'+S.toast+'</div>':'')+h;
-  // attach selectionchange for toolbar sync
+  if(S.view==='nd')setTimeout(function(){setupSCWidget(S.sel);},300);
   var rte=document.getElementById('rte');
-  if(rte){
-    document.addEventListener('selectionchange',updateToolbar);
-    rte.addEventListener('keyup',updateToolbar);
-  }
+  if(rte){document.addEventListener('selectionchange',syncToolbar);rte.addEventListener('keyup',syncToolbar);}
 }
 
+// ── Navigation ────────────────────────────────────────────────────────
 function go(v){
-  if(v==='pm')S._formType=S._formType||'rule';
+  if(v==='pm'){S.ptab=S.ptab||'create';S._formType=S._formType||'rule';}
   S.view=v;render();
 }
 function openCard(id){S.sel=id;S.view='nd';render();}
 function ptab(t){S.ptab=t;render();}
 function addPin(d){if(S.pin.length<4){S.pin+=d;S.perr=false;if(S.pin.length===4)setTimeout(checkPin,120);else render();}}
 function delPin(){if(S.pin.length>0){S.pin=S.pin.slice(0,-1);render();}}
-function checkPin(){if(S.pin===PIN){S.perr=false;S.view='pm';S._formType='rule';S.ptab='create';S.pin='';}else{S.perr=true;S.pin='';}render();}
-function clearFile(){S.pendingFile=null;render();}
+function checkPin(){if(S.pin===PIN){S.perr=false;S.view='pm';S.ptab='create';S._formType='rule';S.pin='';}else{S.perr=true;S.pin='';}render();}
+
+// ── File handling ─────────────────────────────────────────────────────
 function handleFile(e){
-  var file=e.target.files[0];if(!file)return;
-  if(file.size>5*1024*1024){alert('5MB以内のファイルを選んでください');return;}
-  var reader=new FileReader();
-  reader.onload=function(ev){
-    S.pendingFile={name:file.name,data:ev.target.result,type:file.type.startsWith('image/')?'image':'pdf'};
-    render();
-  };
-  reader.readAsDataURL(file);
+  var f=e.target.files[0];if(!f)return;
+  if(f.size>5*1024*1024){alert('5MB以内を選んでください');return;}
+  var r=new FileReader();
+  r.onload=function(ev){S.pendingFile={name:f.name,data:ev.target.result,type:f.type.startsWith('image/')?'image':'pdf'};render();};
+  r.readAsDataURL(f);
 }
-function toggleTag(cid,tag){
-  if(!S.tags[cid])S.tags[cid]=[];
-  var i=S.tags[cid].indexOf(tag);
-  if(i>=0)S.tags[cid].splice(i,1);else S.tags[cid].push(tag);
-  saveT(cid);
-}
-function createCard(){
-  var type=document.getElementById('ct').value;
-  var title=(document.getElementById('ctit').value||'').trim();
-  var url=(document.getElementById('curl').value||'').trim();
-  var rich=isRich(type);
-  var content='';var tracks=null;
-  if(type==='lyrics'){
-    // collect lyrics from DOM textareas (titles already in S._formTracks)
-    var rows=document.querySelectorAll('.track-row');
-    rows.forEach(function(row,i){
-      var ta=row.querySelector('textarea');
-      if(S._formTracks&&S._formTracks[i]&&ta)S._formTracks[i].lyrics=ta.value;
-    });
-    tracks=S._formTracks||[];
-    if(!tracks.length)tracks=[];
-  } else if(rich){
-    var rte=document.getElementById('rte');
-    content=rte?rte.innerHTML.trim():'';
-  } else {
-    var ta=document.getElementById('ccont');
-    content=ta?(ta.value||'').trim():'';
-  }
-  if(!title){alert('タイトルを入力してください');return;}
-  if(!rich&&!tracks)content=content.replace(/\r\n/g,'\n');
-  var card={id:Date.now().toString(36)+Math.random().toString(36).slice(2),type:type,title:title,content:content,rich:rich,tracks:tracks,url:url||null,file:S.pendingFile||null,createdAt:Date.now()};
-  S.pendingFile=null;S._formType='rule';S._formTracks=null;S._fetchStatus=null;
-  save(card);
-  S.toast='dropped!';render();
-  setTimeout(function(){S.toast=null;render();},1800);
-}
-function delCard(id){
-  if(!confirm('このカードを削除しますか？'))return;
-  db.ref('drops/cards/'+id).remove();
-  db.ref('drops/tags/'+id).remove();
-  db.ref('drops/reactions/'+id).remove();
-}
-function updateTrackLyrics(i,v){
-  if(!S._formTracks)return;
-  S._formTracks[i].lyrics=v;
-}
+function clearFile(){S.pendingFile=null;render();}
+function clearEditFile(){var c=S.cards&&S.cards.find(function(x){return x.id===S._editId;});if(c)c.file=null;S.pendingFile=null;render();}
+function dlFile(id){var c=S.cards&&S.cards.find(function(x){return x.id===id;});if(!c||!c.file)return;var a=document.createElement('a');a.href=c.file.data;a.download=c.file.name;a.click();}
 
-function fetchSCTracks(){
-  var urlEl=document.getElementById('curl');
-  var url=urlEl?urlEl.value.trim():'';
-  if(!url){alert('SoundCloudのURLを入力してください');return;}
-  if(!window.SC){alert('SoundCloud APIが読み込まれていません');return;}
-  S._fetchStatus='読み込み中...';render();
-  // restore url value after render
-  setTimeout(function(){
-    var el=document.getElementById('curl');if(el)el.value=url;
-    var titEl=document.getElementById('ctit');if(titEl&&S._savedTit)titEl.value=S._savedTit;
-    var iframe=document.getElementById('sc-hidden-iframe');
-    if(!iframe)return;
-    var embedUrl='https://w.soundcloud.com/player/?url='+encodeURIComponent(url)+'&auto_play=false';
-    iframe.src=embedUrl;
-    var widget=SC.Widget(iframe);
-    widget.bind(SC.Widget.Events.READY,function(){
-      widget.getSounds(function(sounds){
-        if(!sounds||!sounds.length){
-          S._fetchStatus='曲が見つかりませんでした';
-          S._formTracks=[];
-          render();
-          setTimeout(function(){var el=document.getElementById('curl');if(el)el.value=url;},30);
-          return;
-        }
-        S._formTracks=sounds.map(function(s,i){return{title:s.title||('Track '+(i+1)),lyrics:'',index:i};});
-        S._fetchStatus=null;
-        render();
-        setTimeout(function(){
-          var el=document.getElementById('curl');if(el)el.value=url;
-          var titEl=document.getElementById('ctit');if(titEl&&S._savedTit)titEl.value=S._savedTit;
-        },30);
-      });
-    });
-  },80);
-}
+// ── Tags & Reactions ──────────────────────────────────────────────────
+function toggleTag(cid,tag){if(!S.tags[cid])S.tags[cid]=[];var i=S.tags[cid].indexOf(tag);if(i>=0)S.tags[cid].splice(i,1);else S.tags[cid].push(tag);fbTag(cid);}
+function togglePicker(){var p=document.getElementById('rpicker');if(p)p.classList.toggle('on');}
+function doReact(cid,emoji){fbReact(cid,emoji);var p=document.getElementById('rpicker');if(p)p.classList.remove('on');}
 
-function togglePicker(){
-  var p=document.getElementById('rpicker');
-  if(p)p.classList.toggle('on');
-}
-function doReact(cid,emoji){
-  saveReaction(cid,emoji);
-  var p=document.getElementById('rpicker');
-  if(p)p.classList.remove('on');
-}
+// ── SoundCloud Widget ─────────────────────────────────────────────────
 function setupSCWidget(cardId){
   if(!window.SC)return;
-  var iframe=document.getElementById('sc-iframe');
-  if(!iframe)return;
+  var iframe=document.getElementById('sc-iframe');if(!iframe)return;
   var c=S.cards&&S.cards.find(function(x){return x.id===cardId;});
   if(!c||!c.tracks||!c.tracks.length)return;
   try{
-    var widget=SC.Widget(iframe);
-    function onTrackChange(){
-      widget.getCurrentSound(function(sound){
+    var w=SC.Widget(iframe);
+    function onPlay(){
+      w.getCurrentSound(function(sound){
         if(!sound)return;
         var title=sound.title||'';
         var bar=document.getElementById('sc-track-bar');
@@ -776,27 +381,169 @@ function setupSCWidget(cardId){
         if(bar)bar.style.display='flex';
         if(titleEl)titleEl.textContent=title;
         if(lyricsEl){
-          var track=c.tracks.find(function(t){
-            return title.indexOf(t.title)>=0||t.title.indexOf(title)>=0||title===t.title;
-          });
-          if(!track){
-            // fallback: match by current index
-            widget.getCurrentSoundIndex(function(idx){
-              var t2=c.tracks[idx];
-              if(lyricsEl)lyricsEl.innerHTML=t2?(c.rich?t2.lyrics:'<span style="white-space:pre-wrap">'+esc(t2.lyrics)+'</span>'):'';
-            });
-          } else {
-            lyricsEl.innerHTML=c.rich?track.lyrics:'<span style="white-space:pre-wrap">'+esc(track.lyrics)+'</span>';
-          }
+          var tr=c.tracks.find(function(t){return title.indexOf(t.title)>=0||t.title.indexOf(title)>=0;});
+          if(tr){lyricsEl.innerHTML='<div style="white-space:pre-wrap">'+esc(tr.lyrics||'')+'</div>';}
+          else{w.getCurrentSoundIndex(function(idx){var t2=c.tracks[idx];if(lyricsEl&&t2)lyricsEl.innerHTML='<div style="white-space:pre-wrap">'+esc(t2.lyrics||'')+'</div>';});}
         }
       });
     }
-    widget.bind(SC.Widget.Events.PLAY,onTrackChange);
-    widget.bind(SC.Widget.Events.READY,onTrackChange);
-  }catch(e){console.warn('SC Widget error:',e);}
+    w.bind(SC.Widget.Events.PLAY,onPlay);
+    w.bind(SC.Widget.Events.READY,onPlay);
+  }catch(e){console.warn('SC Widget:',e);}
 }
 
-S.reactions={};render();load();
+function fetchTracks(){
+  if(!window.SC){alert('SoundCloud APIが読み込まれていません');return;}
+  var urlEl=document.getElementById('curl');
+  var titEl=document.getElementById('ctit');
+  var url=urlEl?urlEl.value.trim():'';
+  var tit=titEl?titEl.value:'';
+  if(!url){alert('URLを入力してください');return;}
+  S._fetchStatus='読み込み中...';render();
+  setTimeout(function(){
+    var el=document.getElementById('curl');if(el)el.value=url;
+    var t=document.getElementById('ctit');if(t)t.value=tit;
+    var iframe=document.getElementById('sc-hidden-iframe');if(!iframe)return;
+    iframe.src='https://w.soundcloud.com/player/?url='+encodeURIComponent(url)+'&auto_play=false';
+    var w=SC.Widget(iframe);
+    w.bind(SC.Widget.Events.READY,function(){
+      w.getSounds(function(sounds){
+        if(!sounds||!sounds.length){S._fetchStatus='曲が見つかりませんでした';render();return;}
+        S._formTracks=sounds.map(function(s,i){return{title:s.title||('Track '+(i+1)),lyrics:'',index:i};});
+        S._fetchStatus=null;render();
+        setTimeout(function(){var el=document.getElementById('curl');if(el)el.value=url;var t=document.getElementById('ctit');if(t)t.value=tit;},30);
+      });
+    });
+  },80);
+}
+
+function fetchTracksEdit(){
+  if(!window.SC)return;
+  var urlEl=document.getElementById('curl');
+  var titEl=document.getElementById('ctit');
+  var url=urlEl?urlEl.value.trim():'';
+  var tit=titEl?titEl.value:'';
+  if(!url){alert('URLを入力してください');return;}
+  S._editFetchStatus='読み込み中...';render();
+  setTimeout(function(){
+    var el=document.getElementById('curl');if(el)el.value=url;
+    var t=document.getElementById('ctit');if(t)t.value=tit;
+    var iframe=document.getElementById('sc-hidden-iframe-edit');if(!iframe)return;
+    iframe.src='https://w.soundcloud.com/player/?url='+encodeURIComponent(url)+'&auto_play=false';
+    var w=SC.Widget(iframe);
+    w.bind(SC.Widget.Events.READY,function(){
+      w.getSounds(function(sounds){
+        if(!sounds||!sounds.length){S._editFetchStatus='曲が見つかりませんでした';render();return;}
+        var old=S._editTracks||[];
+        S._editTracks=sounds.map(function(s,i){
+          var ex=old.find(function(t){return t.title===s.title;});
+          return{title:s.title||('Track '+(i+1)),lyrics:ex?ex.lyrics:'',index:i};
+        });
+        S._editFetchStatus=null;render();
+        setTimeout(function(){var el=document.getElementById('curl');if(el)el.value=url;var t=document.getElementById('ctit');if(t)t.value=tit;},30);
+      });
+    });
+  },80);
+}
+
+function updEditLyrics(i,v){if(S._editTracks&&S._editTracks[i])S._editTracks[i].lyrics=v;}
+
+// ── Type change ───────────────────────────────────────────────────────
+function onTypeChange(val){
+  S._formType=val;
+  S._formTracks=val==='lyrics'?[]:null;
+  S._fetchStatus=null;
+  render();
+  setTimeout(function(){var t=document.getElementById('ctit');if(t&&S._savedTit)t.value=S._savedTit;var u=document.getElementById('curl');if(u&&S._savedUrl)u.value=S._savedUrl;},30);
+}
+function onEditTypeChange(val){
+  var tit=document.getElementById('ctit');
+  var url=document.getElementById('curl');
+  var rte=document.getElementById('rte');
+  S._savedTit=tit?tit.value:'';
+  S._savedUrl=url?url.value:'';
+  var c=S.cards&&S.cards.find(function(x){return x.id===S._editId;});
+  if(c&&rte)c.content=rte.innerHTML;
+  S._editType=val;
+  render();
+  setTimeout(function(){var t=document.getElementById('ctit');if(t)t.value=S._savedTit;var u=document.getElementById('curl');if(u)u.value=S._savedUrl;},30);
+}
+
+// ── Edit tab switch ───────────────────────────────────────────────────
+function switchEtab(tab){
+  if(tab==='preview'){
+    var c=S.cards&&S.cards.find(function(x){return x.id===S._editId;});
+    if(c){
+      var tit=document.getElementById('ctit');
+      var url=document.getElementById('curl');
+      var rte=document.getElementById('rte');
+      var ta=document.querySelectorAll('.track-row textarea');
+      if(tit)c.title=tit.value;
+      if(url)c.url=url.value;
+      if(rte)c.content=rte.innerHTML;
+      ta.forEach(function(el,i){if(S._editTracks&&S._editTracks[i])S._editTracks[i].lyrics=el.value;});
+      S._draft=JSON.parse(JSON.stringify(c));
+    }
+  }
+  S.etab=tab;render();
+  if(tab==='edit'){setTimeout(function(){var t=document.getElementById('ctit');if(t&&S._draft)t.value=S._draft.title||'';var u=document.getElementById('curl');if(u&&S._draft)u.value=S._draft.url||'';},30);}
+}
+
+// ── Create card ───────────────────────────────────────────────────────
+function createCard(){
+  var type=document.getElementById('ct').value;
+  var title=(document.getElementById('ctit').value||'').trim();
+  var url=(document.getElementById('curl').value||'').trim();
+  if(!title){alert('タイトルを入力してください');return;}
+  var content='',rich=false,tracks=null;
+  if(type==='lyrics'){
+    tracks=S._formTracks||[];
+  }else{
+    var rte=document.getElementById('rte');
+    content=rte?rte.innerHTML.trim():'';
+    rich=true;
+  }
+  var card={id:Date.now().toString(36)+Math.random().toString(36).slice(2),type:type,title:title,content:content,rich:rich,tracks:tracks,url:url||null,file:S.pendingFile||null,createdAt:Date.now()};
+  S.pendingFile=null;S._formTracks=null;S._fetchStatus=null;S._savedTit='';S._savedUrl='';
+  fbSave(card);
+  S.toast='dropped!';render();
+  setTimeout(function(){S.toast=null;render();},1800);
+}
+
+// ── Update card ───────────────────────────────────────────────────────
+function updateCard(){
+  var c=S.cards&&S.cards.find(function(x){return x.id===S._editId;});
+  if(!c)return;
+  var tit=document.getElementById('ctit');
+  var url=document.getElementById('curl');
+  var rte=document.getElementById('rte');
+  var ta=document.querySelectorAll('.track-row textarea');
+  if(tit)c.title=tit.value.trim()||c.title;
+  if(url)c.url=url.value.trim()||null;
+  if(S._editTracks){ta.forEach(function(el,i){if(S._editTracks[i])S._editTracks[i].lyrics=el.value;});c.tracks=S._editTracks;}
+  else if(rte){c.content=rte.innerHTML;c.rich=true;}
+  if(S.pendingFile)c.file=S.pendingFile;
+  if(!c.title){alert('タイトルを入力してください');return;}
+  S.pendingFile=null;S._draft=null;S._editTracks=null;S._editFetchStatus=null;
+  fbSave(c);
+  S.toast='保存しました！';S.view='pm';S.ptab='manage';S.etab='edit';render();
+  setTimeout(function(){S.toast=null;render();},1800);
+}
+
+// ── Edit card ─────────────────────────────────────────────────────────
+function openEdit(id){
+  S._editId=id;S._editType=null;S._draft=null;S.etab='edit';
+  S.pendingFile=null;S._editFetchStatus=null;
+  var c=S.cards&&S.cards.find(function(x){return x.id===id;});
+  S._editTracks=c&&c.tracks&&c.tracks.length?JSON.parse(JSON.stringify(c.tracks)):null;
+  S.view='ed';render();
+}
+
+// ── Delete card ───────────────────────────────────────────────────────
+function delCard(id){if(!confirm('削除しますか？'))return;fbDel(id);}
+
+// ── Boot ──────────────────────────────────────────────────────────────
+render();fbLoad();
 </script>
 </body>
 </html>
