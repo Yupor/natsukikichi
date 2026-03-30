@@ -374,10 +374,30 @@ function toggleLyricsHide(){
 
 function jumpTrack(idx){
   S._activeTrackIdx=idx;
+  // Update UI immediately without full re-render
+  document.querySelectorAll('.tl-item').forEach(function(el,i){
+    el.classList.toggle('active',i===idx);
+    var dot=el.querySelector('.tl-playing');
+    if(i===idx&&!dot){var sp=document.createElement('span');sp.className='tl-playing';el.appendChild(sp);}
+    else if(i!==idx&&dot)dot.remove();
+    el.querySelector('.tl-title').style.color=i===idx?'var(--lyrics)':'';
+  });
+  // Skip widget to track
   var w=getWidget();
-  if(w){try{w.skip(idx);}catch(e){}}
-  render();
-  if(S.view==='nd')setTimeout(function(){setupSCWidget(S.sel);},300);
+  if(w){
+    try{
+      w.skip(idx);
+      w.play();
+      // Update lyrics after short delay
+      setTimeout(function(){
+        var c=S.cards&&S.cards.find(function(x){return x.id===S.sel;});
+        if(c&&c.tracks&&c.tracks[idx]){
+          var el=document.querySelector('.lyrics-text');
+          if(el)el.textContent=c.tracks[idx].lyrics||'';
+        }
+      },200);
+    }catch(e){console.warn('skip error',e);}
+  }
 }
 
 function getWidget(){
@@ -429,39 +449,56 @@ function togglePicker(){var p=document.getElementById('rpicker');if(p)p.classLis
 function doReact(cid,emoji){fbReact(cid,emoji);var p=document.getElementById('rpicker');if(p)p.classList.remove('on');}
 
 // ── SoundCloud Widget ─────────────────────────────────────────────────
+function updateTrackUI(card,idx){
+  if(!card)return;
+  S._activeTrackIdx=idx;
+  document.querySelectorAll('.tl-item').forEach(function(el,i){
+    el.classList.toggle('active',i===idx);
+    var dot=el.querySelector('.tl-playing');
+    if(i===idx&&!dot){var sp=document.createElement('span');sp.className='tl-playing';el.appendChild(sp);}
+    else if(i!==idx&&dot)dot.remove();
+    el.querySelector('.tl-title').style.color=i===idx?'var(--lyrics)':'';
+  });
+  if(card.tracks&&card.tracks[idx]){
+    var lyricsEl=document.querySelector('.lyrics-text');
+    var emptyEl=document.querySelector('.lyrics-empty');
+    var lyrics=card.tracks[idx].lyrics||'';
+    if(lyricsEl)lyricsEl.textContent=lyrics;
+    if(lyrics){
+      if(lyricsEl)lyricsEl.style.display='';
+      if(emptyEl)emptyEl.style.display='none';
+    }else{
+      if(lyricsEl)lyricsEl.style.display='none';
+      if(emptyEl)emptyEl.style.display='';
+    }
+  }
+}
+
 function setupSCWidget(cardId){
   if(!window.SC)return;
   var iframe=document.getElementById('sc-iframe');if(!iframe)return;
-  var c=S.cards&&S.cards.find(function(x){return x.id===cardId;});
-  if(!c)return;
+  var card=S.cards&&S.cards.find(function(x){return x.id===cardId;});
+  if(!card)return;
   try{
     var w=SC.Widget(iframe);
-    function onTrackChange(){
+    var lastIdx=-1;
+    function onPlay(){
       w.getCurrentSoundIndex(function(idx){
-        if(idx===S._activeTrackIdx)return;
-        S._activeTrackIdx=idx;
-        // Update track list highlight and lyrics without full re-render
-        document.querySelectorAll('.tl-item').forEach(function(el,i){
-          el.classList.toggle('active',i===idx);
-          var dot=el.querySelector('.tl-playing');
-          if(i===idx&&!dot){var sp=document.createElement('span');sp.className='tl-playing';el.appendChild(sp);}
-          else if(i!==idx&&dot)dot.remove();
-          el.querySelector('.tl-title').style.color=i===idx?'var(--lyrics)':'';
-        });
-        // Update lyrics box
-        var lyricsBox=document.querySelector('.lyrics-text');
-        if(lyricsBox&&c.tracks&&c.tracks[idx]){
-          lyricsBox.textContent=c.tracks[idx].lyrics||'';
-        }
-        var emptyEl=document.querySelector('.lyrics-empty');
-        if(emptyEl&&c.tracks&&c.tracks[idx]&&c.tracks[idx].lyrics){
-          emptyEl.style.display='none';
-          if(lyricsBox)lyricsBox.style.display='';
-        }
+        if(typeof idx!=='number')return;
+        if(idx===lastIdx)return;
+        lastIdx=idx;
+        updateTrackUI(card,idx);
       });
     }
-    w.bind(SC.Widget.Events.PLAY,onTrackChange);
-    w.bind(SC.Widget.Events.PLAY_PROGRESS,onTrackChange);
+    w.bind(SC.Widget.Events.PLAY,onPlay);
+    // Also poll every 2s to catch auto-advance
+    if(window._scPollTimer)clearInterval(window._scPollTimer);
+    window._scPollTimer=setInterval(function(){
+      if(S.view!=='nd')return clearInterval(window._scPollTimer);
+      w.getCurrentSoundIndex(function(idx){
+        if(typeof idx==='number'&&idx!==lastIdx){lastIdx=idx;updateTrackUI(card,idx);}
+      });
+    },1500);
     if(S._loop){
       w.bind(SC.Widget.Events.FINISH,function(){w.seekTo(0);w.play();});
     }
