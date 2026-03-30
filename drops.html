@@ -180,22 +180,20 @@ html,body{min-height:100%;background:var(--bg);}
 <script src="https://w.soundcloud.com/player/api.js"></script>
 <div id="app"></div>
 <script>
-function initApp(){
-if(typeof firebase==='undefined'){
-  // Firebase not yet loaded - retry
-  setTimeout(initApp,100);return;
-}
-const firebaseConfig={
-  apiKey:"AIzaSyAWKQMRQREp765mBbjHHvntnkPF-PV3MMs",
-  authDomain:"natsukikich.firebaseapp.com",
-  databaseURL:"https://natsukikich-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId:"natsukikich",
-  storageBucket:"natsukikich.firebasestorage.app",
-  messagingSenderId:"897484879290",
-  appId:"1:897484879290:web:dd104398870f0209801983"
-};
-if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
-const db=firebase.database();
+var db;
+function initFirebase(){
+  if(typeof firebase==='undefined'){setTimeout(initFirebase,100);return;}
+  const firebaseConfig={
+    apiKey:"AIzaSyAWKQMRQREp765mBbjHHvntnkPF-PV3MMs",
+    authDomain:"natsukikich.firebaseapp.com",
+    databaseURL:"https://natsukikich-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId:"natsukikich",
+    storageBucket:"natsukikich.firebasestorage.app",
+    messagingSenderId:"897484879290",
+    appId:"1:897484879290:web:dd104398870f0209801983"
+  };
+  if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+  db=firebase.database();
 const PIN='0925';
 const TYPES={rule:'ルール',lyrics:'歌詞',drill:'ドリル',msg:'メッセージ'};
 const TATAGS=['重要','お気に入り','復習','できた!'];
@@ -801,13 +799,13 @@ function setupSCWidget(cardId){
   }catch(e){console.warn('SC Widget error:',e);}
 }
 
-S.reactions={};render();load();
+  S.reactions={};render();load();
 }
 
 if(document.readyState==='loading'){
-  document.addEventListener('DOMContentLoaded',initApp);
+  document.addEventListener('DOMContentLoaded',initFirebase);
 }else{
-  initApp();
+  initFirebase();
 }
 </script>
 </body>
