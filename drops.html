@@ -346,6 +346,13 @@ function insertEmoji(emoji){
   document.getElementById('rtb-emoji').classList.remove('on');
 }
 
+function populateEditFields(){
+  var c=S.cards&&S.cards.find(function(x){return x.id===S._editId;});
+  if(!c)return;
+  var rte=document.getElementById('rte');
+  if(rte)rte.innerHTML=c.rich?c.content||'':c.content||'';
+}
+
 function rED(){
   var c=S.cards&&S.cards.find(function(x){return x.id===S._editId;});
   if(!c)return rPM();
@@ -356,9 +363,11 @@ function rED(){
     ?'<div class="file-preview"><span style="font-size:18px">'+(fp.type==='image'?'&#128444;':'&#128196;')+'</span><span class="file-preview-name">'+esc(fp.name)+'</span><button class="file-preview-rm" onclick="clearFile()">&#10005;</button></div>'
     :(c.file?'<div class="file-preview"><span style="font-size:18px">'+(c.file.type==='image'?'&#128444;':'&#128196;')+'</span><span class="file-preview-name">'+esc(c.file.name)+'</span><button class="file-preview-rm" onclick="clearEditFile()">&#10005;</button></div>'
     :'<label class="file-drop"><input type="file" accept="image/*,.pdf" onchange="handleFile(event)"/><span class="file-drop-lbl">&#128206; ファイルを添付する</span><span class="file-drop-sub">画像 または PDF（5MB以内）</span></label>');
+  // For rich content: inject directly via escaped HTML in a hidden field, then move to rte on mount
+  var safeContent=c.content||'';
   var contentField=showRich
-    ?'<div class="rte-wrap">'+richToolbar()+'<div class="rte-body" id="rte" contenteditable="true" data-placeholder="内容..."></div></div>'
-    :'<textarea class="fi" id="ccont" style="resize:vertical;min-height:90px;line-height:1.65" placeholder="内容を書いてください...">'+esc(showRich?'':c.content)+'</textarea>';
+    ?'<div class="rte-wrap">'+richToolbar()+'<div class="rte-body" id="rte" contenteditable="true" data-placeholder="内容...">'+safeContent+'</div></div>'
+    :'<textarea class="fi" id="ccont" style="resize:vertical;min-height:90px;line-height:1.65" placeholder="内容を書いてください...">'+esc(c.content||'')+'</textarea>';
   var form='<div class="form">'+
     '<div><label class="fl">種類</label><select class="fs" id="ct" onchange="onEditTypeChange(this.value)">'+
       Object.keys(TYPES).map(function(k){return'<option value="'+k+'"'+(k===selType?' selected':'')+'>'+TYPES[k]+'</option>';}).join('')+
@@ -378,38 +387,32 @@ function openEdit(id){
   S.pendingFile=null;
   S.view='ed';
   render();
-  // populate rich content after render
-  setTimeout(function(){
-    var c=S.cards&&S.cards.find(function(x){return x.id===id;});
-    if(!c)return;
-    var rte=document.getElementById('rte');
-    if(rte&&c.rich)rte.innerHTML=c.content||'';
-  },50);
 }
 function onEditTypeChange(val){
-  S._editType=val;
+  // save current values before re-render
   var tit=document.getElementById('ctit');
   var url=document.getElementById('curl');
+  var rte=document.getElementById('rte');
+  var ta=document.getElementById('ccont');
   S._savedTit=tit?tit.value:'';
   S._savedUrl=url?url.value:'';
+  S._savedContent=rte?rte.innerHTML:(ta?ta.value:'');
+  S._editType=val;
+  // update card content temporarily so rED shows saved content
+  var c=S.cards&&S.cards.find(function(x){return x.id===S._editId;});
+  if(c){c.content=S._savedContent;}
   render();
-  if(tit=document.getElementById('ctit'))tit.value=S._savedTit||'';
-  if(url=document.getElementById('curl'))url.value=S._savedUrl||'';
-  setTimeout(function(){
-    var c=S.cards&&S.cards.find(function(x){return x.id===S._editId;});
-    var rte=document.getElementById('rte');
-    if(rte&&c)rte.innerHTML=c.content||'';
-  },50);
+  // restore title/url
+  var t2=document.getElementById('ctit');
+  var u2=document.getElementById('curl');
+  if(t2)t2.value=S._savedTit||'';
+  if(u2)u2.value=S._savedUrl||'';
 }
 function clearEditFile(){
   var c=S.cards&&S.cards.find(function(x){return x.id===S._editId;});
-  if(c){c.file=null;}
+  if(c)c.file=null;
   S.pendingFile=null;
   render();
-  setTimeout(function(){
-    var rte=document.getElementById('rte');
-    if(rte&&c&&c.rich)rte.innerHTML=c.content||'';
-  },50);
 }
 function updateCard(){
   var c=S.cards&&S.cards.find(function(x){return x.id===S._editId;});
