@@ -72,13 +72,14 @@ html,body{min-height:100%;background:var(--bg);}
 .track-title-dot{width:6px;height:6px;border-radius:50%;background:var(--lyrics);flex-shrink:0;animation:pulse 1.5s infinite;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
 .track-title-text{font-size:12px;font-weight:500;color:var(--lyrics);flex:1;}
-.track-row{background:var(--s1);border:1px solid var(--bdr2);border-radius:8px;padding:10px 12px;margin-bottom:8px;}
+.track-row{background:var(--s1);border:1px solid var(--bdr);border-radius:8px;padding:10px 12px;margin-bottom:8px;}
 .track-row-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
-.track-num{font-size:9px;font-family:'Courier New',monospace;color:var(--mut);flex-shrink:0;}
-.track-title-input{flex:1;}
-.track-rm{background:none;border:none;color:rgba(240,80,80,0.5);cursor:pointer;font-size:13px;padding:2px;flex-shrink:0;}
-.track-add-btn{width:100%;padding:8px;border:1px dashed var(--bdr2);border-radius:8px;background:none;color:var(--mut);font-size:11px;font-family:'Courier New',monospace;cursor:pointer;transition:all .1s;}
-.track-add-btn:hover{background:var(--s1);color:var(--txt);}
+.track-num{font-size:9px;font-family:'Courier New',monospace;color:var(--mut);flex-shrink:0;white-space:nowrap;}
+.track-name{font-size:12px;font-weight:500;color:var(--lyrics);flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.sc-fetch-btn{padding:8px 14px;border:1px solid rgba(240,96,192,0.4);border-radius:8px;background:rgba(240,96,192,0.07);color:var(--lyrics);font-size:11px;font-family:'Courier New',monospace;cursor:pointer;transition:all .1s;width:100%;}
+.sc-fetch-btn:hover{background:rgba(240,96,192,0.15);}
+.sc-fetch-loading{font-size:11px;color:var(--mut);font-family:'Courier New',monospace;padding:8px 0;text-align:center;}
+.sc-hidden-player{position:absolute;opacity:0;pointer-events:none;height:1px;overflow:hidden;}
 .det-body{font-size:14px;color:rgba(240,237,230,0.82);line-height:2;margin-bottom:1.2rem;}
 .det-body div,.det-body p{min-height:1em;}
 .det-body b,.det-body strong{font-weight:700;color:var(--txt);}
@@ -179,6 +180,11 @@ html,body{min-height:100%;background:var(--bg);}
 <script src="https://w.soundcloud.com/player/api.js"></script>
 <div id="app"></div>
 <script>
+function initApp(){
+if(typeof firebase==='undefined'){
+  // Firebase not yet loaded - retry
+  setTimeout(initApp,100);return;
+}
 const firebaseConfig={
   apiKey:"AIzaSyAWKQMRQREp765mBbjHHvntnkPF-PV3MMs",
   authDomain:"natsukikich.firebaseapp.com",
@@ -188,7 +194,7 @@ const firebaseConfig={
   messagingSenderId:"897484879290",
   appId:"1:897484879290:web:dd104398870f0209801983"
 };
-firebase.initializeApp(firebaseConfig);
+if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
 const db=firebase.database();
 const PIN='0925';
 const TYPES={rule:'ルール',lyrics:'歌詞',drill:'ドリル',msg:'メッセージ'};
@@ -462,6 +468,11 @@ function openEdit(id){
   S._draft=null;
   S.etab='edit';
   S.pendingFile=null;
+  S._editTracks=null;
+  S._editFetchStatus=null;
+  // pre-load existing tracks from card
+  var c=S.cards&&S.cards.find(function(x){return x.id===id;});
+  if(c&&c.tracks&&c.tracks.length)S._editTracks=JSON.parse(JSON.stringify(c.tracks));
   S.view='ed';
   render();
 }
@@ -491,16 +502,65 @@ function clearEditFile(){
   S.pendingFile=null;
   render();
 }
+function updateEditTrackLyrics(i,v){
+  if(!S._editTracks)return;
+  S._editTracks[i].lyrics=v;
+}
+
+function fetchSCTracksEdit(){
+  if(!window.SC)return;
+  var urlEl=document.getElementById('curl');
+  var url=urlEl?urlEl.value.trim():'';
+  var titEl=document.getElementById('ctit');
+  var savedTit=titEl?titEl.value:'';
+  if(!url){alert('SoundCloudのURLを入力してください');return;}
+  S._editFetchStatus='読み込み中...';render();
+  setTimeout(function(){
+    var el=document.getElementById('curl');if(el)el.value=url;
+    var t=document.getElementById('ctit');if(t)t.value=savedTit;
+    var iframe=document.getElementById('sc-hidden-iframe-edit');
+    if(!iframe)return;
+    iframe.src='https://w.soundcloud.com/player/?url='+encodeURIComponent(url)+'&auto_play=false';
+    var widget=SC.Widget(iframe);
+    widget.bind(SC.Widget.Events.READY,function(){
+      widget.getSounds(function(sounds){
+        if(!sounds||!sounds.length){S._editFetchStatus='曲が見つかりませんでした';render();return;}
+        // preserve existing lyrics by matching titles
+        var oldTracks=S._editTracks||[];
+        S._editTracks=sounds.map(function(s,i){
+          var existing=oldTracks.find(function(t){return t.title===s.title;});
+          return{title:s.title||('Track '+(i+1)),lyrics:existing?existing.lyrics:'',index:i};
+        });
+        S._editFetchStatus=null;
+        render();
+        setTimeout(function(){
+          var el=document.getElementById('curl');if(el)el.value=url;
+          var t=document.getElementById('ctit');if(t)t.value=savedTit;
+        },30);
+      });
+    });
+  },80);
+}
+
 function updateCard(){
   var c=S.cards&&S.cards.find(function(x){return x.id===S._editId;});
   if(!c)return;
   // use draft if we're in preview tab, otherwise read from form
   var d=S._draft||getEditDraft();
   if(!d||!d.title){alert('タイトルを入力してください');return;}
+  // save lyrics from DOM before reading
+  if(c.type==='lyrics'||d.type==='lyrics'){
+    var rows=document.querySelectorAll('.track-row');
+    rows.forEach(function(row,i){
+      var ta=row.querySelector('textarea');
+      if(S._editTracks&&S._editTracks[i]&&ta)S._editTracks[i].lyrics=ta.value;
+    });
+    if(S._editTracks&&S._editTracks.length)c.tracks=S._editTracks;
+  }
   c.type=d.type;c.title=d.title;c.content=d.content;c.rich=d.rich;
   c.url=d.url||null;
   if(d.file)c.file=d.file;
-  S.pendingFile=null;S._draft=null;
+  S.pendingFile=null;S._draft=null;S._editTracks=null;S._editFetchStatus=null;
   save(c);
   S.toast='保存しました！';S.view='pm';S.ptab='manage';S.etab='edit';render();
   setTimeout(function(){S.toast=null;render();},1800);
@@ -541,7 +601,8 @@ function rPM(){
 }
 
 function onTypeChange(val){
-  S._formTracks=val==='lyrics'?[{title:'',lyrics:''}]:null;
+  S._formTracks=val==='lyrics'?[]:null;
+  S._fetchStatus=null;
   S._formType=val;
   // preserve title/url if already typed
   var tit=document.getElementById('ctit');
@@ -623,15 +684,14 @@ function createCard(){
   var rich=isRich(type);
   var content='';var tracks=null;
   if(type==='lyrics'){
-    // collect track data from DOM
+    // collect lyrics from DOM textareas (titles already in S._formTracks)
     var rows=document.querySelectorAll('.track-row');
-    tracks=[];
     rows.forEach(function(row,i){
-      var inp=row.querySelector('input');
       var ta=row.querySelector('textarea');
-      tracks.push({title:inp?inp.value.trim():'',lyrics:ta?ta.value:'',index:i});
+      if(S._formTracks&&S._formTracks[i]&&ta)S._formTracks[i].lyrics=ta.value;
     });
-    if(!tracks.length)tracks=S._formTracks||[];
+    tracks=S._formTracks||[];
+    if(!tracks.length)tracks=[];
   } else if(rich){
     var rte=document.getElementById('rte');
     content=rte?rte.innerHTML.trim():'';
@@ -642,7 +702,7 @@ function createCard(){
   if(!title){alert('タイトルを入力してください');return;}
   if(!rich&&!tracks)content=content.replace(/\r\n/g,'\n');
   var card={id:Date.now().toString(36)+Math.random().toString(36).slice(2),type:type,title:title,content:content,rich:rich,tracks:tracks,url:url||null,file:S.pendingFile||null,createdAt:Date.now()};
-  S.pendingFile=null;S._formType='rule';S._formTracks=null;
+  S.pendingFile=null;S._formType='rule';S._formTracks=null;S._fetchStatus=null;
   save(card);
   S.toast='dropped!';render();
   setTimeout(function(){S.toast=null;render();},1800);
@@ -653,27 +713,45 @@ function delCard(id){
   db.ref('drops/tags/'+id).remove();
   db.ref('drops/reactions/'+id).remove();
 }
-function updateTrackTitle(i,v){if(!S._formTracks)S._formTracks=[{title:'',lyrics:''}];S._formTracks[i].title=v;}
-function updateTrackLyrics(i,v){if(!S._formTracks)S._formTracks=[{title:'',lyrics:''}];S._formTracks[i].lyrics=v;}
-function addTrack(){
-  if(!S._formTracks)S._formTracks=[{title:'',lyrics:''}];
-  S._formTracks.push({title:'',lyrics:''});
-  render();
-  // scroll to new row
-  setTimeout(function(){var w=document.getElementById('tracks-wrap');if(w)w.lastChild&&w.lastChild.scrollIntoView({behavior:'smooth'});},50);
+function updateTrackLyrics(i,v){
+  if(!S._formTracks)return;
+  S._formTracks[i].lyrics=v;
 }
-function removeTrack(i){
-  if(!S._formTracks||S._formTracks.length<=1)return;
-  // save current values first
-  document.querySelectorAll('.track-row').forEach(function(row,idx){
-    var inp=row.querySelector('input');
-    var ta=row.querySelector('textarea');
-    if(S._formTracks[idx]){
-      if(inp)S._formTracks[idx].title=inp.value;
-      if(ta)S._formTracks[idx].lyrics=ta.value;
-    }
-  });
-  S._formTracks.splice(i,1);render();
+
+function fetchSCTracks(){
+  var urlEl=document.getElementById('curl');
+  var url=urlEl?urlEl.value.trim():'';
+  if(!url){alert('SoundCloudのURLを入力してください');return;}
+  if(!window.SC){alert('SoundCloud APIが読み込まれていません');return;}
+  S._fetchStatus='読み込み中...';render();
+  // restore url value after render
+  setTimeout(function(){
+    var el=document.getElementById('curl');if(el)el.value=url;
+    var titEl=document.getElementById('ctit');if(titEl&&S._savedTit)titEl.value=S._savedTit;
+    var iframe=document.getElementById('sc-hidden-iframe');
+    if(!iframe)return;
+    var embedUrl='https://w.soundcloud.com/player/?url='+encodeURIComponent(url)+'&auto_play=false';
+    iframe.src=embedUrl;
+    var widget=SC.Widget(iframe);
+    widget.bind(SC.Widget.Events.READY,function(){
+      widget.getSounds(function(sounds){
+        if(!sounds||!sounds.length){
+          S._fetchStatus='曲が見つかりませんでした';
+          S._formTracks=[];
+          render();
+          setTimeout(function(){var el=document.getElementById('curl');if(el)el.value=url;},30);
+          return;
+        }
+        S._formTracks=sounds.map(function(s,i){return{title:s.title||('Track '+(i+1)),lyrics:'',index:i};});
+        S._fetchStatus=null;
+        render();
+        setTimeout(function(){
+          var el=document.getElementById('curl');if(el)el.value=url;
+          var titEl=document.getElementById('ctit');if(titEl&&S._savedTit)titEl.value=S._savedTit;
+        },30);
+      });
+    });
+  },80);
 }
 
 function togglePicker(){
@@ -724,6 +802,13 @@ function setupSCWidget(cardId){
 }
 
 S.reactions={};render();load();
+}
+
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',initApp);
+}else{
+  initApp();
+}
 </script>
 </body>
 </html>
