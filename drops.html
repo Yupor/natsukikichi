@@ -220,6 +220,10 @@ function load(){
       SEED.forEach(function(c){db.ref('drops/cards/'+c.id).set(c);});
     }
     render();
+  },function(err){
+    console.error('Firebase error:',err);
+    if(!S.cards){S.cards=JSON.parse(JSON.stringify(SEED));}
+    render();
   });
   db.ref('drops/tags').on('value',function(snap){
     S.tags=snap.val()||{};
@@ -263,6 +267,7 @@ function rHome(){
 }
 
 function rNF(){
+  if(!S.cards){return'<div class="v"><div class="nav"><button class="nbk" onclick="go(\'home\')">&#8592; back</button><span class="ntit">夏伎の drops</span></div><div class="empty">— 読み込み中 —</div></div>';}
   const cs=[...S.cards].reverse();
   const list=cs.length?cs.map(function(c){
     const tg=S.tags[c.id]||[];
@@ -273,6 +278,7 @@ function rNF(){
 }
 
 function rND(){
+  if(!S.cards)return rNF();
   var c=S.cards.find(function(x){return x.id===S.sel;});
   if(!c)return rNF();
   var tg=S.tags[c.id]||[];
@@ -359,7 +365,8 @@ function populateEditFields(){
 
 function getEditDraft(){
   // read current form values into a draft object
-  var c=S.cards&&S.cards.find(function(x){return x.id===S._editId;});
+  if(!S.cards)return null;
+  var c=S.cards.find(function(x){return x.id===S._editId;});
   if(!c)return null;
   var type=(document.getElementById('ct')||{}).value||S._editType||c.type;
   var title=((document.getElementById('ctit')||{}).value||'').trim()||c.title;
@@ -511,14 +518,14 @@ function rPM(){
     '<button class="bsend" onclick="createCard()">drop する &#8595;</button>'+
   '</div>';
 
-  var cs=[...S.cards].reverse();
+  var cs=S.cards?[...S.cards].reverse():[];
   var manage=cs.length
     ?'<div style="padding:12px 14px">'+cs.map(function(c){
         return'<div class="mcard"><div class="cacc" style="background:'+ac(c.type)+';width:3px;flex-shrink:0;margin-right:10px;border-radius:2px;align-self:stretch;"></div><div class="mcb"><div class="chead"><span class="ttag '+tc(c.type)+'">'+TYPES[c.type]+'</span><span class="ctit">'+esc(c.title)+'</span>'+cardBadges(c)+'</div><div style="font-family:\'Courier New\',monospace;font-size:10px;color:var(--fnt);margin-top:4px">'+fd(c.createdAt)+'</div></div><div style="display:flex;gap:5px;flex-shrink:0"><button class="bedit" onclick="openEdit(\''+c.id+'\')">編集</button><button class="bdel" onclick="delCard(\''+c.id+'\')">削除</button></div></div>';
       }).join('')+'</div>'
     :'<div class="empty">— まだ drops はありません —</div>';
 
-  return'<div class="v"><div class="nav"><button class="nbk" onclick="go(\'home\')">&#8592; back</button><span class="ntit">ゆうこモード</span></div><div class="tabs"><div class="tab'+(t==='create'?' on':'')+'" onclick="ptab(\'create\')">作る</div><div class="tab'+(t==='manage'?' on':'')+'" onclick="ptab(\'manage\')">送った drops ('+S.cards.length+')</div></div>'+(t==='create'?form:manage)+'</div>';
+  return'<div class="v"><div class="nav"><button class="nbk" onclick="go(\'home\')">&#8592; back</button><span class="ntit">ゆうこモード</span></div><div class="tabs"><div class="tab'+(t==='create'?' on':'')+'" onclick="ptab(\'create\')">作る</div><div class="tab'+(t==='manage'?' on':'')+'" onclick="ptab(\'manage\')">送った drops ('+(S.cards?S.cards.length:0)+')</div></div>'+(t==='create'?form:manage)+'</div>';
 }
 
 function onTypeChange(val){
