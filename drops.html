@@ -189,10 +189,10 @@ function fbLoad(){
     var val=snap.val();
     if(val){S.cards=Object.values(val).sort(function(a,b){return a.createdAt-b.createdAt;});}
     else{S.cards=JSON.parse(JSON.stringify(SEED));SEED.forEach(function(c){db.ref('drops/cards/'+c.id).set(c);});}
-    render();
-  },function(){S.cards=JSON.parse(JSON.stringify(SEED));render();});
-  db.ref('drops/tags').on('value',function(snap){S.tags=snap.val()||{};render();});
-  db.ref('drops/reactions').on('value',function(snap){S.reactions=snap.val()||{};render();});
+    safeRender();
+  },function(){S.cards=JSON.parse(JSON.stringify(SEED));safeRender();});
+  db.ref('drops/tags').on('value',function(snap){S.tags=snap.val()||{};safeRender();});
+  db.ref('drops/reactions').on('value',function(snap){S.reactions=snap.val()||{};safeRender();});
 }
 function fbSave(card){db.ref('drops/cards/'+card.id).set(card);}
 function fbDel(id){db.ref('drops/cards/'+id).remove();db.ref('drops/tags/'+id).remove();db.ref('drops/reactions/'+id).remove();}
@@ -278,6 +278,8 @@ function rPM(){
   var t=S.ptab;
   var sel=S._formType||'rule';
   var isLyrics=sel==='lyrics';
+  // always keep sel in sync
+  S._formType=sel;
   var fp=S.pendingFile;
   var fa=fileArea(fp,null,'clearFile');
   var tracks=S._formTracks||[];
@@ -321,6 +323,13 @@ function rPreview(card){
 }
 
 // ── Render ────────────────────────────────────────────────────────────
+function safeRender(){
+  // Don't disrupt user while typing on create/edit forms
+  if(S.view==='pm'&&S.ptab==='create')return;
+  if(S.view==='ed')return;
+  render();
+}
+
 function render(){
   var h='';
   if(S.view==='home')h=rHome();
