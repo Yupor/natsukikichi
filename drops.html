@@ -116,6 +116,10 @@ html,body{min-height:100%;background:var(--bg);}
 .rtb-sep{width:1px;height:16px;background:var(--bdr2);margin:0 2px;flex-shrink:0;}
 .rtb-color{width:18px;height:18px;border-radius:50%;border:2px solid transparent;cursor:pointer;flex-shrink:0;transition:border-color .1s;}
 .rtb-color:hover,.rtb-color.on{border-color:rgba(255,255,255,0.6);}
+.emoji-panel{background:var(--s2);border-bottom:1px solid var(--bdr);padding:8px;}
+.emoji-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;}
+.emoji-btn{background:none;border:none;cursor:pointer;font-size:18px;padding:4px;border-radius:6px;transition:background .1s;text-align:center;}
+.emoji-btn:hover{background:var(--s1);}
 .rte-body{min-height:100px;padding:10px 12px;background:var(--s1);color:rgba(240,237,230,0.82);font-size:13px;line-height:1.85;outline:none;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;}
 .rte-body b,.rte-body strong{color:var(--txt);}
 .rte-body:empty::before{content:attr(data-placeholder);color:var(--fnt);pointer-events:none;}
@@ -132,21 +136,49 @@ html,body{min-height:100%;background:var(--bg);}
 .bsend:hover{opacity:0.86;}
 .mcard{background:var(--s1);border:1px solid var(--bdr);border-radius:10px;padding:11px 13px;display:flex;gap:10px;align-items:flex-start;margin-bottom:8px;}
 .mcb{flex:1;min-width:0;}
+.bedit{background:none;border:1px solid var(--bdr2);color:var(--mut);border-radius:6px;font-size:10px;padding:4px 10px;cursor:pointer;font-family:'Courier New',monospace;flex-shrink:0;transition:all .1s;}
+.bedit:hover{background:var(--s2);color:var(--txt);}
 .bdel{background:none;border:1px solid rgba(240,80,80,0.25);color:rgba(240,80,80,0.6);border-radius:6px;font-size:10px;padding:4px 10px;cursor:pointer;font-family:'Courier New',monospace;flex-shrink:0;transition:all .1s;}
 .bdel:hover{background:rgba(240,80,80,0.08);border-color:rgba(240,80,80,0.55);color:#f05050;}
 .empty{text-align:center;padding:3rem 1rem;color:var(--fnt);font-size:12px;font-family:'Courier New',monospace;letter-spacing:0.06em;}
 .toast{background:var(--acc);color:#060a10;text-align:center;padding:10px;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;font-family:'Courier New',monospace;position:sticky;top:0;z-index:20;}
+
+.reactions{margin-bottom:1.2rem;}
+.react-lbl{font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--mut);font-family:'Courier New',monospace;margin-bottom:8px;}
+.react-row{display:flex;gap:6px;flex-wrap:wrap;}
+.react-btn{background:var(--s1);border:1px solid var(--bdr2);border-radius:20px;padding:5px 12px;cursor:pointer;font-size:15px;transition:all .1s;display:flex;align-items:center;gap:5px;}
+.react-btn:hover{background:var(--s2);border-color:var(--bdr2);}
+.react-count{font-size:11px;font-family:'Courier New',monospace;color:var(--mut);}
+.react-add{background:none;border:1px dashed var(--bdr2);border-radius:20px;padding:5px 12px;cursor:pointer;font-size:12px;color:var(--mut);font-family:'Courier New',monospace;transition:all .1s;}
+.react-add:hover{background:var(--s1);color:var(--txt);}
+.react-picker{background:var(--s2);border:1px solid var(--bdr2);border-radius:10px;padding:8px;margin-top:6px;display:none;}
+.react-picker.on{display:block;}
+.react-picker-grid{display:flex;flex-wrap:wrap;gap:4px;}
+.react-pick-btn{background:none;border:none;cursor:pointer;font-size:20px;padding:4px;border-radius:6px;transition:background .1s;}
+.react-pick-btn:hover{background:var(--s1);}
 </style>
 </head>
 <body>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <div id="app"></div>
 <script>
-const PIN='1122';
-const CK='drops-cards-v5';
-const TK='drops-tags-v5';
+const firebaseConfig={
+  apiKey:"AIzaSyAWKQMRQREp765mBbjHHvntnkPF-PV3MMs",
+  authDomain:"natsukikich.firebaseapp.com",
+  databaseURL:"https://natsukikich-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:"natsukikich",
+  storageBucket:"natsukikich.firebasestorage.app",
+  messagingSenderId:"897484879290",
+  appId:"1:897484879290:web:dd104398870f0209801983"
+};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.database();
+const PIN='0925';
 const TYPES={rule:'ルール',lyrics:'歌詞',drill:'ドリル',msg:'メッセージ'};
 const TATAGS=['重要','お気に入り','復習','できた!'];
-const RICH_TYPES=['lyrics','drill'];
+const REACT_EMOJIS=['👍','❤️','🔥','😊','🎵','✨','💪','🤩','😂','🥺','👏','🌟'];
+const RICH_TYPES=['rule','lyrics','drill','msg'];
 const COLORS=[
   {v:'#f060c0',label:'ピンク'},
   {v:'#00f0be',label:'グリーン'},
@@ -174,12 +206,37 @@ function scEmbedUrl(url){
   return'https://w.soundcloud.com/player/?url='+encodeURIComponent(url)+'&color=%23f060c0&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=true';
 }
 function load(){
-  try{const r=localStorage.getItem(CK);S.cards=r?JSON.parse(r):null;}catch(e){S.cards=null;}
-  if(!S.cards){S.cards=JSON.parse(JSON.stringify(SEED));save();}
-  try{const r=localStorage.getItem(TK);S.tags=r?JSON.parse(r):{};}catch(e){S.tags={};}
+  S.cards=null;
+  db.ref('drops/cards').on('value',function(snap){
+    var val=snap.val();
+    if(val){
+      S.cards=Object.values(val).sort(function(a,b){return a.createdAt-b.createdAt;});
+    } else {
+      S.cards=JSON.parse(JSON.stringify(SEED));
+      SEED.forEach(function(c){db.ref('drops/cards/'+c.id).set(c);});
+    }
+    render();
+  });
+  db.ref('drops/tags').on('value',function(snap){
+    S.tags=snap.val()||{};
+    render();
+  });
+  db.ref('drops/reactions').on('value',function(snap){
+    S.reactions=snap.val()||{};
+    render();
+  });
 }
-function save(){try{localStorage.setItem(CK,JSON.stringify(S.cards));}catch(e){}}
-function saveT(){try{localStorage.setItem(TK,JSON.stringify(S.tags));}catch(e){}}
+function save(card){
+  db.ref('drops/cards/'+card.id).set(card);
+}
+function saveT(cid){
+  db.ref('drops/tags/'+cid).set(S.tags[cid]||null);
+}
+function saveReaction(cid,emoji){
+  var ref=db.ref('drops/reactions/'+cid+'/'+encodeEmoji(emoji));
+  ref.transaction(function(cur){return(cur||0)+1;});
+}
+function encodeEmoji(e){return e.codePointAt(0).toString(16);}
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function fd(ts){const d=new Date(ts);return(d.getMonth()+1)+'/'+d.getDate();}
@@ -239,9 +296,20 @@ function rPP(){
   return'<div class="v"><div class="nav"><button class="nbk" onclick="go(\'home\')">&#8592; back</button><span class="ntit">ゆうこモード</span></div><div class="pin"><div class="pin-lg">DROPS</div><p class="pin-lbl">PIN を入力</p><div class="pin-dots">'+dots+'</div>'+(S.perr?'<p class="pin-err">PIN が違います</p>':'')+'<div class="npad">'+[1,2,3,4,5,6,7,8,9].map(function(n){return'<button class="nbt" onclick="addPin(\''+n+'\')">'+n+'</button>';}).join('')+'<button class="nbt" onclick="addPin(\'0\')" style="grid-column:2">0</button><button class="nbt" style="font-size:13px;color:var(--mut)" onclick="delPin()">&#9003;</button></div></div></div>';
 }
 
+var EMOJIS=[
+  '😊','😄','😂','🥺','😎','🤔','😴','🥳','😤','🔥',
+  '⭐','✨','💡','📖','✏️','🎵','🎶','🎤','🎸','🎹',
+  '👍','👏','💪','🙌','👀','🤞','✌️','🫶','🤩','💯',
+  '🌸','🌟','🌈','🍀','🐯','🐱','🐶','🦁','🐧','🦋',
+  '📝','📚','🗒️','📌','🔖','💬','📣','🎯','🏆','🎁',
+];
+
 function richToolbar(){
   var colorBtns=COLORS.map(function(c){
     return'<button class="rtb-color" style="background:'+c.v+'" title="'+c.label+'" onclick="fmtColor(\''+c.v+'\')" data-color="'+c.v+'"></button>';
+  }).join('');
+  var emojiGrid=EMOJIS.map(function(e){
+    return'<button class="emoji-btn" onclick="insertEmoji(\''+e+'\')">'+e+'</button>';
   }).join('');
   return'<div class="rte-toolbar">'+
     '<button class="rtb" id="rtb-bold" onclick="fmt(\'bold\')" title="太字"><b>B</b></button>'+
@@ -251,8 +319,116 @@ function richToolbar(){
     '<span style="font-size:10px;color:var(--fnt);font-family:\'Courier New\',monospace;margin-right:4px">色</span>'+
     colorBtns+
     '<div class="rtb-sep"></div>'+
+    '<button class="rtb" onclick="toggleEmoji(event)" title="顔文字" id="rtb-emoji" style="font-size:14px">&#128512;</button>'+
+    '<div class="rtb-sep"></div>'+
     '<button class="rtb" onclick="fmt(\'removeFormat\')" title="書式を消す" style="font-size:10px">消す</button>'+
+  '</div>'+
+  '<div class="emoji-panel" id="emoji-panel" style="display:none">'+
+    '<div class="emoji-grid">'+emojiGrid+'</div>'+
   '</div>';
+}
+
+function toggleEmoji(e){
+  e.stopPropagation();
+  var panel=document.getElementById('emoji-panel');
+  if(!panel)return;
+  var shown=panel.style.display==='block';
+  panel.style.display=shown?'none':'block';
+  document.getElementById('rtb-emoji').classList.toggle('on',!shown);
+}
+function insertEmoji(emoji){
+  var rte=document.getElementById('rte');
+  if(!rte)return;
+  rte.focus();
+  document.execCommand('insertText',false,emoji);
+  var panel=document.getElementById('emoji-panel');
+  if(panel)panel.style.display='none';
+  document.getElementById('rtb-emoji').classList.remove('on');
+}
+
+function rED(){
+  var c=S.cards&&S.cards.find(function(x){return x.id===S._editId;});
+  if(!c)return rPM();
+  var selType=S._editType||c.type;
+  var showRich=isRich(selType);
+  var fp=S.pendingFile;
+  var fileArea=fp
+    ?'<div class="file-preview"><span style="font-size:18px">'+(fp.type==='image'?'&#128444;':'&#128196;')+'</span><span class="file-preview-name">'+esc(fp.name)+'</span><button class="file-preview-rm" onclick="clearFile()">&#10005;</button></div>'
+    :(c.file?'<div class="file-preview"><span style="font-size:18px">'+(c.file.type==='image'?'&#128444;':'&#128196;')+'</span><span class="file-preview-name">'+esc(c.file.name)+'</span><button class="file-preview-rm" onclick="clearEditFile()">&#10005;</button></div>'
+    :'<label class="file-drop"><input type="file" accept="image/*,.pdf" onchange="handleFile(event)"/><span class="file-drop-lbl">&#128206; ファイルを添付する</span><span class="file-drop-sub">画像 または PDF（5MB以内）</span></label>');
+  var contentField=showRich
+    ?'<div class="rte-wrap">'+richToolbar()+'<div class="rte-body" id="rte" contenteditable="true" data-placeholder="内容..."></div></div>'
+    :'<textarea class="fi" id="ccont" style="resize:vertical;min-height:90px;line-height:1.65" placeholder="内容を書いてください...">'+esc(showRich?'':c.content)+'</textarea>';
+  var form='<div class="form">'+
+    '<div><label class="fl">種類</label><select class="fs" id="ct" onchange="onEditTypeChange(this.value)">'+
+      Object.keys(TYPES).map(function(k){return'<option value="'+k+'"'+(k===selType?' selected':'')+'>'+TYPES[k]+'</option>';}).join('')+
+    '</select></div>'+
+    '<div><label class="fl">タイトル</label><input class="fi" type="text" id="ctit" value="'+esc(c.title)+'"/></div>'+
+    '<div><label class="fl">内容'+(showRich?' <span style="font-size:9px;color:var(--acc);font-family:\'Courier New\',monospace">— 太字・色編集対応</span>':'')+'</label>'+contentField+'</div>'+
+    '<div><label class="fl">SoundCloud URL</label><input class="fi" type="url" id="curl" value="'+(c.url?esc(c.url):'')+'"/></div>'+
+    '<div><label class="fl">ファイル添付</label>'+fileArea+'</div>'+
+    '<button class="bsend" onclick="updateCard()">保存する &#10003;</button>'+
+  '</div>';
+  return'<div class="v"><div class="nav"><button class="nbk" onclick="go(\'pm\')">&#8592; もどる</button><span class="ntit" style="color:var(--acc)">編集モード</span></div>'+form+'</div>';
+}
+
+function openEdit(id){
+  S._editId=id;
+  S._editType=null;
+  S.pendingFile=null;
+  S.view='ed';
+  render();
+  // populate rich content after render
+  setTimeout(function(){
+    var c=S.cards&&S.cards.find(function(x){return x.id===id;});
+    if(!c)return;
+    var rte=document.getElementById('rte');
+    if(rte&&c.rich)rte.innerHTML=c.content||'';
+  },50);
+}
+function onEditTypeChange(val){
+  S._editType=val;
+  var tit=document.getElementById('ctit');
+  var url=document.getElementById('curl');
+  S._savedTit=tit?tit.value:'';
+  S._savedUrl=url?url.value:'';
+  render();
+  if(tit=document.getElementById('ctit'))tit.value=S._savedTit||'';
+  if(url=document.getElementById('curl'))url.value=S._savedUrl||'';
+  setTimeout(function(){
+    var c=S.cards&&S.cards.find(function(x){return x.id===S._editId;});
+    var rte=document.getElementById('rte');
+    if(rte&&c)rte.innerHTML=c.content||'';
+  },50);
+}
+function clearEditFile(){
+  var c=S.cards&&S.cards.find(function(x){return x.id===S._editId;});
+  if(c){c.file=null;}
+  S.pendingFile=null;
+  render();
+  setTimeout(function(){
+    var rte=document.getElementById('rte');
+    if(rte&&c&&c.rich)rte.innerHTML=c.content||'';
+  },50);
+}
+function updateCard(){
+  var c=S.cards&&S.cards.find(function(x){return x.id===S._editId;});
+  if(!c)return;
+  var type=document.getElementById('ct').value;
+  var title=(document.getElementById('ctit').value||'').trim();
+  var url=(document.getElementById('curl').value||'').trim();
+  var rich=isRich(type);
+  var content='';
+  if(rich){var rte=document.getElementById('rte');content=rte?rte.innerHTML.trim():'';}
+  else{var ta=document.getElementById('ccont');content=ta?(ta.value||'').trim():'';}
+  if(!title){alert('タイトルを入力してください');return;}
+  c.type=type;c.title=title;c.content=content;c.rich=rich;
+  c.url=url||null;
+  if(S.pendingFile)c.file=S.pendingFile;
+  S.pendingFile=null;
+  save(c);
+  S.toast='保存しました！';S.view='pm';S.ptab='manage';render();
+  setTimeout(function(){S.toast=null;render();},1800);
 }
 
 function rPM(){
@@ -282,7 +458,7 @@ function rPM(){
   var cs=[...S.cards].reverse();
   var manage=cs.length
     ?'<div style="padding:12px 14px">'+cs.map(function(c){
-        return'<div class="mcard"><div class="cacc" style="background:'+ac(c.type)+';width:3px;flex-shrink:0;margin-right:10px;border-radius:2px;align-self:stretch;"></div><div class="mcb"><div class="chead"><span class="ttag '+tc(c.type)+'">'+TYPES[c.type]+'</span><span class="ctit">'+esc(c.title)+'</span>'+cardBadges(c)+'</div><div style="font-family:\'Courier New\',monospace;font-size:10px;color:var(--fnt);margin-top:4px">'+fd(c.createdAt)+'</div></div><button class="bdel" onclick="delCard(\''+c.id+'\')">削除</button></div>';
+        return'<div class="mcard"><div class="cacc" style="background:'+ac(c.type)+';width:3px;flex-shrink:0;margin-right:10px;border-radius:2px;align-self:stretch;"></div><div class="mcb"><div class="chead"><span class="ttag '+tc(c.type)+'">'+TYPES[c.type]+'</span><span class="ctit">'+esc(c.title)+'</span>'+cardBadges(c)+'</div><div style="font-family:\'Courier New\',monospace;font-size:10px;color:var(--fnt);margin-top:4px">'+fd(c.createdAt)+'</div></div><div style="display:flex;gap:5px;flex-shrink:0"><button class="bedit" onclick="openEdit(\''+c.id+'\')">編集</button><button class="bdel" onclick="delCard(\''+c.id+'\')">削除</button></div></div>';
       }).join('')+'</div>'
     :'<div class="empty">— まだ drops はありません —</div>';
 
@@ -328,6 +504,7 @@ function render(){
   else if(S.view==='nd')h=rND();
   else if(S.view==='pp')h=rPP();
   else if(S.view==='pm')h=rPM();
+  else if(S.view==='ed')h=rED();
   document.getElementById('app').innerHTML=(S.toast?'<div class="toast">'+S.toast+'</div>':'')+h;
   // attach selectionchange for toolbar sync
   var rte=document.getElementById('rte');
@@ -361,7 +538,7 @@ function toggleTag(cid,tag){
   if(!S.tags[cid])S.tags[cid]=[];
   var i=S.tags[cid].indexOf(tag);
   if(i>=0)S.tags[cid].splice(i,1);else S.tags[cid].push(tag);
-  saveT();render();
+  saveT(cid);
 }
 function createCard(){
   var type=document.getElementById('ct').value;
@@ -378,16 +555,27 @@ function createCard(){
   }
   if(!title){alert('タイトルを入力してください');return;}
   var card={id:Date.now().toString(36)+Math.random().toString(36).slice(2),type:type,title:title,content:content,rich:rich,url:url||null,file:S.pendingFile||null,createdAt:Date.now()};
-  S.cards.push(card);S.pendingFile=null;S._formType='rule';
-  save();
+  S.pendingFile=null;S._formType='rule';
+  save(card);
   S.toast='dropped!';render();
   setTimeout(function(){S.toast=null;render();},1800);
 }
 function delCard(id){
   if(!confirm('このカードを削除しますか？'))return;
-  S.cards=S.cards.filter(function(c){return c.id!==id;});save();render();
+  db.ref('drops/cards/'+id).remove();
+  db.ref('drops/tags/'+id).remove();
+  db.ref('drops/reactions/'+id).remove();
 }
-load();render();
+function togglePicker(){
+  var p=document.getElementById('rpicker');
+  if(p)p.classList.toggle('on');
+}
+function doReact(cid,emoji){
+  saveReaction(cid,emoji);
+  var p=document.getElementById('rpicker');
+  if(p)p.classList.remove('on');
+}
+S.reactions={};load();
 </script>
 </body>
 </html>
