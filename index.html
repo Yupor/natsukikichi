@@ -2286,7 +2286,10 @@ function selectDay(ds,evts){
   document.getElementById('day-evts-title').textContent='📅 '+parseInt(y)+'年'+parseInt(m)+'月'+parseInt(d)+'日';
   const de=evts.filter(e=>e.date===ds);const el=document.getElementById('day-evts-list');
   if(!de.length){el.innerHTML='<div style="color:var(--text3);font-size:15px;">予定なし</div>';return;}
-  el.innerHTML=de.map(e=>`<div class="srow"><span><span class="etag etag-${e.type}">${e.type==='class'?'授業':e.type==='test'?'テスト':'特訓'}</span> ${e.title}</span><span style="font-size:13px;color:var(--text3);">${e.time||''}</span></div>`).join('');
+  el.innerHTML=de.map(function(e){
+    const typeLabel=e.type==='class'?'授業':e.type==='test'?'テスト':'特訓';
+    return '<div class="srow"><span><span class="etag etag-'+e.type+'">'+typeLabel+'</span> '+e.title+'</span><span style="font-size:13px;color:var(--text3);">'+(e.time||'')+'</span></div>';
+  }).join('');
 }
 function showAddEvt(){if(!selCalDate)return alert('カレンダーから日付を選択してください');document.getElementById('add-evt-form').classList.remove('hidden');}
 async function saveEvt(){
@@ -3474,6 +3477,8 @@ async function analyzeWeakness(){
   document.getElementById('weak-analyze-btn').disabled=false;
   document.getElementById('weak-analyze-btn').textContent='🔬 分析スタート！';
 }
+// Patch celebrate to add sound
+const _origCelebrate=celebrate;
 celebrate=(tier,icon,title,subtitle)=>{
   _origCelebrate(tier,icon,title,subtitle);
   const sounds=['','checkin','medal','fanfare','epic'];
