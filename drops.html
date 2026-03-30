@@ -401,6 +401,12 @@ function setupSCWidget(cardId){
   }catch(e){console.warn('SC Widget:',e);}
 }
 
+function getSoundTitle(s){
+  if(!s)return null;
+  // Try all known field names
+  return s.title||s.label||s.name||(s.user&&s.user.username?s.user.username+' - '+s.id:null)||null;
+}
+
 function fetchTracks(){
   if(!window.SC){alert('SoundCloud APIが読み込まれていません');return;}
   var urlEl=document.getElementById('curl');
@@ -418,8 +424,40 @@ function fetchTracks(){
     w.bind(SC.Widget.Events.READY,function(){
       w.getSounds(function(sounds){
         if(!sounds||!sounds.length){S._fetchStatus='曲が見つかりませんでした';render();return;}
-        S._formTracks=sounds.map(function(s,i){return{title:s.title||('Track '+(i+1)),lyrics:'',index:i};});
-        S._fetchStatus=null;render();
+        // Build tracks - if title missing, use index-based seek
+        var total=sounds.length;
+        var tracks=sounds.map(function(s,i){
+          var title=getSoundTitle(s)||null;
+          return{title:title,lyrics:'',index:i,_needsTitle:!title};
+        });
+        // For tracks missing titles, seek and get currentSound
+        var pending=tracks.filter(function(t){return t._needsTitle;});
+        if(pending.length===0){
+          S._formTracks=tracks.map(function(t,i){return{title:t.title||('Track '+(i+1)),lyrics:'',index:i};});
+          S._fetchStatus=null;render();
+          setTimeout(function(){var el=document.getElementById('curl');if(el)el.value=url;var t2=document.getElementById('ctit');if(t2)t2.value=tit;},30);
+        } else {
+          // fallback: skip to each track and read title
+          var results=tracks.map(function(t){return{title:t.title,lyrics:'',index:t.index};});
+          var idx=0;
+          function nextTrack(){
+            if(idx>=total){
+              S._formTracks=results.map(function(r,i){if(!r.title)r.title='Track '+(i+1);return r;});
+              S._fetchStatus=null;render();
+              setTimeout(function(){var el=document.getElementById('curl');if(el)el.value=url;var t2=document.getElementById('ctit');if(t2)t2.value=tit;},30);
+              return;
+            }
+            w.skip(idx);
+            setTimeout(function(){
+              w.getCurrentSound(function(sound){
+                var t=getSoundTitle(sound);
+                if(t&&!results[idx].title)results[idx].title=t;
+                idx++;nextTrack();
+              });
+            },300);
+          }
+          nextTrack();
+        }
         setTimeout(function(){var el=document.getElementById('curl');if(el)el.value=url;var t=document.getElementById('ctit');if(t)t.value=tit;},30);
       });
     });
@@ -443,10 +481,12 @@ function fetchTracksEdit(){
     w.bind(SC.Widget.Events.READY,function(){
       w.getSounds(function(sounds){
         if(!sounds||!sounds.length){S._editFetchStatus='曲が見つかりませんでした';render();return;}
-        var old=S._editTracks||[];
+        var oldTracks=S._editTracks||[];
         S._editTracks=sounds.map(function(s,i){
-          var ex=old.find(function(t){return t.title===s.title;});
-          return{title:s.title||('Track '+(i+1)),lyrics:ex?ex.lyrics:'',index:i};
+          var title=s.title||s.label||s.name||s.permalink||('Track '+(i+1));
+          if(s.metadata&&s.metadata.title)title=s.metadata.title;
+          var ex=oldTracks.find(function(t){return t.title===title;});
+          return{title:title,lyrics:ex?ex.lyrics:'',index:i};
         });
         S._editFetchStatus=null;render();
         setTimeout(function(){var el=document.getElementById('curl');if(el)el.value=url;var t=document.getElementById('ctit');if(t)t.value=tit;},30);
