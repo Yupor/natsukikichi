@@ -69,6 +69,7 @@ html,body{min-height:100%;background:var(--bg);}
 .sc-player iframe{display:block;width:100%;border:none;}
 .lyrics-lbl{font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--mut);font-family:'Courier New',monospace;margin-bottom:10px;}
 .det-body{font-size:14px;color:rgba(240,237,230,0.82);line-height:2;margin-bottom:1.2rem;}
+.det-body div,.det-body p{min-height:1em;}
 .det-body b,.det-body strong{font-weight:700;color:var(--txt);}
 .det-link{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--s1);border-radius:8px;border:1px solid var(--bdr2);font-size:11px;color:var(--acc);margin-bottom:1rem;font-family:'Courier New',monospace;word-break:break-all;text-decoration:none;transition:border-color .12s;}
 .det-link:hover{border-color:var(--acc);}
@@ -120,6 +121,7 @@ html,body{min-height:100%;background:var(--bg);}
 .emoji-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;}
 .emoji-btn{background:none;border:none;cursor:pointer;font-size:18px;padding:4px;border-radius:6px;transition:background .1s;text-align:center;}
 .emoji-btn:hover{background:var(--s1);}
+.rte-body div,.rte-body p{min-height:1em;}
 .rte-body{min-height:100px;padding:10px 12px;background:var(--s1);color:rgba(240,237,230,0.82);font-size:13px;line-height:1.85;outline:none;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;}
 .rte-body b,.rte-body strong{color:var(--txt);}
 .rte-body:empty::before{content:attr(data-placeholder);color:var(--fnt);pointer-events:none;}
@@ -142,6 +144,8 @@ html,body{min-height:100%;background:var(--bg);}
 .bdel:hover{background:rgba(240,80,80,0.08);border-color:rgba(240,80,80,0.55);color:#f05050;}
 .empty{text-align:center;padding:3rem 1rem;color:var(--fnt);font-size:12px;font-family:'Courier New',monospace;letter-spacing:0.06em;}
 .toast{background:var(--acc);color:#060a10;text-align:center;padding:10px;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;font-family:'Courier New',monospace;position:sticky;top:0;z-index:20;}
+.preview-wrap{padding:1rem 16px 3rem;border-top:1px solid var(--bdr);}
+.preview-card{background:var(--s1);border:1px solid var(--bdr2);border-radius:12px;padding:1rem 14px;}
 
 .reactions{margin-bottom:1.2rem;}
 .react-lbl{font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--mut);font-family:'Courier New',monospace;margin-bottom:8px;}
@@ -200,7 +204,7 @@ const SEED=[
    rich:true,url:'https://soundcloud.com/yupor/sets/akinqrleepmg',file:null,createdAt:Date.now()-86400000*1}
 ];
 
-let S={view:'home',cards:[],tags:{},sel:null,ptab:'create',pin:'',perr:false,toast:null,pendingFile:null};
+let S={view:'home',cards:[],tags:{},sel:null,ptab:'create',etab:'edit',pin:'',perr:false,toast:null,pendingFile:null};
 
 function scEmbedUrl(url){
   return'https://w.soundcloud.com/player/?url='+encodeURIComponent(url)+'&color=%23f060c0&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=true';
@@ -353,6 +357,55 @@ function populateEditFields(){
   if(rte)rte.innerHTML=c.rich?c.content||'':c.content||'';
 }
 
+function getEditDraft(){
+  // read current form values into a draft object
+  var c=S.cards&&S.cards.find(function(x){return x.id===S._editId;});
+  if(!c)return null;
+  var type=(document.getElementById('ct')||{}).value||S._editType||c.type;
+  var title=((document.getElementById('ctit')||{}).value||'').trim()||c.title;
+  var url=((document.getElementById('curl')||{}).value||'').trim()||c.url||'';
+  var rich=isRich(type);
+  var content='';
+  if(rich){var rte=document.getElementById('rte');content=rte?rte.innerHTML:c.content||'';}
+  else{var ta=document.getElementById('ccont');content=ta?ta.value:c.content||'';}
+  return{id:c.id,type:type,title:title,content:content,rich:rich,url:url||null,file:S.pendingFile||c.file||null,createdAt:c.createdAt,reactions:c.reactions||null};
+}
+
+function switchEtab(tab){
+  if(tab==='preview'){
+    // snapshot current values before switching
+    S._draft=getEditDraft();
+  }
+  S.etab=tab;render();
+  if(tab==='edit'){
+    // restore form values
+    setTimeout(function(){
+      var d=S._draft||S.cards&&S.cards.find(function(x){return x.id===S._editId;});
+      if(!d)return;
+      var t=document.getElementById('ctit');if(t)t.value=d.title||'';
+      var u=document.getElementById('curl');if(u)u.value=d.url||'';
+      var rte=document.getElementById('rte');if(rte)rte.innerHTML=d.content||'';
+      var ta=document.getElementById('ccont');if(ta)ta.value=d.content||'';
+    },30);
+  }
+}
+
+function rPreview(){
+  var d=S._draft;
+  if(!d)return'<div class="empty">— プレビューなし —</div>';
+  var showSC=d.type==='lyrics'&&isSC(d.url);
+  var playerHtml=showSC?'<div class="sc-player"><div class="sc-player-lbl">SoundCloud</div><iframe src="'+scEmbedUrl(d.url)+'" height="166" scrolling="no" allow="autoplay"></iframe></div>':'';
+  var attHtml='';
+  if(d.file){
+    if(d.file.type==='image')attHtml='<img class="att-img" src="'+d.file.data+'" alt="'+esc(d.file.name)+'"/>';
+    else attHtml='<div class="att-pdf"><span class="att-pdf-icon">&#128196;</span><div class="att-pdf-meta"><div class="att-pdf-name">'+esc(d.file.name)+'</div><div class="att-pdf-sub">PDF ファイル</div></div></div>';
+  }
+  var bodyHtml=d.content?(d.rich?'<div class="det-body">'+d.content+'</div>':'<div class="det-body" style="white-space:pre-wrap">'+esc(d.content)+'</div>'):'';
+  var lyricsLbl=showSC&&d.content?'<p class="lyrics-lbl">歌詞 / メモ</p>':'';
+  var linkHtml=(!showSC&&d.url)?'<a class="det-link" href="'+esc(d.url)+'" target="_blank">&#9654; リンクを開く</a>':'';
+  return'<div class="preview-wrap"><button class="bsend" style="margin-bottom:1rem" onclick="updateCard()">このまま保存する &#10003;</button><div class="preview-card"><span class="det-type '+tc(d.type)+'" style="font-size:9px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;font-family:'Courier New',monospace;margin-bottom:8px;display:block;">'+TYPES[d.type]+'</span><h1 class="det-tit">'+esc(d.title)+'</h1><hr class="det-div"/>'+playerHtml+lyricsLbl+bodyHtml+attHtml+linkHtml+'</div></div>';
+}
+
 function rED(){
   var c=S.cards&&S.cards.find(function(x){return x.id===S._editId;});
   if(!c)return rPM();
@@ -378,12 +431,17 @@ function rED(){
     '<div><label class="fl">ファイル添付</label>'+fileArea+'</div>'+
     '<button class="bsend" onclick="updateCard()">保存する &#10003;</button>'+
   '</div>';
-  return'<div class="v"><div class="nav"><button class="nbk" onclick="go(\'pm\')">&#8592; もどる</button><span class="ntit" style="color:var(--acc)">編集モード</span></div>'+form+'</div>';
+  var etab=S.etab||'edit';
+  var tabHtml='<div class="tabs"><div class="tab'+(etab==='edit'?' on':'')+'" onclick="switchEtab(\'edit\')">編集</div><div class="tab'+(etab==='preview'?' on':'')+'" onclick="switchEtab(\'preview\')">プレビュー</div></div>';
+  var body=etab==='edit'?form:rPreview();
+  return'<div class="v"><div class="nav"><button class="nbk" onclick="go(\'pm\')">&#8592; もどる</button><span class="ntit" style="color:var(--acc)">編集モード</span></div>'+tabHtml+body+'</div>';
 }
 
 function openEdit(id){
   S._editId=id;
   S._editType=null;
+  S._draft=null;
+  S.etab='edit';
   S.pendingFile=null;
   S.view='ed';
   render();
@@ -417,20 +475,15 @@ function clearEditFile(){
 function updateCard(){
   var c=S.cards&&S.cards.find(function(x){return x.id===S._editId;});
   if(!c)return;
-  var type=document.getElementById('ct').value;
-  var title=(document.getElementById('ctit').value||'').trim();
-  var url=(document.getElementById('curl').value||'').trim();
-  var rich=isRich(type);
-  var content='';
-  if(rich){var rte=document.getElementById('rte');content=rte?rte.innerHTML.trim():'';}
-  else{var ta=document.getElementById('ccont');content=ta?(ta.value||'').trim():'';}
-  if(!title){alert('タイトルを入力してください');return;}
-  c.type=type;c.title=title;c.content=content;c.rich=rich;
-  c.url=url||null;
-  if(S.pendingFile)c.file=S.pendingFile;
-  S.pendingFile=null;
+  // use draft if we're in preview tab, otherwise read from form
+  var d=S._draft||getEditDraft();
+  if(!d||!d.title){alert('タイトルを入力してください');return;}
+  c.type=d.type;c.title=d.title;c.content=d.content;c.rich=d.rich;
+  c.url=d.url||null;
+  if(d.file)c.file=d.file;
+  S.pendingFile=null;S._draft=null;
   save(c);
-  S.toast='保存しました！';S.view='pm';S.ptab='manage';render();
+  S.toast='保存しました！';S.view='pm';S.ptab='manage';S.etab='edit';render();
   setTimeout(function(){S.toast=null;render();},1800);
 }
 
@@ -557,6 +610,7 @@ function createCard(){
     content=ta?(ta.value||'').trim():'';
   }
   if(!title){alert('タイトルを入力してください');return;}
+  if(!rich)content=content.replace(/\r\n/g,'\n');
   var card={id:Date.now().toString(36)+Math.random().toString(36).slice(2),type:type,title:title,content:content,rich:rich,url:url||null,file:S.pendingFile||null,createdAt:Date.now()};
   S.pendingFile=null;S._formType='rule';
   save(card);
