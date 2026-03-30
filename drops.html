@@ -142,6 +142,28 @@ html,body{min-height:100%;background:var(--bg);}
 .empty{text-align:center;padding:3rem 1rem;color:var(--fnt);font-size:12px;font-family:'Courier New',monospace;}
 .toast{background:var(--acc);color:#060a10;text-align:center;padding:10px;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;font-family:'Courier New',monospace;position:sticky;top:0;z-index:20;}
 .sc-hidden{position:absolute;opacity:0;pointer-events:none;height:1px;overflow:hidden;}
+.lyric-player{margin-bottom:1rem;}
+.lyric-player iframe{display:block;width:100%;border:none;}
+.lyric-controls{display:flex;align-items:center;gap:8px;padding:8px 0 12px;}
+.ctrl-btn{background:var(--s1);border:1px solid var(--bdr2);border-radius:8px;padding:7px 14px;cursor:pointer;font-size:11px;font-family:"Courier New",monospace;color:var(--mut);transition:all .12s;}
+.ctrl-btn:hover{background:var(--s2);color:var(--txt);}
+.ctrl-btn.on{background:rgba(240,96,192,0.1);border-color:rgba(240,96,192,0.4);color:var(--lyrics);}
+.track-list{margin-bottom:1.2rem;}
+.tl-label{font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--mut);font-family:"Courier New",monospace;margin-bottom:8px;}
+.tl-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;transition:background .1s;}
+.tl-item:hover{background:var(--s1);}
+.tl-item.active{background:rgba(240,96,192,0.08);border:1px solid rgba(240,96,192,0.2);}
+.tl-num{font-size:10px;font-family:"Courier New",monospace;color:var(--fnt);width:18px;flex-shrink:0;}
+.tl-title{font-size:13px;color:var(--txt);flex:1;}
+.tl-item.active .tl-title{color:var(--lyrics);font-weight:500;}
+.tl-playing{width:8px;height:8px;border-radius:50%;background:var(--lyrics);flex-shrink:0;animation:pulse 1.2s infinite;}
+.lyrics-box{background:var(--s1);border:1px solid var(--bdr);border-radius:10px;padding:14px;margin-bottom:1.2rem;min-height:80px;}
+.lyrics-box-lbl{font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--mut);font-family:"Courier New",monospace;margin-bottom:10px;}
+.lyrics-text{font-size:14px;color:rgba(240,237,230,0.85);line-height:2;white-space:pre-wrap;}
+.lyrics-hidden .lyrics-text{filter:blur(6px);user-select:none;}
+.lyrics-empty{font-size:12px;color:var(--fnt);font-family:"Courier New",monospace;}
+.hide-toggle{font-size:10px;font-family:"Courier New",monospace;color:var(--mut);background:none;border:none;cursor:pointer;padding:0;margin-bottom:8px;}
+.hide-toggle:hover{color:var(--txt);}
 </style>
 </head>
 <body>
@@ -330,6 +352,40 @@ function safeRender(){
   render();
 }
 
+function toggleLoop(){
+  S._loop=!S._loop;
+  var w=getWidget();
+  if(!w)return;
+  // Re-bind FINISH event for loop
+  if(S._loop){
+    w.bind(SC.Widget.Events.FINISH,function(){w.seekTo(0);w.play();});
+  }else{
+    w.unbind(SC.Widget.Events.FINISH);
+  }
+  render();
+  if(S.view==='nd')setTimeout(function(){setupSCWidget(S.sel);},300);
+}
+
+function toggleLyricsHide(){
+  S._lyricsHidden=!S._lyricsHidden;
+  render();
+  if(S.view==='nd')setTimeout(function(){setupSCWidget(S.sel);},300);
+}
+
+function jumpTrack(idx){
+  S._activeTrackIdx=idx;
+  var w=getWidget();
+  if(w){try{w.skip(idx);}catch(e){}}
+  render();
+  if(S.view==='nd')setTimeout(function(){setupSCWidget(S.sel);},300);
+}
+
+function getWidget(){
+  var iframe=document.getElementById('sc-iframe');
+  if(!iframe||!window.SC)return null;
+  try{return SC.Widget(iframe);}catch(e){return null;}
+}
+
 function render(){
   var h='';
   if(S.view==='home')h=rHome();
@@ -349,7 +405,7 @@ function go(v){
   if(v==='pm'){S.ptab=S.ptab||'create';S._formType=S._formType||'rule';}
   S.view=v;render();
 }
-function openCard(id){S.sel=id;S.view='nd';render();}
+function openCard(id){S.sel=id;S.view='nd';S._activeTrackIdx=0;render();}
 function ptab(t){S.ptab=t;render();}
 function addPin(d){if(S.pin.length<4){S.pin+=d;S.perr=false;if(S.pin.length===4)setTimeout(checkPin,120);else render();}}
 function delPin(){if(S.pin.length>0){S.pin=S.pin.slice(0,-1);render();}}
@@ -377,27 +433,38 @@ function setupSCWidget(cardId){
   if(!window.SC)return;
   var iframe=document.getElementById('sc-iframe');if(!iframe)return;
   var c=S.cards&&S.cards.find(function(x){return x.id===cardId;});
-  if(!c||!c.tracks||!c.tracks.length)return;
+  if(!c)return;
   try{
     var w=SC.Widget(iframe);
-    function onPlay(){
-      w.getCurrentSound(function(sound){
-        if(!sound)return;
-        var title=sound.title||'';
-        var bar=document.getElementById('sc-track-bar');
-        var titleEl=document.getElementById('sc-track-title');
-        var lyricsEl=document.getElementById('sc-lyrics-body');
-        if(bar)bar.style.display='flex';
-        if(titleEl)titleEl.textContent=title;
-        if(lyricsEl){
-          var tr=c.tracks.find(function(t){return title.indexOf(t.title)>=0||t.title.indexOf(title)>=0;});
-          if(tr){lyricsEl.innerHTML='<div style="white-space:pre-wrap">'+esc(tr.lyrics||'')+'</div>';}
-          else{w.getCurrentSoundIndex(function(idx){var t2=c.tracks[idx];if(lyricsEl&&t2)lyricsEl.innerHTML='<div style="white-space:pre-wrap">'+esc(t2.lyrics||'')+'</div>';});}
+    function onTrackChange(){
+      w.getCurrentSoundIndex(function(idx){
+        if(idx===S._activeTrackIdx)return;
+        S._activeTrackIdx=idx;
+        // Update track list highlight and lyrics without full re-render
+        document.querySelectorAll('.tl-item').forEach(function(el,i){
+          el.classList.toggle('active',i===idx);
+          var dot=el.querySelector('.tl-playing');
+          if(i===idx&&!dot){var sp=document.createElement('span');sp.className='tl-playing';el.appendChild(sp);}
+          else if(i!==idx&&dot)dot.remove();
+          el.querySelector('.tl-title').style.color=i===idx?'var(--lyrics)':'';
+        });
+        // Update lyrics box
+        var lyricsBox=document.querySelector('.lyrics-text');
+        if(lyricsBox&&c.tracks&&c.tracks[idx]){
+          lyricsBox.textContent=c.tracks[idx].lyrics||'';
+        }
+        var emptyEl=document.querySelector('.lyrics-empty');
+        if(emptyEl&&c.tracks&&c.tracks[idx]&&c.tracks[idx].lyrics){
+          emptyEl.style.display='none';
+          if(lyricsBox)lyricsBox.style.display='';
         }
       });
     }
-    w.bind(SC.Widget.Events.PLAY,onPlay);
-    w.bind(SC.Widget.Events.READY,onPlay);
+    w.bind(SC.Widget.Events.PLAY,onTrackChange);
+    w.bind(SC.Widget.Events.PLAY_PROGRESS,onTrackChange);
+    if(S._loop){
+      w.bind(SC.Widget.Events.FINISH,function(){w.seekTo(0);w.play();});
+    }
   }catch(e){console.warn('SC Widget:',e);}
 }
 
