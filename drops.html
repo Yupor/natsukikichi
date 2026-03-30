@@ -403,7 +403,7 @@ function rPreview(){
   var bodyHtml=d.content?(d.rich?'<div class="det-body">'+d.content+'</div>':'<div class="det-body" style="white-space:pre-wrap">'+esc(d.content)+'</div>'):'';
   var lyricsLbl=showSC&&d.content?'<p class="lyrics-lbl">歌詞 / メモ</p>':'';
   var linkHtml=(!showSC&&d.url)?'<a class="det-link" href="'+esc(d.url)+'" target="_blank">&#9654; リンクを開く</a>':'';
-  return'<div class="preview-wrap"><button class="bsend" style="margin-bottom:1rem" onclick="updateCard()">このまま保存する &#10003;</button><div class="preview-card"><span class="det-type '+tc(d.type)+'" style="font-size:9px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;font-family:'Courier New',monospace;margin-bottom:8px;display:block;">'+TYPES[d.type]+'</span><h1 class="det-tit">'+esc(d.title)+'</h1><hr class="det-div"/>'+playerHtml+lyricsLbl+bodyHtml+attHtml+linkHtml+'</div></div>';
+  return'<div class="preview-wrap"><button class="bsend" style="margin-bottom:1rem" onclick="updateCard()">このまま保存する &#10003;</button><div class="preview-card"><span class="det-type '+tc(d.type)+'" style="font-size:9px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;font-family:Courier New,monospace;margin-bottom:8px;display:block;">'+TYPES[d.type]+'</span><h1 class="det-tit">'+esc(d.title)+'</h1><hr class="det-div"/>'+playerHtml+lyricsLbl+bodyHtml+attHtml+linkHtml+'</div></div>';
 }
 
 function rED(){
